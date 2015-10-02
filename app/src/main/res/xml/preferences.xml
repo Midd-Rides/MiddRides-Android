@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="cate1"
+        android:title="Category 1">
+
+        <SwitchPreference
+            android:key="pref1"
+            android:title="Preference 1"
+            android:summary="Pref 1"
+            android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="cate2"
+        android:title="Category 2">
+
+        <CheckBoxPreference
+            android:key="pref2"
+            android:title="Preference 2"
+            android:summary="Pref 2"
+            android:defaultValue="false"/>
+
+        <EditTextPreference
+            android:key="pref3"
+            android:title="Preference 3"
+            android:summary="Pref 3"
+            android:defaultValue="Input"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
