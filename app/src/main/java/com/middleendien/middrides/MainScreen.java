@@ -1,6 +1,5 @@
 package com.middleendien.middrides;
 
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,21 +10,43 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.middleendien.middrides.backup.AnnouncementFragment;
+import com.middleendien.middrides.utils.AnnouncementDialogFragment;
 
 public class MainScreen extends AppCompatActivity {
 
     private MenuItem loginButton;
 
+    private AnnouncementDialogFragment announcementDialogFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        initView();
+        initEvent();
+    }
+
+    private void initEvent() {
+        // check for announcements
+        if(hasAnnouncement()){
+            announcementDialogFragment = new AnnouncementDialogFragment();
+            announcementDialogFragment.show(getFragmentManager(), "Announcement");
+        }
+    }
+
+    private void initView() {
+        // temporary announcement
+
+        // define the floating action button
+        FloatingActionButton callService = (FloatingActionButton) findViewById(R.id.fab);
+        callService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
@@ -37,8 +58,13 @@ public class MainScreen extends AppCompatActivity {
             }
         });
 
+        // define the action bar button
         // to change showAsAction property later
         loginButton = (MenuItem) findViewById(R.id.action_login);
+    }
+
+    private boolean hasAnnouncement() {
+        return true;
     }
 
     @Override

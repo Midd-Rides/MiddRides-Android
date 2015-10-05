@@ -1,16 +1,18 @@
 package com.middleendien.middrides;
 
-import android.app.ActionBar;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 
 import android.os.Bundle;
 
+import java.util.List;
+
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginPage extends AppCompatActivity {
+public class LoginPage extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +21,14 @@ public class LoginPage extends AppCompatActivity {
 
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+
+//        MenuInflater inflater = getMenuInflater();
+
+        initView();
+    }
+
+    private void initView() {
+
     }
 
     /**

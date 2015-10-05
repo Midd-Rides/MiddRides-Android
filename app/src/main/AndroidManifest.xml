@@ -25,7 +25,7 @@
             android:name=".LoginPage"
             android:label="@string/title_activity_login_page"
             android:parentActivityName=".MainScreen"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
         </activity>
 
         <activity

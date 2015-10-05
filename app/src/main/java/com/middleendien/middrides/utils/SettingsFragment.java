@@ -3,6 +3,7 @@ package com.middleendien.middrides.utils;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.util.Log;
 
 import com.middleendien.middrides.R;
 
