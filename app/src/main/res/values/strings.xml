@@ -6,6 +6,9 @@
     <string name="got_it">Got it!</string>
     <string name="login_button">Log In</string>
     <string name="register_button">Register</string>
+
+    <!--Switches-->
+    <string name="dispatcher_login">Dispatcher</string>
     
     <!--Action Bars & SnackBar-->
     <string name="action_settings">Settings</string>

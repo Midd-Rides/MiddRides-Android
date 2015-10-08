@@ -21,7 +21,8 @@
         android:layout_below="@id/login_boxes"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp">
+        android:layout_marginRight="20dp"
+        android:id="@+id/relativeLayout">
 
         <Button
             android:id="@+id/login_button"
@@ -36,6 +37,14 @@
             android:layout_height="wrap_content"
             android:text="@string/register_button"
             android:layout_alignParentRight="true"/>
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dispatcher_login"
+            android:id="@+id/dispatcher_login_switch"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
 </RelativeLayout>
