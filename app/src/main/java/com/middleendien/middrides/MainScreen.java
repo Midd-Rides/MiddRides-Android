@@ -1,6 +1,7 @@
 package com.middleendien.middrides;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,12 +23,13 @@ public class MainScreen extends AppCompatActivity {
 
     private AnnouncementDialogFragment announcementDialogFragment;
 
+    // for settings such as announcement, user name and login status and so on
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         initView();
         initEvent();
@@ -37,7 +39,8 @@ public class MainScreen extends AppCompatActivity {
         // check for announcements
         if(hasAnnouncement()){
             announcementDialogFragment = new AnnouncementDialogFragment();
-            announcementDialogFragment.show(getFragmentManager(), "Announcement");
+            announcementDialogFragment
+                    .show(getFragmentManager(), "Announcement");
         }
     }
 
@@ -76,12 +79,9 @@ public class MainScreen extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Action Bar items' click events
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         switch (id){
             case R.id.action_settings:
                 Intent intentSettings = new Intent(MainScreen.this, Settings.class);
