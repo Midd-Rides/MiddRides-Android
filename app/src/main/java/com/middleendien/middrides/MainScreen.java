@@ -1,5 +1,28 @@
 package com.middleendien.middrides;
 
+///////////////////////////////////////////////////////////////////
+//                            _ooOoo_                             //
+//                           o8888888o                            //
+//                           88" . "88                            //
+//                           (| ^_^ |)                            //
+//                           O\  =  /O                            //
+//                        ____/`---'\____                         //
+//                      .'  \\|     |//  `.                       //
+//                     /  \\|||  :  |||//  \                      //
+//                    /  _||||| -:- |||||-  \                     //
+//                    |   | \\\  -  /// |   |                     //
+//                    | \_|  ''\---/''  |   |                     //
+//                    \  .-\__  `-`  ___/-. /                     //
+//                  ___`. .'  /--.--\  `. . ___                   //
+//                ."" '<  `.___\_<|>_/___.'  >'"".                //
+//              | | :  `- \`.;`\ _ /`;.`/ - ` : | |               //
+//              \  \ `-.   \_ __\ /__ _/   .-` /  /               //
+//        ========`-.____`-.___\_____/___.-`____.-'========       //
+//                             `=---='                            //
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      //
+//                    Buddha Keeps Bugs Away                      //
+////////////////////////////////////////////////////////////////////
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,23 +31,29 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.middleendien.middrides.backup.AnnouncementFragment;
 import com.middleendien.middrides.utils.AnnouncementDialogFragment;
+import com.parse.ParseUser;
 
 public class MainScreen extends AppCompatActivity {
-
-    private MenuItem loginButton;
 
     private AnnouncementDialogFragment announcementDialogFragment;
 
     // for settings such as announcement, user name and login status and so on
     private SharedPreferences sharedPreferences;
+
+    private FloatingActionButton callService;
+//    private Button callService;
+
+    private long backFirstPressed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,38 +61,43 @@ public class MainScreen extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initView();
-        initEvent();
-    }
 
-    private void initEvent() {
-        // check for announcements
-        if(hasAnnouncement()){
-            announcementDialogFragment = new AnnouncementDialogFragment();
-            announcementDialogFragment
-                    .show(getFragmentManager(), "Announcement");
-        }
+        initEvent();
     }
 
     private void initView() {
         // temporary announcement
 
         // define the floating action button
-        FloatingActionButton callService = (FloatingActionButton) findViewById(R.id.fab);
+        callService = (FloatingActionButton) findViewById(R.id.fab);
+//        callService = (Button) findViewById(R.id.fab);
         callService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (ParseUser.getCurrentUser() == null) {
+                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                } else {
+                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
 
-                Toast toast = Toast.makeText(MainScreen.this, "We Send a request", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(MainScreen.this, "We send a request", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
             }
         });
+    }
 
-        // define the action bar button
-        // to change showAsAction property later
-        loginButton = (MenuItem) findViewById(R.id.action_login);
+    private void initEvent() {
+        backFirstPressed = System.currentTimeMillis() - 2000;
+
+        // check for announcements
+        if(hasAnnouncement()){
+//            announcementDialogFragment = new AnnouncementDialogFragment();
+//            announcementDialogFragment
+//                    .show(getFragmentManager(), "Announcement");
+        }
     }
 
     private boolean hasAnnouncement() {
@@ -89,11 +123,37 @@ public class MainScreen extends AppCompatActivity {
                 return true;
 
             case R.id.action_login:
-                Intent intentLogin = new Intent(MainScreen.this, LoginPage.class);
-                startActivity(intentLogin);
+                if(ParseUser.getCurrentUser() == null){
+                    Intent toLoginScreen = new Intent(MainScreen.this, LoginPage.class);
+                    startActivity(toLoginScreen);
+                }
+                else {
+                    Intent toUserScreen = new Intent(MainScreen.this, UserScreen.class);
+                    startActivity(toUserScreen);
+                }
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode){
+            case KeyEvent.KEYCODE_BACK:
+                long backSecondPressed = System.currentTimeMillis();
+                if(backSecondPressed - backFirstPressed >= 2000){
+                    Snackbar.make(callService, getResources().getString(R.string.press_again_exit), Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null)
+                            .show();
+                    backFirstPressed = backSecondPressed;
+                    return true;
+                }
+                else {
+                    finish();
+                }
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 }

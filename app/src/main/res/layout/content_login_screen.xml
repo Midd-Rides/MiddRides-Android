@@ -11,14 +11,16 @@
         android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginBottom="5dp"/>
+        android:layout_marginBottom="5dp"
+        android:inputType="textEmailAddress"/>
 
     <EditText
         android:id="@+id/passwdBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"/>
+        android:layout_marginRight="20dp"
+        android:inputType="textPassword"/>
 
     <TextView
         android:id="@+id/textView"
