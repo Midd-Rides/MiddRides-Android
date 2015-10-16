@@ -3,6 +3,22 @@
     <string name="title_activity_login_page">Log In</string>
     <string name="title_activity_register_page">Register</string>
     <string name="title_activity_main_page">MiddRides</string>
+    
+    <!--Log in/Sign up message-->
+    <string name="logged_in">Logged In</string>
+    <string name="wrong_email">Incorrect Email Format</string>
+
+    <string name="connection_fail">Connection Failed</string>
+    <string name="account_linked">Account Already Linked</string>
+    <string name="inter_server_err">Server Error</string>
+    <string name="time_out">Login Timed Out</string>
+    <string name="wrong_info">Incorrect E-mail or Password</string>
+    <string name="other_failure">Something Happened</string>
+    <string name="no_user">User Does Not Exist</string>
+    <string name="user_exists">User Already Exists</string>
+
+    <string name="login_fail_msg">Login Fail Message</string>
+    <string name="reg_fail_msg">Register Fail Message</string>
 
     <!--Buttons-->
     <string name="got_it">Got it!</string>
@@ -27,5 +43,6 @@
 
     <!--Preferences-->
     <string name="pref_screen_announcements">Announcement</string>
+    <string name="login_status">LoginStatus</string>
 
 </resources>

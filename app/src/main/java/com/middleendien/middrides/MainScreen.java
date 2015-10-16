@@ -1,5 +1,28 @@
 package com.middleendien.middrides;
 
+///////////////////////////////////////////////////////////////////
+//                            _ooOoo_                             //
+//                           o8888888o                            //
+//                           88" . "88                            //
+//                           (| ^_^ |)                            //
+//                           O\  =  /O                            //
+//                        ____/`---'\____                         //
+//                      .'  \\|     |//  `.                       //
+//                     /  \\|||  :  |||//  \                      //
+//                    /  _||||| -:- |||||-  \                     //
+//                    |   | \\\  -  /// |   |                     //
+//                    | \_|  ''\---/''  |   |                     //
+//                    \  .-\__  `-`  ___/-. /                     //
+//                  ___`. .'  /--.--\  `. . ___                   //
+//                ."" '<  `.___\_<|>_/___.'  >'"".                //
+//              | | :  `- \`.;`\ _ /`;.`/ - ` : | |               //
+//              \  \ `-.   \_ __\ /__ _/   .-` /  /               //
+//        ========`-.____`-.___\_____/___.-`____.-'========       //
+//                             `=---='                            //
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      //
+//                    Buddha Keeps Bugs Away                      //
+////////////////////////////////////////////////////////////////////
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,10 +39,12 @@ import android.widget.Toast;
 
 import com.middleendien.middrides.backup.AnnouncementFragment;
 import com.middleendien.middrides.utils.AnnouncementDialogFragment;
+import com.parse.ParseUser;
 
 public class MainScreen extends AppCompatActivity {
 
     private MenuItem loginButton;
+    private Menu menu;
 
     private AnnouncementDialogFragment announcementDialogFragment;
 
@@ -32,16 +57,8 @@ public class MainScreen extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initView();
-        initEvent();
-    }
 
-    private void initEvent() {
-        // check for announcements
-        if(hasAnnouncement()){
-            announcementDialogFragment = new AnnouncementDialogFragment();
-            announcementDialogFragment
-                    .show(getFragmentManager(), "Announcement");
-        }
+        initEvent();
     }
 
     private void initView() {
@@ -52,8 +69,13 @@ public class MainScreen extends AppCompatActivity {
         callService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (ParseUser.getCurrentUser() == null) {
+                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                } else {
+                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
 
                 Toast toast = Toast.makeText(MainScreen.this, "We Send a request", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
@@ -61,9 +83,23 @@ public class MainScreen extends AppCompatActivity {
             }
         });
 
-        // define the action bar button
-        // to change showAsAction property later
-        loginButton = (MenuItem) findViewById(R.id.action_login);
+//        loginButton = menu.findItem(R.id.action_login);
+        // hide login button if already logged in
+//        if(ParseUser.getCurrentUser() != null){
+//            loginButton.setVisible(false);
+//        }
+//        else {
+//            loginButton.setVisible(true);
+//        }
+    }
+
+    private void initEvent() {
+        // check for announcements
+        if(hasAnnouncement()){
+//            announcementDialogFragment = new AnnouncementDialogFragment();
+//            announcementDialogFragment
+//                    .show(getFragmentManager(), "Announcement");
+        }
     }
 
     private boolean hasAnnouncement() {
@@ -74,6 +110,7 @@ public class MainScreen extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        this.menu = menu;
         return true;
     }
 
