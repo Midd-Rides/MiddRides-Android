@@ -21,7 +21,7 @@ public class ParseApplication extends Application {
 
         // TODO: remove this when publishing
         // this would log out every time a session starts
-        ParseUser.logOut();
+//        ParseUser.logOut();
 
         // for test purposes, will send a test object to Parse database
 //        ParseObject testObject = new ParseObject("TestObject");

@@ -47,6 +47,12 @@ public class LoginPage extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        if(ParseUser.getCurrentUser() != null){
+            Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
+            startActivity(toMainScreen);
+            finish();
+        }
+
         initView();
 
         initData();
@@ -73,44 +79,44 @@ public class LoginPage extends AppCompatActivity{
         btnLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {               // login business is implemented with the LoginAgent class
-                // use sharedpreference to access the error message if any
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-
                 // check e-mail validity
                 if(!LoginAgent.isEmailValid(usernameBox.getText().toString())){
                     Toast.makeText(LoginPage.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-
-                ParseUser.logInInBackground(usernameBox.getText().toString(), passwdBox.getText().toString(), new LogInCallback() {
-                    @Override
-                    public void done(ParseUser user, ParseException e) {
-                        if (user != null) {
-                            Log.i("Login Success", "Login Success");
-                            Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
-                            Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
-                            startActivity(toMainScreen);
-                            finish();
-                        } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
-                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                        } else if (e.getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.account_linked), Toast.LENGTH_SHORT).show();                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                        } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
-                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                        } else if (e.getCode() == ParseException.TIMEOUT) {
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                        } else if (e.getCode() == ParseException.VALIDATION_ERROR) {
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                        } else if (e.getCode() == 101) {
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                        } else {
-                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                            Toast.makeText(LoginPage.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();                        }
-                    }
-                });
+                 ParseUser.logInInBackground(usernameBox.getText().toString(), passwdBox.getText().toString(), new LogInCallback() {
+                     @Override
+                     public void done(ParseUser user, ParseException e) {
+                         if (user != null) {
+                             Log.i("Login Success", "Login Success");
+                             Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
+                             Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
+                             startActivity(toMainScreen);
+                             finish();
+                         } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                         } else if (e.getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.account_linked), Toast.LENGTH_SHORT).show();
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                         } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                         } else if (e.getCode() == ParseException.TIMEOUT) {
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                         } else if (e.getCode() == ParseException.VALIDATION_ERROR) {
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                         } else if (e.getCode() == 101) {
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                         } else {
+                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                             Toast.makeText(LoginPage.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
+                         }
+                     }
+                 });
 
 
 

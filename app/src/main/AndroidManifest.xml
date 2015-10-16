@@ -48,6 +48,12 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity
+            android:name=".UserScreen"
+            android:parentActivityName=".MainScreen"
+            android:screenOrientation="portrait">
+        </activity>
+
 
     </application>
 
