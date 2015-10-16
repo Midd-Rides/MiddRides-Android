@@ -35,6 +35,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ public class MainScreen extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
 
     private FloatingActionButton callService;
+//    private Button callService;
 
     private long backFirstPressed;
 
@@ -68,6 +70,7 @@ public class MainScreen extends AppCompatActivity {
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
+//        callService = (Button) findViewById(R.id.fab);
         callService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
