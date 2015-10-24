@@ -23,11 +23,13 @@ package com.middleendien.middrides;
 //                    Buddha Keeps Bugs Away                      //
 ////////////////////////////////////////////////////////////////////
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -36,11 +38,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.middleendien.middrides.backup.AnnouncementFragment;
+import com.middleendien.middrides.models.Location;
+import com.middleendien.middrides.models.UserRequest;
 import com.middleendien.middrides.utils.AnnouncementDialogFragment;
+import com.middleendien.middrides.utils.LocationSelectDialogFragment;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 
-public class MainScreen extends AppCompatActivity {
+public class MainScreen extends AppCompatActivity implements LocationSelectDialogFragment.SelectLocationDialogListener{
 
     private AnnouncementDialogFragment announcementDialogFragment;
 
@@ -67,6 +72,7 @@ public class MainScreen extends AppCompatActivity {
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
+        //callService.setEnabled(false); //DISABLED UNTIL USER LOGS IN
 //        callService = (Button) findViewById(R.id.fab);
         callService.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,11 +85,20 @@ public class MainScreen extends AppCompatActivity {
                             .setAction("Action", null).show();
                 }
 
+                //Start Dialog for userRequest
+                showLocationDialog();
+
                 Toast toast = Toast.makeText(MainScreen.this, "We send a request", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
             }
         });
+    }
+
+    private void showLocationDialog(){
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        DialogFragment locationFragment =  new LocationSelectDialogFragment();
+        locationFragment.show(fm, "Select Location");
     }
 
     private void initEvent() {
@@ -152,5 +167,19 @@ public class MainScreen extends AppCompatActivity {
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void onLocationSelected(Location locationSelected){
+
+        Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
+
+        //Make new userRequest and send to Parse
+        UserRequest newRequest = new UserRequest(ParseUser.getCurrentUser().getObjectId(),locationSelected.getName());
+
+        ParseObject parseUserRequest = new ParseObject("UserRequest");
+        parseUserRequest.put("RequestTime",newRequest.getTimeOfRequest());
+        parseUserRequest.put("UserId",newRequest.getUserID());
+        parseUserRequest.put("Location_Name",locationSelected.getName());
+        parseUserRequest.saveInBackground();
     }
 }
