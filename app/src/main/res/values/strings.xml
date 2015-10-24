@@ -26,6 +26,7 @@
     <string name="register_button">Register</string>
     <string name="log_in_later">Log in later</string>
     <string name="logout_button">Log Out</string>
+    <string name="resend_email_button">Re-send verification e-mail</string>
 
     <!--Switches-->
     <string name="dispatcher_login">Dispatcher</string>
@@ -46,6 +47,10 @@
     <!--Preferences-->
     <string name="pref_screen_announcements">Announcement</string>
     <string name="login_status">LoginStatus</string>
+
+    <!--Toast-->
+    <string name="already_verified">E-mail Already Verified</string>
+    <string name="resent_email">Re-sent Verification Email</string>
 
     <!--Others-->
     <string name="email_not_verified">Email Not Verified</string>
