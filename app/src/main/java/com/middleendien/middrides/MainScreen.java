@@ -23,7 +23,6 @@ package com.middleendien.middrides;
 //                    Buddha Keeps Bugs Away                      //
 ////////////////////////////////////////////////////////////////////
 
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -48,6 +47,14 @@ import com.parse.ParseUser;
 public class MainScreen extends AppCompatActivity implements LocationSelectDialogFragment.SelectLocationDialogListener{
 
     private AnnouncementDialogFragment announcementDialogFragment;
+
+    //Static strings for Parse Requests
+    private static final String USER_REQUESTS_PARSE_OBJECT = "UserRequest";
+    private static final String REQUEST_TIME__PARSE_OBJECT = "RequestTime";
+    private static final String USER_ID__PARSE_OBJECT = "UserId";
+    private static final String USER_EMAIL__PARSE_OBJECT = "UserEmail";
+    private static final String LOCATION_NAME__PARSE_OBJECT = "Location_Name";
+
 
     // for settings such as announcement, user name and login status and so on
     private SharedPreferences sharedPreferences;
@@ -176,10 +183,11 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
         //Make new userRequest and send to Parse
         UserRequest newRequest = new UserRequest(ParseUser.getCurrentUser().getObjectId(),locationSelected.getName());
 
-        ParseObject parseUserRequest = new ParseObject("UserRequest");
-        parseUserRequest.put("RequestTime",newRequest.getTimeOfRequest());
-        parseUserRequest.put("UserId",newRequest.getUserID());
-        parseUserRequest.put("Location_Name",locationSelected.getName());
+        ParseObject parseUserRequest = new ParseObject(USER_REQUESTS_PARSE_OBJECT);
+        parseUserRequest.put(REQUEST_TIME__PARSE_OBJECT,newRequest.getTimeOfRequest());
+        parseUserRequest.put(USER_ID__PARSE_OBJECT,newRequest.getUserID());
+        parseUserRequest.put(USER_EMAIL__PARSE_OBJECT,ParseUser.getCurrentUser().get("email"));
+        parseUserRequest.put(LOCATION_NAME__PARSE_OBJECT,locationSelected.getName());
         parseUserRequest.saveInBackground();
     }
 }

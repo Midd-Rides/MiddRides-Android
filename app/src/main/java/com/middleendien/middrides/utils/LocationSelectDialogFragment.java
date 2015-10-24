@@ -1,5 +1,9 @@
 package com.middleendien.middrides.utils;
 
+import android.content.Intent;
+import android.location.Criteria;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -9,9 +13,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.middleendien.middrides.R;
+import com.middleendien.middrides.Settings;
 import com.middleendien.middrides.models.Location;
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 
@@ -22,14 +33,18 @@ public class LocationSelectDialogFragment extends DialogFragment {
 
 
     private ArrayList<Location> locationArrayList = new ArrayList<>();
+    private android.location.Location Ulocation;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_select_location, container, false);
         final ListView locationsList = (ListView)v.findViewById(R.id.locationListView);
         Button selectNearestStop = (Button)v.findViewById(R.id.chooseNearestStopButton);
+        selectNearestStop.setEnabled(false);
 
         getDialog().setTitle("Select Location");
+
 
         //INITIALIZE LIST OF LOCATIONS NOTE THAT LOT LATS AND LONGS MAY NOT BE ACCURATE
         locationArrayList.add(new Location("Adirondack Circle", 44.010250, -73.179967));
@@ -39,8 +54,8 @@ public class LocationSelectDialogFragment extends DialogFragment {
         locationArrayList.add(new Location("T Lot",44.012077,-73.176455));
         locationArrayList.add(new Location("McCullough Student Center",44.008295,-73.177213));
         locationArrayList.add(new Location("E Lot",44.012077,-73.176455));
-        locationArrayList.add(new Location("Q Lot",44.012077,-73.176455));
-        locationArrayList.add(new Location("Frog Hollow",44.013340,-73.169148));
+        locationArrayList.add(new Location("Q Lot", 44.012077, -73.176455));
+        locationArrayList.add(new Location("Frog Hollow", 44.013340, -73.169148));
 
 
         //Set custom adapter;
@@ -52,26 +67,23 @@ public class LocationSelectDialogFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Location locationSelected = (Location) locationsList.getItemAtPosition(position);
 
-                SelectLocationDialogListener mainScreenActivity =  (SelectLocationDialogListener)getActivity();
+                SelectLocationDialogListener mainScreenActivity = (SelectLocationDialogListener) getActivity();
                 mainScreenActivity.onLocationSelected(locationSelected);
 
                 dismiss();
             }
         });
 
-        selectNearestStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Get user current lat and long
 
-                //USE PARSE TO GET CLOSEST STOP
-            }
-        });
 
         return v;
     }
 
+
+
     public interface SelectLocationDialogListener{
         void onLocationSelected(Location locationSelected);
     }
+
+
 }
