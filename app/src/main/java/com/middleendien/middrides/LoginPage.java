@@ -91,8 +91,14 @@ public class LoginPage extends AppCompatActivity{
                          if (user != null) {
                              Log.i("Login Success", "Login Success");
                              Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
-                             Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
-                             startActivity(toMainScreen);
+                             if(user.getBoolean(getString(R.string.is_dispatcher))){
+                                 // TODO: go to dispatcher page (or begin that fragment or what)
+                                 // TODO: you guys do it
+                             }
+                             else {
+                                 Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
+                                 startActivity(toMainScreen);
+                             }
                              finish();
                          } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
                              Toast.makeText(LoginPage.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();

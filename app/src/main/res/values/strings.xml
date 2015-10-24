@@ -40,6 +40,7 @@
     <!--Intent Bundle keys-->
     <string name="current_user">User</string>
     <string name="is_logged_in">loggedIn</string>
+    <string name="is_dispatcher">Dispatcher</string>
 
     <!--Tags-->
     <string name="announcement_fragment">ShowAnnouncement</string>
