@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.parse.ParseUser;
 
@@ -16,6 +17,7 @@ public class UserScreen extends AppCompatActivity {
 
     private ImageView userAvatar;
     private Button logoutButton;
+    private TextView verificationStatusTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,11 @@ public class UserScreen extends AppCompatActivity {
     private void initView() {
         userAvatar = (ImageView) findViewById(R.id.user_avatar);
         logoutButton = (Button) findViewById(R.id.btn_logout);
+        verificationStatusTextView = (TextView) findViewById(R.id.verification_status);
+        if(ParseUser.getCurrentUser().isAuthenticated())
+            verificationStatusTextView.setText(getResources().getString(R.string.email_verified));
+        else
+            verificationStatusTextView.setText(getResources().getString(R.string.email_not_verified));
     }
 
     private void initEvent() {

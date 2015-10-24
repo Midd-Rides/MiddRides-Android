@@ -47,4 +47,8 @@
     <string name="pref_screen_announcements">Announcement</string>
     <string name="login_status">LoginStatus</string>
 
+    <!--Others-->
+    <string name="email_not_verified">Email Not Verified</string>
+    <string name="email_verified">Email Verified</string>
+
 </resources>
