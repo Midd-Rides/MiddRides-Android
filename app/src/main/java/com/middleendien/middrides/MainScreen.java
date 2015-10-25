@@ -97,7 +97,7 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
 
                 //Start Dialog for userRequest
                 //If request pending, then show message
-                if((boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) != true){
+                if((boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) == true){
                     Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                 }else {
