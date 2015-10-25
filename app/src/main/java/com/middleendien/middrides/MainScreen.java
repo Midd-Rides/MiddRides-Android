@@ -41,21 +41,24 @@ import com.middleendien.middrides.models.Location;
 import com.middleendien.middrides.models.UserRequest;
 import com.middleendien.middrides.utils.AnnouncementDialogFragment;
 import com.middleendien.middrides.utils.LocationSelectDialogFragment;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 public class MainScreen extends AppCompatActivity implements LocationSelectDialogFragment.SelectLocationDialogListener{
 
     private AnnouncementDialogFragment announcementDialogFragment;
 
     // Constant strings for Parse Requests
-    private static final String USER_REQUESTS_PARSE_OBJECT = "UserRequest";
+    public static final String USER_REQUESTS_PARSE_OBJECT = "UserRequest";
     private static final String REQUEST_TIME__PARSE_OBJECT = "RequestTime";
     private static final String USER_ID_PARSE_OBJECT = "UserId";
     private static final String USER_EMAIL_PARSE_OBJECT = "UserEmail";
     private static final String USER_EMAIL_KEY_PARSE_OBJECT = "email";
     private static final String LOCATION_NAME__PARSE_OBJECT = "Location_Name";
     public static final String PENDING_USER_REQUEST_PARSE_KEY = "PendingRequest";
+    public static final String PENDING_USER_REQUESTID_PARSE_KEY = "requestID";
 
 
 
@@ -95,16 +98,13 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
                             .setAction("Action", null).show();
                 }
 
-                //Start Dialog for userRequest
                 //If request pending, then show message
                 if((boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) == true){
                     Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
-                }else {
+
+                }else { //choose location from dialog
                     showLocationDialog();
-                    Toast toast = Toast.makeText(MainScreen.this, "We send a request", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
                 }
 
             }
@@ -194,15 +194,23 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
         //Make new userRequest and send to Parse
         UserRequest newRequest = new UserRequest(ParseUser.getCurrentUser().getObjectId(),locationSelected.getName());
 
-        ParseObject parseUserRequest = new ParseObject(USER_REQUESTS_PARSE_OBJECT);
+        final ParseObject parseUserRequest = new ParseObject(USER_REQUESTS_PARSE_OBJECT);
         parseUserRequest.put(REQUEST_TIME__PARSE_OBJECT,newRequest.getTimeOfRequest());
         parseUserRequest.put(USER_ID_PARSE_OBJECT,newRequest.getUserID());
         parseUserRequest.put(USER_EMAIL_PARSE_OBJECT,ParseUser.getCurrentUser().get(USER_EMAIL_KEY_PARSE_OBJECT));
         parseUserRequest.put(LOCATION_NAME__PARSE_OBJECT, locationSelected.getName());
-        parseUserRequest.saveInBackground();
+        parseUserRequest.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    //Update user entries when done
+                    ParseUser setPendingRequestUser = ParseUser.getCurrentUser();
+                    setPendingRequestUser.put(PENDING_USER_REQUEST_PARSE_KEY,true);
+                    setPendingRequestUser.put(PENDING_USER_REQUESTID_PARSE_KEY,parseUserRequest.getObjectId());
+                    setPendingRequestUser.saveInBackground();
+                }
+            }
+        });
 
-        ParseUser setPendingRequestUser = ParseUser.getCurrentUser();
-        setPendingRequestUser.put(PENDING_USER_REQUEST_PARSE_KEY,true);
-        setPendingRequestUser.saveInBackground();
     }
 }

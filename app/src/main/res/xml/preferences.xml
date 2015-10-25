@@ -23,11 +23,10 @@
             android:summary="Pref 2"
             android:defaultValue="false"/>
 
-        <EditTextPreference
-            android:key="pref3"
-            android:title="Preference 3"
-            android:summary="Pref 3"
-            android:defaultValue="Input"/>
+        <Preference
+            android:key="@string/cancelRequest_button"
+            android:title="@string/cancelRequest_button"
+            android:summary="You don't need a ride" />
 
     </PreferenceCategory>
 
