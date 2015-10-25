@@ -25,7 +25,7 @@ public class SettingsFragment extends PreferenceFragment {
 
         addPreferencesFromResource(R.xml.preferences);
 
-        Preference cancelRequestButton =  findPreference(getString(R.string.cancelRequest_button));
+        final Preference cancelRequestButton =  findPreference(getString(R.string.cancelRequest_button));
         if((boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == true){
             cancelRequestButton.setEnabled(true);
         }else{
@@ -45,6 +45,9 @@ public class SettingsFragment extends PreferenceFragment {
                             requestToDelete.deleteInBackground();
                             ParseUser.getCurrentUser().put(MainScreen.PENDING_USER_REQUEST_PARSE_KEY, false);
                             ParseUser.getCurrentUser().saveInBackground();
+                            Toast.makeText(getActivity(), "Your current request has been cancelled", Toast.LENGTH_SHORT).show();
+                            cancelRequestButton.setEnabled(false);
+
                         }
                         else {
                             Toast.makeText(getActivity(),"Something went wrong",Toast.LENGTH_SHORT).show();
