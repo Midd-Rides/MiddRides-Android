@@ -19,13 +19,16 @@ import com.parse.ParseUser;
 import java.text.ParseException;
 
 public class SettingsFragment extends PreferenceFragment {
+
+    private Preference cancelRequestButton;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
 
-        final Preference cancelRequestButton =  findPreference(getString(R.string.cancelRequest_button));
+       cancelRequestButton =  findPreference(getString(R.string.cancelRequest_button));
         if((boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == true){
             cancelRequestButton.setEnabled(true);
         }else{
@@ -58,5 +61,15 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
 
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if((boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == true){
+            cancelRequestButton.setEnabled(true);
+        }else{
+            cancelRequestButton.setEnabled(false);
+        }
     }
 }
