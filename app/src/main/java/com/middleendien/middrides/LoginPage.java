@@ -90,6 +90,12 @@ public class LoginPage extends AppCompatActivity{
                          if (user != null) {
                              Log.i("Login Success", "Login Success");
                              Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
+
+                             //TODO:UPDATE WITH LISTENER METHOD FROM DISPATCHER
+                             ParseUser setPending = ParseUser.getCurrentUser();
+                             setPending.put(MainScreen.PENDING_USER_REQUEST_PARSE_KEY, false);
+                             setPending.saveInBackground();
+
                              Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
                              startActivity(toMainScreen);
                              finish();

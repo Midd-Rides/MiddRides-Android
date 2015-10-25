@@ -24,10 +24,6 @@ public class UserRequest {
         return timeOfRequest;
     }
 
-    public void setTimeOfRequest(Date timeOfRequest) {
-        this.timeOfRequest = timeOfRequest;
-    }
-
     public String getUserID() {
         return userID;
     }

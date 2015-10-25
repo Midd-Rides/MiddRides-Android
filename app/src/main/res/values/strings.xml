@@ -8,6 +8,7 @@
     <string name="logged_in">Logged In</string>
     <string name="wrong_email">Incorrect Email Format</string>
     <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
+    <string name="pending_request_error">You can only make one request at a time</string>
 
     <string name="connection_fail">Connection Failed</string>
     <string name="account_linked">Account Already Linked</string>
