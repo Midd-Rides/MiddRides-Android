@@ -208,6 +208,8 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
                     setPendingRequestUser.put(PENDING_USER_REQUEST_PARSE_KEY,true);
                     setPendingRequestUser.put(PENDING_USER_REQUESTID_PARSE_KEY,parseUserRequest.getObjectId());
                     setPendingRequestUser.saveInBackground();
+                }else{
+                    Toast.makeText(getApplicationContext(),"Something went wrong",Toast.LENGTH_SHORT).show();
                 }
             }
         });
