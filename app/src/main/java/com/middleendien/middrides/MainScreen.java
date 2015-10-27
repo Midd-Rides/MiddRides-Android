@@ -30,7 +30,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
@@ -50,7 +49,7 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
 
     private AnnouncementDialogFragment announcementDialogFragment;
 
-    // Constant strings for Parse Requests
+    //Constant Strings for Parse Request
     public static final String USER_REQUESTS_PARSE_OBJECT = "UserRequest";
     private static final String REQUEST_TIME__PARSE_OBJECT = "RequestTime";
     private static final String USER_ID_PARSE_OBJECT = "UserId";
@@ -85,8 +84,7 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
-        //callService.setEnabled(false); //DISABLED UNTIL USER LOGS IN
-//        callService = (Button) findViewById(R.id.fab);
+
         callService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,12 +96,12 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
                             .setAction("Action", null).show();
                 }
 
-                //If request pending, then show message
+                //If user has already requested the van
                 if((boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) == true){
                     Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
 
-                }else { //choose location from dialog
+                }else { //initialize Location Dialog
                     showLocationDialog();
                 }
 

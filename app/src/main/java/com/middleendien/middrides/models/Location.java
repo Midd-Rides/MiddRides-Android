@@ -4,7 +4,13 @@ import java.io.Serializable;
 
 /**
  * Created by Nosagie on 10/23/15.
+ *
+ * Represents a MiddRides Stop
+ * Latitude and Longitude methods are used to find closest stop to the user
  */
+
+
+
 public class Location implements Serializable{
 
     private String name;

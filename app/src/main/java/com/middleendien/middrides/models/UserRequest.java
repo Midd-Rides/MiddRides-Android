@@ -5,6 +5,9 @@ import java.util.UUID;
 
 /**
  * Created by Nosagie on 10/23/15.
+ *
+ * Represents a user request for a van
+ * Stores the time of the Request, the User's ID, and the Location's name
  */
 public class UserRequest {
 
