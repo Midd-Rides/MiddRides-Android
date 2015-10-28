@@ -25,7 +25,7 @@ public class LocationSelectDialogFragment extends DialogFragment {
 
 
     //List of MiddRide stops
-    private ArrayList<Location> vanStopLocationsList = new ArrayList<>();
+    private ArrayList<Location> vanStopLocationsList = new ArrayList<Location>();
 
     private ListView locationsListView;
     private Button selectNearestStop;
@@ -70,7 +70,7 @@ public class LocationSelectDialogFragment extends DialogFragment {
 
     //Configures adapter and sets Item click listener for List
     private void configureAdapter(){
-        ArrayAdapter<Location> locationsArrayListAdapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_activated_1, vanStopLocationsList);
+        ArrayAdapter<Location> locationsArrayListAdapter = new ArrayAdapter<Location>(getActivity(),android.R.layout.simple_list_item_activated_1, vanStopLocationsList);
         locationsListView.setAdapter(locationsArrayListAdapter);
 
         locationsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

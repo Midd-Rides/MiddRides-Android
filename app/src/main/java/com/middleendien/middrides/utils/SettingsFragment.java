@@ -29,7 +29,7 @@ public class SettingsFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.preferences);
 
        cancelRequestButton =  findPreference(getString(R.string.cancelRequest_button));
-        if((boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == true){
+        if((Boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == Boolean.TRUE){
             cancelRequestButton.setEnabled(true);
         }else{
             cancelRequestButton.setEnabled(false);
@@ -66,10 +66,15 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onResume(){
         super.onResume();
-        if((boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == true){
+        if((Boolean)ParseUser.getCurrentUser().get(MainScreen.PENDING_USER_REQUEST_PARSE_KEY) == true){
             cancelRequestButton.setEnabled(true);
         }else{
             cancelRequestButton.setEnabled(false);
         }
+    }
+
+    @Override
+    public void onPause(){
+
     }
 }

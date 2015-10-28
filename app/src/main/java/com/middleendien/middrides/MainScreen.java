@@ -97,7 +97,7 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
                 }
 
                 //If user has already requested the van
-                if((Boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) == true){
+                if((Boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) == Boolean.TRUE){
                     Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
 
