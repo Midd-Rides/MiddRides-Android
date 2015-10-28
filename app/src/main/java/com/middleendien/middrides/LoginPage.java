@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -80,7 +81,7 @@ public class LoginPage extends AppCompatActivity{
             @Override
             public void onClick(View v) {               // login business is implemented with the LoginAgent class
                 // check e-mail validity
-                if(!LoginAgent.isEmailValid(usernameBox.getText().toString())){
+                if(!LoginAgent.isEmailValid(usernameBox.getText().toString()) || !Patterns.EMAIL_ADDRESS.matcher(usernameBox.getText().toString()).matches()){
                     Toast.makeText(LoginPage.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -90,6 +91,7 @@ public class LoginPage extends AppCompatActivity{
                          if (user != null) {
                              Log.i("Login Success", "Login Success");
                              Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
+<<<<<<< HEAD
 
                              //TODO:UPDATE WITH LISTENER METHOD FROM DISPATCHER
                              ParseUser setPending = ParseUser.getCurrentUser();
@@ -98,6 +100,16 @@ public class LoginPage extends AppCompatActivity{
 
                              Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
                              startActivity(toMainScreen);
+=======
+                             if(user.getBoolean(getString(R.string.is_dispatcher))){
+                                 // TODO: go to dispatcher page (or begin that fragment or what)
+                                 // TODO: you guys do it
+                             }
+                             else {
+                                 Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
+                                 startActivity(toMainScreen);
+                             }
+>>>>>>> origin/Login
                              finish();
                          } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
                              Toast.makeText(LoginPage.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
@@ -128,32 +140,6 @@ public class LoginPage extends AppCompatActivity{
 
                 // until I figure out how to do Async
                 // Windows Phone is the best
-
-//                loginAgent = LoginAgent.getInstance(usernameBox.getText().toString(), passwdBox.getText().toString(), LoginPage.this);
-//
-//                boolean loginSuccess = loginAgent.attemptLogin(usernameBox.getText().toString(), passwdBox.getText().toString());
-//
-//                if(!loginSuccess){
-//                    String errorMessage = sharedPreferences.getString(getResources().getString(R.string.login_fail_msg),
-//                            getResources().getString(R.string.other_failure));
-//
-//                    Toast.makeText(LoginPage.this, errorMessage, Toast.LENGTH_SHORT).show();
-//                }
-//                else {
-//                    Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();         // this toast is temporary
-//                }
-//
-//
-//
-//
-//                if(loginSuccess){
-//                    Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
-//                    startActivity(toMainScreen);
-//                    finish();
-//                }
-//                else {
-//                    // do nothings
-//                }
             }
         });
 

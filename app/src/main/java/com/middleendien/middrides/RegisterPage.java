@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -52,7 +53,7 @@ public class RegisterPage extends AppCompatActivity {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
                 // check e-mail validity
-                if(!LoginAgent.isEmailValid(usernameBox.getText().toString())){
+                if(!LoginAgent.isEmailValid(usernameBox.getText().toString()) || !Patterns.EMAIL_ADDRESS.matcher(usernameBox.getText().toString()).matches()){
                     Toast.makeText(RegisterPage.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
                     return;
                 }
