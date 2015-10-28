@@ -91,6 +91,16 @@ public class LoginPage extends AppCompatActivity{
                          if (user != null) {
                              Log.i("Login Success", "Login Success");
                              Toast.makeText(LoginPage.this, "Login Success", Toast.LENGTH_SHORT).show();
+<<<<<<< HEAD
+
+                             //TODO:UPDATE WITH LISTENER METHOD FROM DISPATCHER
+                             ParseUser setPending = ParseUser.getCurrentUser();
+                             setPending.put(MainScreen.PENDING_USER_REQUEST_PARSE_KEY, false);
+                             setPending.saveInBackground();
+
+                             Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
+                             startActivity(toMainScreen);
+=======
                              if(user.getBoolean(getString(R.string.is_dispatcher))){
                                  // TODO: go to dispatcher page (or begin that fragment or what)
                                  // TODO: you guys do it
@@ -99,6 +109,7 @@ public class LoginPage extends AppCompatActivity{
                                  Intent toMainScreen = new Intent(LoginPage.this, MainScreen.class);
                                  startActivity(toMainScreen);
                              }
+>>>>>>> origin/Login
                              finish();
                          } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
                              Toast.makeText(LoginPage.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
