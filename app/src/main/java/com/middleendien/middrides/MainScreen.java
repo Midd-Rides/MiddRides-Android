@@ -28,24 +28,38 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.middleendien.middrides.backup.AnnouncementFragment;
+import com.middleendien.middrides.models.Location;
+import com.middleendien.middrides.models.UserRequest;
 import com.middleendien.middrides.utils.AnnouncementDialogFragment;
+import com.middleendien.middrides.utils.LocationSelectDialogFragment;
+import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
-public class MainScreen extends AppCompatActivity {
+public class MainScreen extends AppCompatActivity implements LocationSelectDialogFragment.SelectLocationDialogListener{
 
     private AnnouncementDialogFragment announcementDialogFragment;
+
+    //Constant Strings for Parse Request
+    public static final String USER_REQUESTS_PARSE_OBJECT = "UserRequest";
+    private static final String REQUEST_TIME__PARSE_OBJECT = "RequestTime";
+    private static final String USER_ID_PARSE_OBJECT = "UserId";
+    private static final String USER_EMAIL_PARSE_OBJECT = "UserEmail";
+    private static final String USER_EMAIL_KEY_PARSE_OBJECT = "email";
+    private static final String LOCATION_NAME__PARSE_OBJECT = "Location_Name";
+    public static final String PENDING_USER_REQUEST_PARSE_KEY = "PendingRequest";
+    public static final String PENDING_USER_REQUESTID_PARSE_KEY = "requestID";
+
+
 
     // for settings such as announcement, user name and login status and so on
     private SharedPreferences sharedPreferences;
@@ -70,7 +84,7 @@ public class MainScreen extends AppCompatActivity {
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
-//        callService = (Button) findViewById(R.id.fab);
+
         callService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,11 +96,23 @@ public class MainScreen extends AppCompatActivity {
                             .setAction("Action", null).show();
                 }
 
-                Toast toast = Toast.makeText(MainScreen.this, "We send a request", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
+                //If user has already requested the van
+                if((Boolean)ParseUser.getCurrentUser().get(PENDING_USER_REQUEST_PARSE_KEY) == Boolean.TRUE){
+                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+
+                }else { //initialize Location Dialog
+                    showLocationDialog();
+                }
+
             }
         });
+    }
+
+    private void showLocationDialog(){
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        DialogFragment locationFragment =  new LocationSelectDialogFragment();
+        locationFragment.show(fm, "Select Location");
     }
 
     private void initEvent() {
@@ -97,6 +123,8 @@ public class MainScreen extends AppCompatActivity {
 //            announcementDialogFragment = new AnnouncementDialogFragment();
 //            announcementDialogFragment
 //                    .show(getFragmentManager(), "Announcement");
+
+            //TODO: Update Pending request field in parse user object when request is satisfied
         }
     }
 
@@ -155,5 +183,34 @@ public class MainScreen extends AppCompatActivity {
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void onLocationSelected(Location locationSelected){
+
+        Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
+
+        //Make new userRequest and send to Parse
+        UserRequest newRequest = new UserRequest(ParseUser.getCurrentUser().getObjectId(),locationSelected.getName());
+
+        final ParseObject parseUserRequest = new ParseObject(USER_REQUESTS_PARSE_OBJECT);
+        parseUserRequest.put(REQUEST_TIME__PARSE_OBJECT,newRequest.getTimeOfRequest());
+        parseUserRequest.put(USER_ID_PARSE_OBJECT,newRequest.getUserID());
+        parseUserRequest.put(USER_EMAIL_PARSE_OBJECT,ParseUser.getCurrentUser().get(USER_EMAIL_KEY_PARSE_OBJECT));
+        parseUserRequest.put(LOCATION_NAME__PARSE_OBJECT, locationSelected.getName());
+        parseUserRequest.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    //Update user entries when done
+                    ParseUser setPendingRequestUser = ParseUser.getCurrentUser();
+                    setPendingRequestUser.put(PENDING_USER_REQUEST_PARSE_KEY,true);
+                    setPendingRequestUser.put(PENDING_USER_REQUESTID_PARSE_KEY,parseUserRequest.getObjectId());
+                    setPendingRequestUser.saveInBackground();
+                }else{
+                    Toast.makeText(getApplicationContext(),"Something went wrong",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 }

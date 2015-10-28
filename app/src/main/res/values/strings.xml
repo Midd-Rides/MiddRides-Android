@@ -7,6 +7,8 @@
     <!--Log in/Sign up message-->
     <string name="logged_in">Logged In</string>
     <string name="wrong_email">Incorrect Email Format</string>
+    <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
+    <string name="pending_request_error">You can only make one request at a time</string>
 
     <string name="connection_fail">Connection Failed</string>
     <string name="account_linked">Account Already Linked</string>
@@ -26,6 +28,9 @@
     <string name="register_button">Register</string>
     <string name="log_in_later">Log in later</string>
     <string name="logout_button">Log Out</string>
+    <string name="nearestLocation_button">Click this if Drunk</string>
+    <string name="cancelRequest_button">Cancel Request</string>
+    <string name="resend_email_button">Re-send verification e-mail</string>
 
     <!--Switches-->
     <string name="dispatcher_login">Dispatcher</string>
@@ -39,6 +44,7 @@
     <!--Intent Bundle keys-->
     <string name="current_user">User</string>
     <string name="is_logged_in">loggedIn</string>
+    <string name="is_dispatcher">Dispatcher</string>
 
     <!--Tags-->
     <string name="announcement_fragment">ShowAnnouncement</string>
@@ -46,5 +52,13 @@
     <!--Preferences-->
     <string name="pref_screen_announcements">Announcement</string>
     <string name="login_status">LoginStatus</string>
+
+    <!--Toast-->
+    <string name="already_verified">E-mail Already Verified</string>
+    <string name="resent_email">Re-sent Verification Email</string>
+
+    <!--Others-->
+    <string name="email_not_verified">Email Not Verified</string>
+    <string name="email_verified">Email Verified</string>
 
 </resources>
