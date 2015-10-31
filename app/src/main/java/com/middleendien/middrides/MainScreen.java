@@ -55,7 +55,7 @@ public class MainScreen extends AppCompatActivity implements LocationSelectDialo
     private static final String USER_ID_PARSE_OBJECT = "UserId";
     private static final String USER_EMAIL_PARSE_OBJECT = "UserEmail";
     private static final String USER_EMAIL_KEY_PARSE_OBJECT = "email";
-    private static final String LOCATION_NAME__PARSE_OBJECT = "Location_Name";
+    private static final String LOCATION_NAME__PARSE_OBJECT = "locationName";
     public static final String PENDING_USER_REQUEST_PARSE_KEY = "PendingRequest";
     public static final String PENDING_USER_REQUESTID_PARSE_KEY = "requestID";
 

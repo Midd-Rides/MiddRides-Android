@@ -73,8 +73,4 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    @Override
-    public void onPause(){
-
-    }
 }
