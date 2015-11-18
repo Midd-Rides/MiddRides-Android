@@ -65,9 +65,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     private FloatingActionButton callService;
 
     // request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
-    private static final int STATUS_SERVICE_RUNNING_REQUEST_CODE        = 0x001;
-    private static final int STATUS_LOCATION_VERSION_REQUEST_CODE       = 0x002;
-    private static final int LOCATION_GET_LASTEST_VERSION_REQUEST_CODE = 0x003;
+    private static final int STATUS_SERVICE_RUNNING_REQUEST_CODE            = 0x001;
+    private static final int STATUS_LOCATION_VERSION_REQUEST_CODE           = 0x002;
+    private static final int LOCATION_GET_LASTEST_VERSION_REQUEST_CODE      = 0x003;
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
@@ -76,6 +76,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     // I only do this nasty thing because the dialog was not made with an id attached to it
     private int locationDialogFragmentId;
+    private int serverVersion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,7 +216,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
             case STATUS_LOCATION_VERSION_REQUEST_CODE:
                 int localVersion = sharedPreferences.getInt(getString(R.string.parse_status_location_version), 0);
-                int serverVersion = object.getInt(getString(R.string.parse_status_location_version));
+                serverVersion = object.getInt(getString(R.string.parse_status_location_version));
                 if (serverVersion > localVersion) {
                     // server has newer version
                     Log.i("QueryInfo", "Location Update Available");
@@ -236,6 +237,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     obj.pinInBackground();      // save locally
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
+                SharedPreferences.Editor editor = (SharedPreferences.Editor) PreferenceManager.getDefaultSharedPreferences(this);
+                editor.putInt(getString(R.string.parse_status_location_version), serverVersion);    // should be initialised
+
                 break;
 
             case LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE:           // update from local

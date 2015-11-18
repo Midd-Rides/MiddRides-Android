@@ -14,6 +14,7 @@ import com.parse.ParseUser;
 
 /**
  * Created by Peter on 10/16/15.
+ * 
  */
 public class UserScreen extends AppCompatActivity {
 
@@ -39,7 +40,7 @@ public class UserScreen extends AppCompatActivity {
         userAvatar = (ImageView) findViewById(R.id.user_avatar);
         logoutButton = (Button) findViewById(R.id.btn_logout);
         resendButton = (Button) findViewById(R.id.btn_resend_email);
-        resendButton = (Button) findViewById(R.id.btn_reset_passwd);
+        resetButton = (Button) findViewById(R.id.btn_reset_passwd);
         verificationStatusTextView = (TextView) findViewById(R.id.verification_status);
 
         if(ParseUser.getCurrentUser().isAuthenticated()){
@@ -76,9 +77,10 @@ public class UserScreen extends AppCompatActivity {
             }
         });
 
-        resendButton.setOnClickListener(new View.OnClickListener() {
+        resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(UserScreen.this, "Reset is easy, I'll do it today", Toast.LENGTH_SHORT).show();
                 Log.i("UserScreen", "Reset Password");
                 //TODO:
             }
