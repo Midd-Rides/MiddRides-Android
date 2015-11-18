@@ -8,7 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:id="@+id/login_layout"
-    tools:context="com.middleendien.middrides.LoginPage"
+    tools:context="com.middleendien.middrides.LoginScreen"
     android:orientation="vertical">
 
     <include layout="@layout/content_login_screen"

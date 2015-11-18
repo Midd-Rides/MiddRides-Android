@@ -10,8 +10,9 @@ import com.middleendien.middrides.utils.SettingsFragment;
 
 /**
  * Created by Peter on 10/1/15.
+ *
  */
-public class Settings extends AppCompatActivity {
+public class SettingsScreen extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +29,8 @@ public class Settings extends AppCompatActivity {
         inflater.inflate(R.menu.menu_settings, menu);
 
         android.support.v7.app.ActionBar actionBar= getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
         return super.onCreateOptionsMenu(menu);
     }

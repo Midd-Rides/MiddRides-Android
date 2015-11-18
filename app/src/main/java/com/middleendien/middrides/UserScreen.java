@@ -3,6 +3,7 @@ package com.middleendien.middrides;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,6 +20,7 @@ public class UserScreen extends AppCompatActivity {
     private ImageView userAvatar;
     private Button logoutButton;
     private Button resendButton;
+    private Button resetButton;
     private TextView verificationStatusTextView;
 
     @Override
@@ -37,6 +39,7 @@ public class UserScreen extends AppCompatActivity {
         userAvatar = (ImageView) findViewById(R.id.user_avatar);
         logoutButton = (Button) findViewById(R.id.btn_logout);
         resendButton = (Button) findViewById(R.id.btn_resend_email);
+        resendButton = (Button) findViewById(R.id.btn_reset_passwd);
         verificationStatusTextView = (TextView) findViewById(R.id.verification_status);
 
         if(ParseUser.getCurrentUser().isAuthenticated()){
@@ -54,7 +57,7 @@ public class UserScreen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ParseUser.logOut();
-                Intent toLoginScreen = new Intent(UserScreen.this, LoginPage.class);
+                Intent toLoginScreen = new Intent(UserScreen.this, LoginScreen.class);
                 startActivity(toLoginScreen);
                 finish();
             }
@@ -70,6 +73,14 @@ public class UserScreen extends AppCompatActivity {
                     ParseUser.getCurrentUser().saveInBackground();
                     Toast.makeText(UserScreen.this, getString(R.string.resent_email), Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        resendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("UserScreen", "Reset Password");
+                //TODO:
             }
         });
     }

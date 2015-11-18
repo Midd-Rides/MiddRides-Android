@@ -3,7 +3,29 @@
     <string name="title_activity_login_page">Log In</string>
     <string name="title_activity_register_page">Register</string>
     <string name="title_activity_main_page">MiddRides</string>
-    
+
+    <!--Action Bars & SnackBar-->
+    <string name="action_settings">Settings</string>
+    <string name="action_login">Log In</string>
+    <string name="not_logged_in">You have to log in first</string>
+    <string name="press_again_exit">Press again to exit</string>
+
+    <!--Buttons-->
+    <string name="got_it">Got it!</string>
+    <string name="login_button">Log In</string>
+    <string name="register_button">Register</string>
+    <string name="log_in_later">Log in later</string>
+    <string name="logout_button">Log Out</string>
+    <string name="nearestLocation_button">Click this if Drunk</string>
+    <string name="cancelRequest_button">Cancel Request</string>
+    <string name="resend_email_button">Re-send verification e-mail</string>
+    <string name="reset_passwd_button">Reset Password</string>
+
+    <!--Intent Bundle keys-->
+    <string name="current_user">User</string>
+    <string name="is_logged_in">loggedIn</string>
+    <string name="is_dispatcher">Dispatcher</string>
+
     <!--Log in/Sign up message-->
     <string name="logged_in">Logged In</string>
     <string name="wrong_email">Incorrect Email Format</string>
@@ -22,43 +44,53 @@
     <string name="login_fail_msg">Login Fail Message</string>
     <string name="reg_fail_msg">Register Fail Message</string>
 
-    <!--Buttons-->
-    <string name="got_it">Got it!</string>
-    <string name="login_button">Log In</string>
-    <string name="register_button">Register</string>
-    <string name="log_in_later">Log in later</string>
-    <string name="logout_button">Log Out</string>
-    <string name="nearestLocation_button">Click this if Drunk</string>
-    <string name="cancelRequest_button">Cancel Request</string>
-    <string name="resend_email_button">Re-send verification e-mail</string>
+    <!--Others-->
+    <string name="email_not_verified">Email Not Verified</string>
+    <string name="email_verified">Email Verified</string>
+
+    <!--Parse Classes-->
+    <string name="parse_class_status">Status</string>
+    <string name="parse_class_request">UserRequest</string>
+    <string name="parse_class_locaton">Location</string>
+    <string name="parse_class_user">User</string>
+
+    <!--Parse Objects-->
+    <!--Format goes: parse + class name + variable name-->
+    <string name="parse_request_user_request">userRequest</string>
+    <string name="parse_request_request_time">requestTime</string>
+    <string name="parse_request_user_id">userId</string>
+    <string name="parse_request_user_email">email</string>
+    <string name="parse_request_pickup_location">pickUpLocation</string>
+    <string name="parse_request_dst_location">dstLocation</string>
+    <string name="parse_request_request_id">requestId</string>
+
+    <string name="parse_user_pending_request">pendingRequest</string>
+    <string name="parse_user_email">email</string>
+
+    <string name="parse_status_is_running">serviceIsRunning</string>
+    <string name="parse_status_location_version">latestLocVersion</string>
+
+    <string name="parse_location_name">name</string>
+    <string name="parse_location_lat">lat</string>
+    <string name="parse_location_lng">lng</string>
+
+    <!--SharedPreferences-->
+    <string name="pref_screen_announcements">Announcement</string>
+    <string name="login_status">LoginStatus</string>
+    <string name="location_version">LocationVersion</string>
 
     <!--Switches-->
     <string name="dispatcher_login">Dispatcher</string>
-    
-    <!--Action Bars & SnackBar-->
-    <string name="action_settings">Settings</string>
-    <string name="action_login">Log In</string>
-    <string name="not_logged_in">You have to log in first</string>
-    <string name="press_again_exit">Press again to exit</string>
-
-    <!--Intent Bundle keys-->
-    <string name="current_user">User</string>
-    <string name="is_logged_in">loggedIn</string>
-    <string name="is_dispatcher">Dispatcher</string>
 
     <!--Tags-->
     <string name="announcement_fragment">ShowAnnouncement</string>
 
-    <!--Preferences-->
-    <string name="pref_screen_announcements">Announcement</string>
-    <string name="login_status">LoginStatus</string>
-
     <!--Toast-->
     <string name="already_verified">E-mail Already Verified</string>
     <string name="resent_email">Re-sent Verification Email</string>
-
-    <!--Others-->
-    <string name="email_not_verified">Email Not Verified</string>
-    <string name="email_verified">Email Verified</string>
+    <string name="reset_email_sent">Reset Password Email Sent</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="version_not_updated">Your local data might not be up to date</string>
+    <string name="request_cancelled">Your current request has been cancelled</string>
 
 </resources>
