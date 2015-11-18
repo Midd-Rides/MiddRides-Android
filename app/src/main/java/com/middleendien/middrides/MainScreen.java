@@ -64,12 +64,16 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private FloatingActionButton callService;
 
-    // request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
+    /**
+     * request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
+     */
     private static final int STATUS_SERVICE_RUNNING_REQUEST_CODE            = 0x001;
     private static final int STATUS_LOCATION_VERSION_REQUEST_CODE           = 0x002;
     private static final int LOCATION_GET_LASTEST_VERSION_REQUEST_CODE      = 0x003;
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
+
+    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
 
     // for double click exit
     private long backFirstPressed;
@@ -237,8 +241,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     obj.pinInBackground();      // save locally
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
-                SharedPreferences.Editor editor = (SharedPreferences.Editor) PreferenceManager.getDefaultSharedPreferences(this);
-                editor.putInt(getString(R.string.parse_status_location_version), serverVersion);    // should be initialised
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+                editor.putInt(getString(R.string.parse_status_location_version), serverVersion)         // should be initialised by now
+                        .apply();
 
                 break;
 
@@ -246,9 +251,15 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 LocationSelectDialogFragment fragment = (LocationSelectDialogFragment) getSupportFragmentManager().
                         findFragmentById(locationDialogFragmentId);
 
-                fragment.updateLocations(objectList);
+                if (fragment != null)
+                    fragment.updateLocations(objectList);
                 break;
         }
+    }
+
+    @Override
+    public void onResetPasswordComplete(boolean resetSuccess, int requestCode) {
+        // do nothing
     }
 
     public void onLocationSelected(Location locationSelected){

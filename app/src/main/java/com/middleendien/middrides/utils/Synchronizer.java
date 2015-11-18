@@ -10,6 +10,8 @@ import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.RequestPasswordResetCallback;
 
 import java.util.List;
 
@@ -85,7 +87,6 @@ public class Synchronizer {
                 if (e == null) {
                     // success, verified        - Peter
                     callback.onGetListObjectsComplete(objects, requestCode);
-                    callback.onGetObjectComplete(objects.get(0), requestCode);
                 } else {            // error syncing
                     // do nothing
                 }
@@ -93,12 +94,24 @@ public class Synchronizer {
         });
     }
 
+    public void resetPassword (String email, final int requestCode) {
+        ParseUser.requestPasswordResetInBackground(email, new RequestPasswordResetCallback() {
+            @Override
+            public void done(ParseException e) {
+                callback.onResetPasswordComplete(e == null, requestCode);
+            }
+        });
+    }
+
+
 
     public interface OnSynchronizeListener {
 
         void onGetObjectComplete(ParseObject object, int requestCode);
 
         void onGetListObjectsComplete(List<ParseObject> objects, int requestCode);
+
+        void onResetPasswordComplete(boolean resetSuccess, int requestCode);
 
     }
 

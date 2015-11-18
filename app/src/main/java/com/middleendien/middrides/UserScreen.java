@@ -10,19 +10,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.middleendien.middrides.utils.Synchronizer;
+import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
+
+import java.util.List;
 
 /**
  * Created by Peter on 10/16/15.
  * 
  */
-public class UserScreen extends AppCompatActivity {
+public class UserScreen extends AppCompatActivity implements OnSynchronizeListener{
 
     private ImageView userAvatar;
     private Button logoutButton;
     private Button resendButton;
     private Button resetButton;
     private TextView verificationStatusTextView;
+
+    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,11 +87,32 @@ public class UserScreen extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(UserScreen.this, "Reset is easy, I'll do it today", Toast.LENGTH_SHORT).show();
                 Log.i("UserScreen", "Reset Password");
-                //TODO:
+                Synchronizer.getInstance(UserScreen.this).resetPassword(ParseUser.getCurrentUser().getEmail(),
+                        USER_RESET_PASSWORD_REQUEST_CODE);
             }
         });
     }
 
+    @Override
+    public void onGetObjectComplete(ParseObject object, int requestCode) {
+        // do nothing
+    }
+
+    @Override
+    public void onGetListObjectsComplete(List<ParseObject> objects, int requestCode) {
+        // do nothing
+    }
+
+    @Override
+    public void onResetPasswordComplete(boolean success, int requestCode) {
+        switch (requestCode) {
+            case USER_RESET_PASSWORD_REQUEST_CODE:
+                Toast.makeText(UserScreen.this,
+                        success ? getString(R.string.reset_email_sent) : getString(R.string.something_went_wrong),
+                        Toast.LENGTH_SHORT)
+                        .show();
+                break;
+        }
+    }
 }

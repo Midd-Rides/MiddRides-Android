@@ -45,18 +45,13 @@ public class LocationSelectDialogFragment extends DialogFragment {
         View rootView = inflater.inflate(R.layout.fragment_select_location, container, false);
         getDialog().setTitle("Select Location");
 
-
-        initView(rootView);
-
-
         //Initialize list of locations
         initializeLocationsList();
 
+        initView(rootView);
 
         //Populate List View using adapter
         configureAdapter();
-
-
 
         return rootView;
     }
@@ -80,15 +75,7 @@ public class LocationSelectDialogFragment extends DialogFragment {
                     obj.getDouble(getString(R.string.parse_location_lat)),
                     obj.getDouble(getString(R.string.parse_location_lng))));
         }
-//        locationList.add(new Location("Adirondack Circle", 44.010250, -73.179967));
-//        locationList.add(new Location("R Lot", 44.012077, -73.176455));
-//        locationList.add(new Location("Robert A Jones' 59 House", 44.008026, -73.180564));
-//        locationList.add(new Location("Track Lot/KDR", 44.015337, -73.167340));
-//        locationList.add(new Location("T Lot", 44.012077, -73.176455));
-//        locationList.add(new Location("McCullough Student Center", 44.008295, -73.177213));
-//        locationList.add(new Location("E Lot", 44.012077, -73.176455));
-//        locationList.add(new Location("Q Lot", 44.012077, -73.176455));
-//        locationList.add(new Location("Frog Hollow", 44.013340, -73.169148));
+        configureAdapter();
     }
 
     //Configures adapter and sets Item click listener for List
