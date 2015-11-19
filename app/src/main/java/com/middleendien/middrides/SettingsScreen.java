@@ -1,17 +1,18 @@
 package com.middleendien.middrides;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 
-import com.middleendien.middrides.utils.SettingsFragment;
+import com.middleendien.middrides.fragment.SettingsFragment;
 
 /**
  * Created by Peter on 10/1/15.
+ * TODO: pass the parent activity in with intent
+ * TODO: so that when user logs out, the parent activity finishes as well
  */
-public class Settings extends AppCompatActivity {
+public class SettingsScreen extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +29,8 @@ public class Settings extends AppCompatActivity {
         inflater.inflate(R.menu.menu_settings, menu);
 
         android.support.v7.app.ActionBar actionBar= getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
         return super.onCreateOptionsMenu(menu);
     }

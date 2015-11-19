@@ -12,6 +12,34 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"/>
 
+    <TextView
+        android:id="@+id/verification_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/user_avatar"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorWarning"
+        android:textSize="24sp"
+        android:text="@string/email_not_verified"/>
+
+    <Button
+        android:id="@+id/btn_reset_passwd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/btn_resend_email"
+        android:text="@string/reset_passwd_button"
+        android:visibility="visible"/>
+
+    <Button
+        android:id="@+id/btn_resend_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/btn_logout"
+        android:text="@string/resend_email_button"
+        android:visibility="visible"/>
+
     <Button
         android:id="@+id/btn_logout"
         android:layout_width="wrap_content"
