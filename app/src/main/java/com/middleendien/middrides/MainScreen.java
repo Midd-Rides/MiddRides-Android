@@ -42,7 +42,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.fragment.AnnouncementDialogFragment;
 import com.middleendien.middrides.fragment.LocationSelectDialogFragment;
 import com.middleendien.middrides.fragment.LocationSelectDialogFragment.SelectLocationDialogListener;
 import com.middleendien.middrides.utils.Synchronizer;
@@ -56,9 +55,7 @@ import java.util.Date;
 import java.util.List;
 
 public class MainScreen extends AppCompatActivity implements SelectLocationDialogListener,
-        OnSynchronizeListener{
-
-    private AnnouncementDialogFragment announcementDialogFragment;
+        OnSynchronizeListener {
 
     private Synchronizer synchronizer;
 
@@ -73,8 +70,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
-    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
-
     // for double click exit
     private long backFirstPressed;
 
@@ -87,6 +82,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("MainScreen", "Create");
+
+        //TODO: check all status: e-mail verified and so on
 
         initData();
 
@@ -109,7 +106,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         // check location list version
         synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_LOCATION_VERSION_REQUEST_CODE);
 
-        // we should react to these results
+        // TODO: we should react to these results
         // - Peter
     }
 
@@ -143,25 +140,16 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         });
     }
 
+    private void initEvent() {
+        backFirstPressed = System.currentTimeMillis() - 2000;
+    }
+
     private void showLocationDialog(){
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         DialogFragment locationFragment =  new LocationSelectDialogFragment();
 
         locationDialogFragmentId = locationFragment.getId();
         locationFragment.show(fm, "Select Location");
-    }
-
-    private void initEvent() {
-        backFirstPressed = System.currentTimeMillis() - 2000;
-
-        // check for announcements
-        if (hasAnnouncement()) {
-//            announcementDialogFragment = new AnnouncementDialogFragment();
-//            announcementDialogFragment
-//                    .show(getFragmentManager(), "Announcement");
-
-            //TODO: Update Pending request field in parse user object when request is satisfied
-        }
     }
 
     private boolean hasAnnouncement() {
@@ -184,16 +172,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             case R.id.action_settings:
                 Intent intentSettings = new Intent(MainScreen.this, SettingsScreen.class);
                 startActivity(intentSettings);
-                return true;
-
-            case R.id.action_login:
-                if (ParseUser.getCurrentUser() == null) {
-                    Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
-                    startActivity(toLoginScreen);
-                } else {
-                    Intent toUserScreen = new Intent(MainScreen.this, UserScreen.class);
-                    startActivity(toUserScreen);
-                }
                 return true;
         }
 

@@ -17,10 +17,10 @@ public class Location implements Serializable{
     private double latitude;
     private double longitude;
 
-    public Location(String Lname,double Llatitude, double Llongitude ){
-        name= Lname;
-        latitude =  Llatitude;
-        longitude = Llongitude;
+    public Location(String name, double latitude, double longitude ){
+        this.name = name;
+        this.latitude =  latitude;
+        this.longitude = longitude;
     }
 
     public double getLatitude() {

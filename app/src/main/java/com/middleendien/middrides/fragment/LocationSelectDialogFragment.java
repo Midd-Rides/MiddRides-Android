@@ -39,7 +39,7 @@ public class LocationSelectDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_select_location, container, false);
+        View rootView = inflater.inflate(R.layout.layout_select_location_dialog_fragment, container, false);
         getDialog().setTitle(getString(R.string.dialog_select_location));
 
         initData();

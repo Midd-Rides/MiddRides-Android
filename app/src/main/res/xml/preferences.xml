@@ -2,46 +2,51 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:key="cate1"
-        android:title="Category 1">
+        android:key="@string/cat_user"
+        android:title="@string/cat_user">
 
-        <SwitchPreference
-            android:key="pref1"
-            android:title="Preference 1"
-            android:summary="Pref 1"
-            android:defaultValue="false"/>
+        <Preference
+            android:key="@string/pref_log_out"
+            android:title="@string/pref_log_out" />
+
+        <Preference
+            android:key="@string/pref_reset_passwd"
+            android:title="@string/pref_reset_passwd" />
+
+        <Preference
+            android:key="@string/pref_verification_status_unavailable"
+            android:title="@string/pref_verification_status_unavailable" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="cate2"
-        android:title="Category 2">
-
-        <CheckBoxPreference
-            android:key="pref2"
-            android:title="Preference 2"
-            android:summary="Pref 2"
-            android:defaultValue="false"/>
+        android:key="@string/cat_request"
+        android:title="@string/cat_request">
 
         <Preference
-            android:key="@string/cancelRequest_button"
-            android:title="@string/cancelRequest_button"
-            android:summary="You don't need a ride" />
+            android:key="@string/pref_cancel_request"
+            android:title="@string/pref_cancel_request" />
 
     </PreferenceCategory>
 
-    <PreferenceScreen
-        android:key="pref_screen_announcements"
-        android:title="@string/pref_screen_announcements">
+    <PreferenceCategory
+        android:key="@string/cat_others"
+        android:title="@string/cat_others">
 
-        <Preference
-            android:key="announce1"
-            android:title="Announcement1"/>
+        <PreferenceScreen
+            android:key="@string/pref_screen_announcements"
+            android:title="@string/pref_screen_announcements">
 
-        <Preference
-            android:key="announce2"
-            android:title="Announcement2"/>
+            <Preference
+                android:key="announce1"
+                android:title="Announcement1"/>
 
-    </PreferenceScreen>
+            <Preference
+                android:key="announce2"
+                android:title="Announcement2"/>
+
+        </PreferenceScreen>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

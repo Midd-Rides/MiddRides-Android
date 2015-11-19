@@ -1,6 +1,9 @@
 package com.middleendien.middrides;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
@@ -78,56 +81,54 @@ public class LoginScreen extends AppCompatActivity{
                     Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                 ParseUser.logInInBackground(usernameBox.getText().toString(), passwdBox.getText().toString(), new LogInCallback() {
-                     @Override
-                     public void done(ParseUser user, ParseException e) {
-                         if (user != null) {
-                             Log.i("Login Success", "Login Success");
-                             Toast.makeText(LoginScreen.this, "Login Success", Toast.LENGTH_SHORT).show();
+                ParseUser.logInInBackground(usernameBox.getText().toString(), passwdBox.getText().toString(), new LogInCallback() {
+                    @Override
+                    public void done(ParseUser user, ParseException e) {
+                        if (user != null) {
+                            Log.i("Login Success", "Login Success");
+                            Toast.makeText(LoginScreen.this, "Login Success", Toast.LENGTH_SHORT).show();
 
-                             Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-                             startActivity(toMainScreen);
-                             if (user.getBoolean(getString(R.string.is_dispatcher))) {
-                                 // TODO: go to dispatcher page (or begin that fragment or what)
-                                 // TODO: you guys do it
-                             } else {
-                                 ParseUser setPending = ParseUser.getCurrentUser();
-                                 setPending.put(getString(R.string.parse_user_pending_request), false);
-                                 setPending.saveInBackground();
-                                 toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-                                 startActivity(toMainScreen);
-                             }
+                            Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
+                            startActivity(toMainScreen);
+                            if (user.getBoolean(getString(R.string.is_dispatcher))) {
+                                // TODO: go to dispatcher page (or begin that fragment or what)
+                                // TODO: you guys do it
+                            } else {
+                                ParseUser setPending = ParseUser.getCurrentUser();
+                                setPending.put(getString(R.string.parse_user_pending_request), false);
+                                setPending.saveInBackground();
+                                toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
+                                startActivity(toMainScreen);
+                            }
 
-                             //TODO:UPDATE WITH LISTENER METHOD FROM DISPATCHER
-
-
-                             finish();
-                         } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                         } else if (e.getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.account_linked), Toast.LENGTH_SHORT).show();
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                         } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                         } else if (e.getCode() == ParseException.TIMEOUT) {
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                         } else if (e.getCode() == ParseException.VALIDATION_ERROR) {
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                         } else if (e.getCode() == 101) {
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                         } else {
-                             Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                             Toast.makeText(LoginScreen.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
-                         }
-                     }
-                 });
+                            //TODO:UPDATE WITH LISTENER METHOD FROM DISPATCHER
 
 
+                            finish();
+                        } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                        } else if (e.getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.account_linked), Toast.LENGTH_SHORT).show();
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                        } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                        } else if (e.getCode() == ParseException.TIMEOUT) {
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                        } else if (e.getCode() == ParseException.VALIDATION_ERROR) {
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                        } else if (e.getCode() == 101) {
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                        } else {
+                            Log.i("Login Error", e.getCode() + " " + e.getMessage());
+                            Toast.makeText(LoginScreen.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
                 // until I figure out how to do Async
                 // Windows Phone is the best
