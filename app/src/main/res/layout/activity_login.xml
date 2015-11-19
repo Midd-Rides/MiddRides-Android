@@ -11,8 +11,31 @@
     tools:context="com.middleendien.middrides.LoginScreen"
     android:orientation="vertical">
 
-    <include layout="@layout/content_login_screen"
-        android:id="@+id/login_boxes"/>
+    <LinearLayout
+        android:id="@+id/login_boxes"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/usernameBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="5dp"
+            android:inputType="textEmailAddress"/>
+
+        <EditText
+            android:id="@+id/passwdBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:inputType="textPassword"/>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -29,25 +52,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/login_button"
-            android:layout_alignParentLeft="true"/>
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
 
         <Button
             android:id="@+id/register_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/register_button"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
 
     </RelativeLayout>
-
-    <Button
-        android:id="@+id/skip_login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/log_in_later"
-        style="?android:attr/borderlessButtonStyle"
-        android:textColor="#651FFF"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

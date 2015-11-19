@@ -1,19 +1,17 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.middrides.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 
 import com.middleendien.middrides.R;
 import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
+import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.ParseObject;
 
 
@@ -34,7 +32,6 @@ public class LocationSelectDialogFragment extends DialogFragment {
     private ArrayList<Location> locationList = new ArrayList<Location>();
 
     private ListView locationsListView;
-    private Button selectNearestStop;
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
@@ -43,27 +40,23 @@ public class LocationSelectDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_select_location, container, false);
-        getDialog().setTitle("Select Location");
+        getDialog().setTitle(getString(R.string.dialog_select_location));
 
-        //Initialize list of locations
-        initializeLocationsList();
+        initData();
 
         initView(rootView);
 
-        //Populate List View using adapter
-        configureAdapter();
+        initEvent();
 
         return rootView;
     }
 
     private void initView(View rootView) {
         //Initialize buttons and list view
-        locationsListView = (ListView)rootView.findViewById(R.id.locationListView);
-        selectNearestStop = (Button)rootView.findViewById(R.id.chooseNearestStopButton);
-        selectNearestStop.setEnabled(false);
+        locationsListView = (ListView) rootView.findViewById(R.id.dialogLocationListView);
     }
 
-    private void initializeLocationsList(){
+    private void initData(){
         Synchronizer synchronizer = Synchronizer.getInstance(getActivity());
         synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
     }
@@ -75,13 +68,13 @@ public class LocationSelectDialogFragment extends DialogFragment {
                     obj.getDouble(getString(R.string.parse_location_lat)),
                     obj.getDouble(getString(R.string.parse_location_lng))));
         }
-        configureAdapter();
+        initEvent();
     }
 
     //Configures adapter and sets Item click listener for List
-    private void configureAdapter(){
+    private void initEvent(){
         ArrayAdapter<Location> locationsArrayListAdapter = new ArrayAdapter<Location>
-                (getActivity(),android.R.layout.simple_list_item_activated_1, locationList);
+                (getActivity(), android.R.layout.simple_list_item_activated_1, locationList);
 
         locationsListView.setAdapter(locationsArrayListAdapter);
 
@@ -101,8 +94,8 @@ public class LocationSelectDialogFragment extends DialogFragment {
 
     //Interface for caller activity
     public interface SelectLocationDialogListener {
+
         void onLocationSelected(Location locationSelected);
+
     }
-
-
 }

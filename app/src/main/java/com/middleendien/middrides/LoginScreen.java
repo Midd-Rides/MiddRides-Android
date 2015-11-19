@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.middleendien.middrides.backup.LoginAgent;
+import com.middleendien.middrides.utils.LoginAgent;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -29,8 +29,6 @@ public class LoginScreen extends AppCompatActivity{
     // UI
     private Button btnLogIn;
     private Button btnRegister;
-    private Button btnSkipLogIn;
-
     private EditText usernameBox;
     private EditText passwdBox;
 
@@ -56,13 +54,12 @@ public class LoginScreen extends AppCompatActivity{
 
         initEvent();
 
-        requestPerm();
+        requestPermission();
     }
 
     private void initView() {
         btnLogIn = (Button) findViewById(R.id.login_button);
         btnRegister = (Button) findViewById(R.id.register_button);
-        btnSkipLogIn = (Button) findViewById(R.id.skip_login_button);
 
         usernameBox = (EditText) findViewById(R.id.usernameBox);
         passwdBox = (EditText) findViewById(R.id.passwdBox);
@@ -77,7 +74,7 @@ public class LoginScreen extends AppCompatActivity{
             @Override
             public void onClick(View v) {               // login business is implemented with the LoginAgent class
                 // check e-mail validity
-                if(!LoginAgent.isEmailValid(usernameBox.getText().toString()) || !Patterns.EMAIL_ADDRESS.matcher(usernameBox.getText().toString()).matches()){
+                if(!LoginAgent.isEmailValid(usernameBox.getText().toString())){
                     Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -90,11 +87,10 @@ public class LoginScreen extends AppCompatActivity{
 
                              Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
                              startActivity(toMainScreen);
-                             if(user.getBoolean(getString(R.string.is_dispatcher))){
+                             if (user.getBoolean(getString(R.string.is_dispatcher))) {
                                  // TODO: go to dispatcher page (or begin that fragment or what)
                                  // TODO: you guys do it
-                             }
-                             else {
+                             } else {
                                  ParseUser setPending = ParseUser.getCurrentUser();
                                  setPending.put(getString(R.string.parse_user_pending_request), false);
                                  setPending.saveInBackground();
@@ -145,17 +141,6 @@ public class LoginScreen extends AppCompatActivity{
                 startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE);
             }
         });
-
-        // This button will lead program to attempt to login
-        btnSkipLogIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-                toMainScreen.putExtra(getResources().getString(R.string.is_logged_in), false);
-                startActivity(toMainScreen);
-                finish();
-            }
-        });
     }
 
     @Override
@@ -166,8 +151,7 @@ public class LoginScreen extends AppCompatActivity{
                     Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
                     startActivity(toMainScreen);
                     finish();
-                }
-                else {
+                } else {
                     // Register not successful, do nothing
                 }
                 break;
@@ -176,7 +160,7 @@ public class LoginScreen extends AppCompatActivity{
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void requestPerm() {
+    private void requestPermission() {
         // TODO:
     }
 

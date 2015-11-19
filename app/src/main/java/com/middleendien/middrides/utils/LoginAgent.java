@@ -1,16 +1,9 @@
-package com.middleendien.middrides.backup;
+package com.middleendien.middrides.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.widget.Toast;
+import android.util.Patterns;
 
-import com.middleendien.middrides.R;
-import com.parse.LogInCallback;
-import com.parse.ParseException;
 import com.parse.ParseUser;
-import com.parse.SignUpCallback;
 
 /**
  * Created by Peter on 10/1/15.
@@ -20,70 +13,34 @@ import com.parse.SignUpCallback;
  * and changing all methods to static
  * as it is no longer representing a user but merely an interface between UI and Parse database
  *
- *
- * Lastest: this class is no longer in use until further notice
+ * Legacy comments above, ignore        - Peter
  *
  */
 public class LoginAgent /*implements Serializable*/ {
 
     // formatted for local storage
-    private static LoginAgent localUser;
-    // for uploading to Parse
-    private static ParseUser parseUser;
+    private static LoginAgent loginAgent;
 
-    private boolean registerSuccess;
-    private boolean loginSuccess;
-    private static Context context;                     // for accessing sharedPreference
+    private Context context;                     // for accessing sharedPreference
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    private String email;
-
-    public String getPasswd() {
-        return passwd;
-    }
-
-    public void setPasswd(String passwd) {
-        this.passwd = passwd;
-    }
-
-    private String passwd;
-
-    protected LoginAgent(String email, String passwd, Context context){
-        setEmail(email);
-        setPasswd(passwd);
+    private LoginAgent(Context context){
         this.context = context;
     }
 
-    // use this method when you're certain that localUser has been initialised
-    public static LoginAgent getInstance(){
-        return localUser;
-    }
+    public static LoginAgent getInstance(Context context){
+        if (loginAgent != null)
+            loginAgent = new LoginAgent(context);
 
-    // use this when you haven't initialised a user or not sure about it (eg. logged out already)
-    public static LoginAgent getInstance(String email, String passwd, Context context){
-        if(localUser == null){
-            localUser = new LoginAgent(email, passwd, context);          // if localUser is initialised
-        }
-        return localUser;
+        return loginAgent;
     }
 
     public static boolean isEmailValid(String email) {
         if(email.length() <= 15)
             return false;
 
-        if(email.substring(email.length() - 15).equals("@middlebury.edu")
-                && email.indexOf("@") == email.length() - 15){      // so that there is only one "@" in the e-mail address
-            return true;
-        }
-
-        return false;
+        return email.substring(email.length() - 15).equals("@middlebury.edu")       // ends with middlebury.edu
+                && email.indexOf("@") == email.length() - 15                        // doesn't have other @ in it's email
+                && Patterns.EMAIL_ADDRESS.matcher(email).matches();                 // Android's default check
     }
 
 

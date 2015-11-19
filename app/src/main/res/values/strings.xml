@@ -21,6 +21,9 @@
     <string name="resend_email_button">Re-send verification e-mail</string>
     <string name="reset_passwd_button">Reset Password</string>
 
+    <!--Dialogs-->
+    <string name="dialog_select_location">Select Location</string>
+
     <!--Intent Bundle keys-->
     <string name="current_user">User</string>
     <string name="is_logged_in">loggedIn</string>
@@ -73,6 +76,8 @@
     <string name="parse_location_name">name</string>
     <string name="parse_location_lat">lat</string>
     <string name="parse_location_lng">lng</string>
+
+    <string name="parse_installation_email">email</string>
 
     <!--SharedPreferences-->
     <string name="pref_screen_announcements">Announcement</string>

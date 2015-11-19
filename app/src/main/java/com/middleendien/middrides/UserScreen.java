@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * Created by Peter on 10/16/15.
- * 
+ *
  */
 public class UserScreen extends AppCompatActivity implements OnSynchronizeListener{
 

@@ -1,4 +1,4 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.middrides.fragment;
 
 
 import android.os.Bundle;

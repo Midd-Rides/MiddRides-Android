@@ -42,9 +42,9 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.utils.AnnouncementDialogFragment;
-import com.middleendien.middrides.utils.LocationSelectDialogFragment;
-import com.middleendien.middrides.utils.LocationSelectDialogFragment.SelectLocationDialogListener;
+import com.middleendien.middrides.fragment.AnnouncementDialogFragment;
+import com.middleendien.middrides.fragment.LocationSelectDialogFragment;
+import com.middleendien.middrides.fragment.LocationSelectDialogFragment.SelectLocationDialogListener;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
 import com.parse.ParseException;
@@ -146,6 +146,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     private void showLocationDialog(){
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         DialogFragment locationFragment =  new LocationSelectDialogFragment();
+
         locationDialogFragmentId = locationFragment.getId();
         locationFragment.show(fm, "Select Location");
     }
@@ -179,18 +180,17 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         // Action Bar items' click events
         int id = item.getItemId();
 
-        switch (id){
+        switch (id) {
             case R.id.action_settings:
                 Intent intentSettings = new Intent(MainScreen.this, SettingsScreen.class);
                 startActivity(intentSettings);
                 return true;
 
             case R.id.action_login:
-                if(ParseUser.getCurrentUser() == null){
+                if (ParseUser.getCurrentUser() == null) {
                     Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
                     startActivity(toLoginScreen);
-                }
-                else {
+                } else {
                     Intent toUserScreen = new Intent(MainScreen.this, UserScreen.class);
                     startActivity(toUserScreen);
                 }
@@ -262,7 +262,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         // do nothing
     }
 
-    public void onLocationSelected(Location locationSelected){
+    public void onLocationSelected(Location locationSelected) {
 
         Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
 
@@ -309,7 +309,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode){
+        switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 long backSecondPressed = System.currentTimeMillis();
                 if(backSecondPressed - backFirstPressed >= 2000){

@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <Button
-        android:id="@+id/chooseNearestStopButton"
-        android:layout_height="100dp"
-        android:layout_width="match_parent"
-        android:text="@string/nearestLocation_button"
-        />
-
+    android:layout_height="wrap_content">
 
     <ListView
-        android:layout_below="@+id/chooseNearestStopButton"
+        android:id="@+id/dialogLocationListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/locationListView">
+        android:layout_marginTop="5dp" >
     </ListView>
 
 </RelativeLayout>
