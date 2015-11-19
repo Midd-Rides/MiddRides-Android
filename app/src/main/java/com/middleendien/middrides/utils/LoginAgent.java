@@ -1,9 +1,18 @@
 package com.middleendien.middrides.utils;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.util.Patterns;
+import android.widget.Toast;
 
+import com.middleendien.middrides.MainScreen;
+import com.middleendien.middrides.R;
+import com.parse.LogInCallback;
+import com.parse.ParseException;
 import com.parse.ParseUser;
+import com.parse.SignUpCallback;
 
 /**
  * Created by Peter on 10/1/15.
@@ -15,182 +24,80 @@ import com.parse.ParseUser;
  *
  * Legacy comments above, ignore        - Peter
  *
+ * Now takes care of logging in and registering
+ *
  */
-public class LoginAgent /*implements Serializable*/ {
+public class LoginAgent {
 
-    // formatted for local storage
     private static LoginAgent loginAgent;
+    private OnLoginListener loginListener;
+    private OnRegisterListener registerListener;
 
-    private Context context;                     // for accessing sharedPreference
+    public static final int LOGIN       = 0x021;
+    public static final int REGISTER    = 0x022;
 
-    private LoginAgent(Context context){
-        this.context = context;
-    }
 
-    public static LoginAgent getInstance(Context context){
-        if (loginAgent != null)
-            loginAgent = new LoginAgent(context);
+    private LoginAgent() { }
+
+    public static LoginAgent getInstance(){
+        if (loginAgent == null)
+            loginAgent = new LoginAgent();
 
         return loginAgent;
     }
 
     public static boolean isEmailValid(String email) {
-        if(email.length() <= 15)
-            return false;
+        return email.length() > 15                                                      // length longer than 15
+                && email.substring(email.length() - 15).equals("@middlebury.edu")       // ends with middlebury.edu
+                && email.indexOf("@") == email.length() - 15                            // doesn't have other @ in it's email
+                && Patterns.EMAIL_ADDRESS.matcher(email).matches();                     // Android's default check
+    }
 
-        return email.substring(email.length() - 15).equals("@middlebury.edu")       // ends with middlebury.edu
-                && email.indexOf("@") == email.length() - 15                        // doesn't have other @ in it's email
-                && Patterns.EMAIL_ADDRESS.matcher(email).matches();                 // Android's default check
+    public void loginInBackground(String email, String password) {
+        ParseUser.logInInBackground(email, password, new LogInCallback() {
+            @Override
+            public void done(ParseUser user, ParseException e) {
+                loginListener.onLoginComplete(e == null, e);
+            }
+        });
+    }
+
+    public void registerInBackground(String email, String password) {
+        ParseUser parseUser = new ParseUser();
+        parseUser.setEmail(email);
+        parseUser.setUsername(email);
+        parseUser.setPassword(password);
+
+        parseUser.signUpInBackground(new SignUpCallback() {
+            @Override
+            public void done(ParseException e) {
+                registerListener.onRegisterComplete(e == null, e);
+            }
+        });
+    }
+
+    public void registerListener(int requestCode, Context context) {
+        switch (requestCode) {
+            case LOGIN:
+                loginListener = (OnLoginListener) context;
+                break;
+            case REGISTER:
+                registerListener = (OnRegisterListener) context;
+                break;
+        }
     }
 
 
 
+    public interface OnLoginListener {
 
+        void onLoginComplete (boolean loginSuccess, ParseException e);
 
+    }
 
+    public interface OnRegisterListener {
 
+        void onRegisterComplete (boolean registerSuccess, ParseException e);
 
-
-
-
-
-
-
-    /**
-     * Log in is already Async, below code might not be needed
-     * TODO: delete when first version is released
-     */
-
-
-//    public boolean attemptLogin(String email, String passwd) {
-//        setEmail(email);
-//        setPasswd(passwd);
-//        loginSuccess = false;
-////        Toast.makeText(context, getEmail() + " " + getPasswd(), Toast.LENGTH_SHORT).show();
-//        ParseUser.logInInBackground(getEmail(), getPasswd(), new LogInCallback() {
-//            @Override
-//            public void done(ParseUser user, ParseException e) {
-//                if (user != null) {
-//                    parseUser = user;
-//                    loginSuccess = true;
-//                    Log.i("Login Success", "Login Success");
-//                } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
-//                    setLoginFailMessage(context.getResources().getString(R.string.connection_fail));
-//                    loginSuccess = false;
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-//                } else if (e.getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
-//                    setLoginFailMessage(context.getResources().getString(R.string.account_linked));
-//                    loginSuccess = false;
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-//                } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
-//                    setLoginFailMessage(context.getResources().getString(R.string.inter_server_err));
-//                    loginSuccess = false;
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-//                } else if (e.getCode() == ParseException.TIMEOUT) {
-//                    setLoginFailMessage(context.getResources().getString(R.string.time_out));
-//                    loginSuccess = false;
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-//                } else if (e.getCode() == ParseException.VALIDATION_ERROR) {
-//                    setLoginFailMessage(context.getResources().getString(R.string.wrong_info));
-//                    loginSuccess = false;
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-//                } else if (e.getCode() == 101) {
-//                    setLoginFailMessage(context.getResources().getString(R.string.wrong_info));
-//                    loginSuccess = false;
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-//                } else {
-//                    Log.i("Login Error", e.getCode() + " " + e.getMessage());
-////                    e.printStackTrace();
-//                    setLoginFailMessage(context.getResources().getString(R.string.other_failure));
-//                    loginSuccess = false;
-//                }
-//            }
-//        });
-//
-//        if(loginSuccess) {
-//            return true;
-//        }
-//        else {
-//            return false;
-//        }
-//    }
-
-//    public boolean attemptRegister(String email, String passwd){
-//        setEmail(email);
-//        setPasswd(passwd);
-//        parseUser = new ParseUser();
-//        parseUser.setEmail(email);
-//        parseUser.setUsername(email);
-//        parseUser.setPassword(passwd);
-//
-//        parseUser.signUpInBackground(new SignUpCallback() {
-//            @Override
-//            public void done(ParseException e) {
-//                if (e == null) {
-//                    registerSuccess = true;
-//                    Log.i("Register Success", "Register Success");
-//                    Toast.makeText(context, "Reached 1" + registerSuccess, Toast.LENGTH_SHORT).show();
-//                } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
-//                    setRegisterFailMessage(context.getResources().getString(R.string.connection_fail));
-//                    Log.i("Register Error", e.getCode() + " " + e.getMessage());
-//                    registerSuccess = false;
-//                    Toast.makeText(context, "Reached 2", Toast.LENGTH_SHORT).show();
-//                } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
-//                    setRegisterFailMessage(context.getResources().getString(R.string.inter_server_err));
-//                    Log.i("Register Error", e.getCode() + " " + e.getMessage());
-//                    registerSuccess = false;
-//                    Toast.makeText(context, "Reached 3", Toast.LENGTH_SHORT).show();
-//                } else if (e.getCode() == ParseException.TIMEOUT) {
-//                    setRegisterFailMessage(context.getResources().getString(R.string.time_out));
-//                    Log.i("Register Error", e.getCode() + " " + e.getMessage());
-//                    registerSuccess = false;
-//                    Toast.makeText(context, "Reached 4", Toast.LENGTH_SHORT).show();
-//                } else if (e.getCode() == 202) {
-//                    setRegisterFailMessage(context.getResources().getString(R.string.user_exists));
-//                    Log.i("Register Error", e.getCode() + " " + e.getMessage());
-//                    registerSuccess = false;
-//                    Toast.makeText(context, "Reached 5", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    Log.i("Register Error", e.getCode() + " " + e.getMessage());
-////                   e.printStackTrace();
-//                    setRegisterFailMessage(context.getResources().getString(R.string.other_failure));
-//                    registerSuccess = false;
-//                    Toast.makeText(context, "Reached 6", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-////        Toast.makeText(context, "Reached Here " + registerSuccess, Toast.LENGTH_SHORT).show();
-//
-//        if(registerSuccess){
-//            return true;
-//        }
-//        else {
-//            return false;
-//        }
-//    }
-
-//    // static because I think this is a class level thing, feel free to change
-//    private static void updateLoginInfo (Context context){
-//        // use SharedPreferences to store the boolean value of whether logged in
-//        // NOTE: this is one-way street, you can only update the sharedpreferences, but not downloading from it!!!
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        //TODO: change login status
-//        editor.putBoolean(context.getResources().getString(R.string.login_status), false)
-//                .apply();
-//    }
-
-//    private void setLoginFailMessage(String msg){
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        editor.putString(context.getResources().getString(R.string.login_fail_msg), msg)
-//                .apply();
-//    }
-//
-//    private void setRegisterFailMessage(String msg){
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        editor.putString(context.getResources().getString(R.string.reg_fail_msg), msg)
-//                .apply();
-//    }
+    }
 }

@@ -80,7 +80,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_screen);
         Log.d("MainScreen", "Create");
 
         //TODO: check all status: e-mail verified and so on

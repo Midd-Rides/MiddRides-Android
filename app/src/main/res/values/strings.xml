@@ -28,6 +28,8 @@
     <string name="dialog_msg_are_you_sure">Are you sure?</string>
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_cancel">Cancel</string>
+    <string name="dialog_logging_in">Signing In…</string>
+    <string name="dialog_registering">Registering…</string>
 
     <!--Intent Bundle keys-->
     <string name="current_user">User</string>
