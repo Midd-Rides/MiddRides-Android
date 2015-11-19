@@ -1,4 +1,4 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.middrides.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,6 +10,10 @@ import com.middleendien.middrides.R;
 
 /**
  * Created by Peter on 10/5/15.
+ *
+ * The app checks for unread announcements at launch
+ * and will display them in this dialog
+ *
  */
 public class AnnouncementDialogFragment extends DialogFragment {
 

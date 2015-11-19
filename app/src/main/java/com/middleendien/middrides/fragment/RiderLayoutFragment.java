@@ -1,4 +1,4 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.middrides.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -9,9 +9,9 @@ import android.view.ViewGroup;
 
 /**
  * Created by Peter on 10/8/15.
+ *
  */
-public class DispatcherLayoutFragment extends Fragment {
-
+public class RiderLayoutFragment extends Fragment {
 
     @Nullable
     @Override

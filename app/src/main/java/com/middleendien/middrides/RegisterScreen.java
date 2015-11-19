@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.middleendien.middrides.backup.LoginAgent;
+import com.middleendien.middrides.utils.LoginAgent;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -19,7 +19,7 @@ import com.parse.SignUpCallback;
 /**
  * Created by Peter on 10/5/15.
  */
-public class RegisterPage extends AppCompatActivity {
+public class RegisterScreen extends AppCompatActivity {
     private EditText usernameBox;
     private EditText passwdBox;
     private Button regButton;
@@ -54,7 +54,7 @@ public class RegisterPage extends AppCompatActivity {
 
                 // check e-mail validity
                 if(!LoginAgent.isEmailValid(usernameBox.getText().toString()) || !Patterns.EMAIL_ADDRESS.matcher(usernameBox.getText().toString()).matches()){
-                    Toast.makeText(RegisterPage.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -68,30 +68,30 @@ public class RegisterPage extends AppCompatActivity {
                     public void done(ParseException e) {
                         if (e == null) {
 //                            registerSuccess = true;
-                            Toast.makeText(RegisterPage.this, "Register Success", Toast.LENGTH_SHORT).show();   // This toast is temporary
+                            Toast.makeText(RegisterScreen.this, "Register Success", Toast.LENGTH_SHORT).show();   // This toast is temporary
                             setResult(REGISTER_SUCCESS_CODE);
                             finish();
                             Log.i("Register Success", "Register Success");
                         } else if (e.getCode() == ParseException.CONNECTION_FAILED) {
-                            Toast.makeText(RegisterPage.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterScreen.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
                             Log.i("Register Error", e.getCode() + " " + e.getMessage());
 //                            registerSuccess = false;
                         } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
-                            Toast.makeText(RegisterPage.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterScreen.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
                             Log.i("Register Error", e.getCode() + " " + e.getMessage());
 //                            registerSuccess = false;
                         } else if (e.getCode() == ParseException.TIMEOUT) {
-                            Toast.makeText(RegisterPage.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterScreen.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();
                             Log.i("Register Error", e.getCode() + " " + e.getMessage());
 //                            registerSuccess = false;
                         } else if (e.getCode() == 202) {
-                            Toast.makeText(RegisterPage.this, getResources().getString(R.string.user_exists), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterScreen.this, getResources().getString(R.string.user_exists), Toast.LENGTH_SHORT).show();
                             Log.i("Register Error", e.getCode() + " " + e.getMessage());
 //                            registerSuccess = false;
                         } else {
                             Log.i("Register Error", e.getCode() + " " + e.getMessage());
 //                   e.printStackTrace();
-                            Toast.makeText(RegisterPage.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterScreen.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
 //                            registerSuccess = false;
                         }
                     }
@@ -101,17 +101,17 @@ public class RegisterPage extends AppCompatActivity {
                 // I'll reuse the code below when I figure out how to do Async Tasks on Android
                 // Point of information, it is much simpler on .NET platform, just saying
 
-//                loginAgent = LoginAgent.getInstance(usernameBox.getText().toString(), passwdBox.getText().toString(), RegisterPage.this);
+//                loginAgent = LoginAgent.getInstance(usernameBox.getText().toString(), passwdBox.getText().toString(), RegisterScreen.this);
 //
 //                boolean registerSuccess = loginAgent.attemptRegister(usernameBox.getText().toString(), passwdBox.getText().toString());
 //                if(!registerSuccess){
 //                    String errorMessage = sharedPreferences.getString(getResources().getString(R.string.reg_fail_msg),
 //                            getResources().getString(R.string.other_failure));
 //
-////                    Toast.makeText(RegisterPage.this, errorMessage, Toast.LENGTH_SHORT).show();
+////                    Toast.makeText(RegisterScreen.this, errorMessage, Toast.LENGTH_SHORT).show();
 //                }
 //                else {
-//                    Toast.makeText(RegisterPage.this, "Register Success", Toast.LENGTH_SHORT).show();   // This toast is temporary
+//                    Toast.makeText(RegisterScreen.this, "Register Success", Toast.LENGTH_SHORT).show();   // This toast is temporary
 //                    setResult(REGISTER_SUCCESS_CODE);
 //                    finish();
 //                }
