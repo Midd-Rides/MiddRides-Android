@@ -1,25 +1,36 @@
 package com.middleendien.middrides;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnLoginListener;
 import com.parse.ParseException;
 import com.parse.ParseUser;
+
+import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -32,7 +43,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     // UI
     private Button btnLogIn;
     private Button btnRegister;
-    private EditText usernameBox;
+    private AutoCompleteTextView usernameBox;
     private EditText passwdBox;
 
     private static final int REGISTER_REQUEST_CODE = 0x001;
@@ -73,11 +84,44 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
         btnLogIn = (Button) findViewById(R.id.login_button);
         btnRegister = (Button) findViewById(R.id.register_button);
 
-        usernameBox = (EditText) findViewById(R.id.usernameBox);
+        usernameBox = (AutoCompleteTextView) findViewById(R.id.usernameBox);
         passwdBox = (EditText) findViewById(R.id.passwdBox);
     }
 
     private void initEvent() {
+        usernameBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().length() > 0 && s.charAt(s.length() - 1) == '@') {             // ends with "@"
+                    ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
+                            LoginScreen.this,
+                            android.R.layout.simple_dropdown_item_1line, new String[] { s + "middlebury.edu" });
+                    usernameBox.setAdapter(autoCompleteAdapter);
+                } else if (s.toString().length() > 2 && !s.toString().contains("@")) {         // "sth"
+                    ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
+                            LoginScreen.this,
+                            android.R.layout.simple_dropdown_item_1line, new String[] { s + "@middlebury.edu" });
+                    usernameBox.setAdapter(autoCompleteAdapter);
+                } else if (s.toString().length() > 15 && s.toString().substring(s.length() - 15).equals("@middlebury.edu")) {
+                    // completed format
+                    usernameBox.dismissDropDown();
+                } else if (s.toString().length() == 0) {
+                    // cleared everything or initial state, without @
+                    usernameBox.setAdapter(null);
+                }   // else do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         btnLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {               // login business is implemented with the LoginAgent class

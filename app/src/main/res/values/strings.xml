@@ -86,6 +86,9 @@
 
     <string name="parse_installation_email">email</string>
 
+    <!--Permission-->
+    <string name="perm_contacts_rationale">We need to access your email account names</string>
+
     <!--SharedPreferences-->
     <string name="login_status">LoginStatus</string>
     <string name="location_version">LocationVersion</string>
@@ -106,6 +109,10 @@
 
     <!--Tags-->
     <string name="announcement_fragment">ShowAnnouncement</string>
+
+    <!--TextViews-->
+    <string name="text_hint_email">Email</string>
+    <string name="text_hint_passwd">Password</string>
 
     <!--Toast-->
     <string name="already_verified">E-mail Already Verified</string>

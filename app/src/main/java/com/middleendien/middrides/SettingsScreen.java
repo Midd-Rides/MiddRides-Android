@@ -62,6 +62,7 @@ public class SettingsScreen extends AppCompatActivity implements OnSynchronizeLi
     public void onResetPasswordComplete(boolean resetSuccess, int requestCode) {
         switch (requestCode) {
             case USER_RESET_PASSWORD_REQUEST_CODE:
+                //TODO: this toast is not shown, figure out why         - Peter
                 Toast.makeText(SettingsScreen.this,
                         resetSuccess ? getString(R.string.reset_email_sent) : getString(R.string.something_went_wrong),
                         Toast.LENGTH_SHORT)
