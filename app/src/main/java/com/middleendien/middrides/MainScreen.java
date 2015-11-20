@@ -39,6 +39,9 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
@@ -51,6 +54,7 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -77,6 +81,14 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     private int locationDialogFragmentId;
     private int serverVersion;
 
+    // location spinners
+    private Spinner pickUpSpinner;
+    private Spinner dstSpinner;
+
+    private List<Location> locationList;
+    ArrayAdapter spinnerAdapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +105,12 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     private void initData() {
+        locationList = new ArrayList<Location>();
+
         synchronizer = Synchronizer.getInstance(this);
+        synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+
+
 
         /**
          * Deal with everything in callback
@@ -111,7 +128,10 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     private void initView() {
-        // temporary announcement
+        pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
+        dstSpinner = (Spinner) findViewById(R.id.dst_spinner);
+
+        pickUpSpinner.setPrompt("This is a prompt");
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
@@ -142,6 +162,35 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private void initEvent() {
         backFirstPressed = System.currentTimeMillis() - 2000;
+
+        spinnerAdapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_activated_1, locationList);
+
+        pickUpSpinner.setAdapter(spinnerAdapter);
+        dstSpinner.setAdapter(spinnerAdapter);
+
+        pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("Origin Spinner", position + "");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                pickUpSpinner.setSelection(0);
+            }
+        });
+
+        dstSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("Desti Spinner", position + "");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                dstSpinner.setSelection(0);
+            }
+        });
     }
 
     private void showLocationDialog(){
@@ -219,6 +268,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     obj.pinInBackground();      // save locally
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
+
+                synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
                 editor.putInt(getString(R.string.parse_status_location_version), serverVersion)         // should be initialised by now
                         .apply();
@@ -231,6 +283,17 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
                 if (fragment != null)
                     fragment.updateLocations(objectList);
+
+                if (objectList.size() > 1) {
+                    for (ParseObject obj : objectList) {
+                        locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
+                                obj.getDouble(getString(R.string.parse_location_lat)),
+                                obj.getDouble(getString(R.string.parse_location_lng))));
+                    }
+                    spinnerAdapter.notifyDataSetChanged();
+                } else {
+                    synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+                }
                 break;
         }
     }

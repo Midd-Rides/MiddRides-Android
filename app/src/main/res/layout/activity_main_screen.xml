@@ -8,6 +8,30 @@
     android:fitsSystemWindows="true"
     tools:context=".MainScreen">
 
+    <RelativeLayout
+        android:id="@+id/spinner_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Spinner
+            android:id="@+id/pick_up_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:labelFor="@string/spinner_pick_up"
+            android:spinnerMode="dialog" />
+
+        <Spinner
+            android:id="@+id/dst_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/pick_up_spinner"
+            android:labelFor="@string/spinner_dst"
+            android:spinnerMode="dropdown"/>
+
+    </RelativeLayout>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

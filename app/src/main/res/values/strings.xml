@@ -104,6 +104,10 @@
     <string name="pref_not_verifed">Email Not Verified</string>
     <string name="pref_screen_announcements">Announcements</string>
 
+    <!--Spinners-->
+    <string name="spinner_pick_up">Pick Up Location</string>
+    <string name="spinner_dst">Destination</string>
+
     <!--Switches-->
     <string name="dispatcher_login">Dispatcher</string>
 
@@ -121,5 +125,6 @@
     <string name="something_went_wrong">Something went wrong</string>
     <string name="version_not_updated">Your local data might not be up to date</string>
     <string name="request_cancelled">Your current request has been cancelled</string>
+    <string name="permission_internet_denied">MiddRides needs Internet access to log in and send requests</string>
 
 </resources>
