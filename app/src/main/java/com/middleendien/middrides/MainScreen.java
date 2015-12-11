@@ -39,10 +39,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.fragment.AnnouncementDialogFragment;
 import com.middleendien.middrides.fragment.LocationSelectDialogFragment;
 import com.middleendien.middrides.fragment.LocationSelectDialogFragment.SelectLocationDialogListener;
 import com.middleendien.middrides.utils.Synchronizer;
@@ -52,13 +54,12 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class MainScreen extends AppCompatActivity implements SelectLocationDialogListener,
-        OnSynchronizeListener{
-
-    private AnnouncementDialogFragment announcementDialogFragment;
+        OnSynchronizeListener {
 
     private Synchronizer synchronizer;
 
@@ -73,8 +74,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
-    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
-
     // for double click exit
     private long backFirstPressed;
 
@@ -82,11 +81,21 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     private int locationDialogFragmentId;
     private int serverVersion;
 
+    // location spinners
+    private Spinner pickUpSpinner;
+    private Spinner dstSpinner;
+
+    private List<Location> locationList;
+    ArrayAdapter spinnerAdapter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_screen);
         Log.d("MainScreen", "Create");
+
+        //TODO: check all status: e-mail verified and so on
 
         initData();
 
@@ -96,7 +105,10 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     private void initData() {
+        locationList = new ArrayList<Location>();
+
         synchronizer = Synchronizer.getInstance(this);
+        synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
         /**
          * Deal with everything in callback
@@ -109,12 +121,15 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         // check location list version
         synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_LOCATION_VERSION_REQUEST_CODE);
 
-        // we should react to these results
+        // TODO: we should react to these results
         // - Peter
     }
 
     private void initView() {
-        // temporary announcement
+        pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
+        dstSpinner = (Spinner) findViewById(R.id.dst_spinner);
+
+        pickUpSpinner.setPrompt("This is a prompt");
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
@@ -143,27 +158,48 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         });
     }
 
+    private void initEvent() {
+        backFirstPressed = System.currentTimeMillis() - 2000;
+
+        spinnerAdapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_activated_1, locationList);
+
+        pickUpSpinner.setAdapter(spinnerAdapter);
+        dstSpinner.setAdapter(spinnerAdapter);
+
+        pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("Origin Spinner", position + "");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                pickUpSpinner.setSelection(0);
+            }
+        });
+
+        dstSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("Desti Spinner", position + "");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                dstSpinner.setSelection(0);
+            }
+        });
+    }
+
     private void showLocationDialog(){
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         DialogFragment locationFragment =  new LocationSelectDialogFragment();
 
         locationDialogFragmentId = locationFragment.getId();
-        locationFragment.show(fm, "Select Location");
+        locationFragment.show(fm, "Select Location");       // TODO: put in resource file
     }
 
-    private void initEvent() {
-        backFirstPressed = System.currentTimeMillis() - 2000;
-
-        // check for announcements
-        if (hasAnnouncement()) {
-//            announcementDialogFragment = new AnnouncementDialogFragment();
-//            announcementDialogFragment
-//                    .show(getFragmentManager(), "Announcement");
-
-            //TODO: Update Pending request field in parse user object when request is satisfied
-        }
-    }
-
+    // TODO:
     private boolean hasAnnouncement() {
         return true;
     }
@@ -185,23 +221,13 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 Intent intentSettings = new Intent(MainScreen.this, SettingsScreen.class);
                 startActivity(intentSettings);
                 return true;
-
-            case R.id.action_login:
-                if (ParseUser.getCurrentUser() == null) {
-                    Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
-                    startActivity(toLoginScreen);
-                } else {
-                    Intent toUserScreen = new Intent(MainScreen.this, UserScreen.class);
-                    startActivity(toUserScreen);
-                }
-                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     private void updateLocations() {
-        synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+        synchronizer.getListObjectsServer(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
         Log.d("updateLocations()", "Called");
     }
 
@@ -221,8 +247,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             case STATUS_LOCATION_VERSION_REQUEST_CODE:
                 int localVersion = sharedPreferences.getInt(getString(R.string.parse_status_location_version), 0);
                 serverVersion = object.getInt(getString(R.string.parse_status_location_version));
-                if (serverVersion > localVersion) {
-                    // server has newer version
+                if (serverVersion > localVersion) {         // server has newer version
                     Log.i("QueryInfo", "Location Update Available");
                     updateLocations();                      // pull from server
                 } else {
@@ -235,12 +260,28 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     @Override
     public void onGetListObjectsComplete(List<ParseObject> objectList, int requestCode) {
+        LocationSelectDialogFragment fragment = (LocationSelectDialogFragment) getSupportFragmentManager().
+                findFragmentById(locationDialogFragmentId);
+
         switch (requestCode) {
             case LOCATION_GET_LASTEST_VERSION_REQUEST_CODE:         // update from server
+                locationList.clear();           // initialise
+                if (fragment != null)
+                    fragment.updateLocations(objectList);
+
                 for (ParseObject obj : objectList) {
                     obj.pinInBackground();      // save locally
+//                    Location newLocation = new Location(obj.getString(getString(R.string.parse_location_name)),
+//                                                                    obj.getDouble(getString(R.string.parse_location_lat)),
+//                                                                    obj.getDouble(getString(R.string.parse_location_lng)))
+//                                                .setObjectId(obj.getObjectId());
+//                    locationList.add(newLocation);
+                    spinnerAdapter.notifyDataSetChanged();
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
+
+                synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
                 editor.putInt(getString(R.string.parse_status_location_version), serverVersion)         // should be initialised by now
                         .apply();
@@ -248,11 +289,22 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 break;
 
             case LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE:           // update from local
-                LocationSelectDialogFragment fragment = (LocationSelectDialogFragment) getSupportFragmentManager().
-                        findFragmentById(locationDialogFragmentId);
+                if (objectList.size() > 1) {
+                    if (fragment != null)
+                        fragment.updateLocations(objectList);
+                    else {          // not called from fragment
+                        locationList.clear();
+                        for (ParseObject obj : objectList)
+                            locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
+                                                        obj.getDouble(getString(R.string.parse_location_lat)),
+                                                        obj.getDouble(getString(R.string.parse_location_lng)))
+                                                        .setObjectId(obj.getObjectId()));
+                    }
 
-                if (fragment != null)
-                    fragment.updateLocations(objectList);
+                    spinnerAdapter.notifyDataSetChanged();
+                } else {
+                    synchronizer.getListObjectsServer(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+                }
                 break;
         }
     }
@@ -289,6 +341,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     setPendingRequestUser.saveInBackground();
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                    Log.d("New Request", "onLocationSelected");
                 }
             }
         });
