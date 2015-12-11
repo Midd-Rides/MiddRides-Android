@@ -35,6 +35,8 @@ public class LocationSelectDialogFragment extends DialogFragment {
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
+    ArrayAdapter<Location> locationsArrayListAdapter;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,14 +68,15 @@ public class LocationSelectDialogFragment extends DialogFragment {
         for (ParseObject obj : objectList) {
             locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                     obj.getDouble(getString(R.string.parse_location_lat)),
-                    obj.getDouble(getString(R.string.parse_location_lng))));
+                    obj.getDouble(getString(R.string.parse_location_lng)))
+                    .setObjectId(obj.getObjectId()));
         }
-        initEvent();
+        locationsArrayListAdapter.notifyDataSetChanged();
     }
 
-    //Configures adapter and sets Item click listener for List
-    private void initEvent(){
-        ArrayAdapter<Location> locationsArrayListAdapter = new ArrayAdapter<Location>
+    // configures adapter and sets item click listener for List
+    private void initEvent() {
+        locationsArrayListAdapter = new ArrayAdapter<Location>
                 (getActivity(), android.R.layout.simple_list_item_activated_1, locationList);
 
         locationsListView.setAdapter(locationsArrayListAdapter);
@@ -83,9 +86,9 @@ public class LocationSelectDialogFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Location locationSelected = (Location) locationsListView.getItemAtPosition(position);
 
-                //Return selected Location to caller Activity and dismiss dialog
-                SelectLocationDialogListener mainScreenActivity = (SelectLocationDialogListener) getActivity();
-                mainScreenActivity.onLocationSelected(locationSelected);
+                // return selected Location to caller Activity and dismiss dialog
+                SelectLocationDialogListener callback = (SelectLocationDialogListener) getActivity();
+                callback.onLocationSelected(locationSelected);
 
                 dismiss();
             }
