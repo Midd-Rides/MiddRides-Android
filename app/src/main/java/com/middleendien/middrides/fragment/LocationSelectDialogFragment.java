@@ -66,10 +66,10 @@ public class LocationSelectDialogFragment extends DialogFragment {
     public void updateLocations(List<ParseObject> objectList) {
         locationList.clear();
         for (ParseObject obj : objectList) {
-            locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
-                    obj.getDouble(getString(R.string.parse_location_lat)),
-                    obj.getDouble(getString(R.string.parse_location_lng)))
-                    .setObjectId(obj.getObjectId()));
+            locationList.add(new Location().setName(obj.getString(getString(R.string.parse_location_name)))
+                                            .setLatitude(obj.getDouble(getString(R.string.parse_location_lat)))
+                                            .setLongitude(obj.getDouble(getString(R.string.parse_location_lng)))
+                                            .setObjectId(obj.getObjectId()));
         }
         locationsArrayListAdapter.notifyDataSetChanged();
     }

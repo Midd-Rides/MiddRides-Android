@@ -271,12 +271,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
                 for (ParseObject obj : objectList) {
                     obj.pinInBackground();      // save locally
-//                    Location newLocation = new Location(obj.getString(getString(R.string.parse_location_name)),
-//                                                                    obj.getDouble(getString(R.string.parse_location_lat)),
-//                                                                    obj.getDouble(getString(R.string.parse_location_lng)))
-//                                                .setObjectId(obj.getObjectId());
-//                    locationList.add(newLocation);
-                    spinnerAdapter.notifyDataSetChanged();
+                    spinnerAdapter.notifyDataSetChanged();      // was updated
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
 
@@ -295,10 +290,10 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     else {          // not called from fragment
                         locationList.clear();
                         for (ParseObject obj : objectList)
-                            locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
-                                                        obj.getDouble(getString(R.string.parse_location_lat)),
-                                                        obj.getDouble(getString(R.string.parse_location_lng)))
-                                                        .setObjectId(obj.getObjectId()));
+                            locationList.add(new Location().setName(obj.getString(getString(R.string.parse_location_name)))
+                                                            .setLatitude(obj.getDouble(getString(R.string.parse_location_lat)))
+                                                            .setLongitude(obj.getDouble(getString(R.string.parse_location_lng)))
+                                                            .setObjectId(obj.getObjectId()));
                     }
 
                     spinnerAdapter.notifyDataSetChanged();
