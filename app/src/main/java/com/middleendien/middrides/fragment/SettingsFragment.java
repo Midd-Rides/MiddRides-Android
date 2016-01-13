@@ -17,6 +17,7 @@ import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.GetCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -110,6 +111,10 @@ public class SettingsFragment extends PreferenceFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ParseUser.logOut();
+                                ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                                installation.put("user","0");
+                                installation.saveInBackground();
+
                                 Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
                                 toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(toLoginScreen);

@@ -126,5 +126,6 @@
     <string name="version_not_updated">Your local data might not be up to date</string>
     <string name="request_cancelled">Your current request has been cancelled</string>
     <string name="permission_internet_denied">MiddRides needs Internet access to log in and send requests</string>
+    <string name="parse_request_locationID">locationId</string>
 
 </resources>

@@ -319,6 +319,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
         parseUserRequest.put(getString(R.string.parse_request_pickup_location), locationSelected.getName());    // origin
 
+        parseUserRequest.put(getString(R.string.parse_request_locationID),locationSelected.getLocationId());
+
         parseUserRequest.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {

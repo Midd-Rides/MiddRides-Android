@@ -16,11 +16,29 @@ public class Location implements Serializable{
     private String name;
     private double latitude;
     private double longitude;
+    private String locationID;
+
 
     public Location(String name, double latitude, double longitude ){
         this.name = name;
         this.latitude =  latitude;
         this.longitude = longitude;
+    }
+
+    public String getLocationId() {
+        return locationID;
+    }
+
+    public void setLocationID(String locationID) {
+        this.locationID = locationID;
+    }
+
+    public Location(String name, double latitude, double longitude, String locationID ){
+        this.name = name;
+        this.latitude =  latitude;
+        this.longitude = longitude;
+
+        this.locationID = locationID;
     }
 
     public double getLatitude() {

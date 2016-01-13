@@ -66,7 +66,8 @@ public class LocationSelectDialogFragment extends DialogFragment {
         for (ParseObject obj : objectList) {
             locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                     obj.getDouble(getString(R.string.parse_location_lat)),
-                    obj.getDouble(getString(R.string.parse_location_lng))));
+                    obj.getDouble(getString(R.string.parse_location_lng)),
+                    obj.getObjectId()));
         }
         initEvent();
     }
