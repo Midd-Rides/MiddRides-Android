@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -27,10 +29,6 @@ import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnLoginListener;
 import com.parse.ParseException;
 import com.parse.ParseUser;
-
-import java.util.List;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -50,6 +48,8 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
     private static final int REGISTER_SUCCESS_CODE = 0x101;
     private static final int REGISTER_FAILURE_CODE = 0x102;
+
+    private static final int LOGIN_CANCEL_RESULT_CODE = 0x301;
 
     private static final int PERMISSION_INTERNET_REQUEST_CODE = 0x201;
 
@@ -139,7 +139,6 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 }
 
                 hideKeyboard();
-                // Windows Phone is the best
             }
         });
 
@@ -218,6 +217,16 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     public boolean onTouchEvent(MotionEvent event) {
         hideKeyboard();
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                setResult(LOGIN_CANCEL_RESULT_CODE);
+                finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override

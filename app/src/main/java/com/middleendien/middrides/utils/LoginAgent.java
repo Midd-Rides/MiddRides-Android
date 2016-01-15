@@ -11,7 +11,9 @@ import com.middleendien.middrides.MainScreen;
 import com.middleendien.middrides.R;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
 /**
@@ -58,6 +60,20 @@ public class LoginAgent {
             @Override
             public void done(ParseUser user, ParseException e) {
                 loginListener.onLoginComplete(e == null, e);
+                if(e==null){
+                    ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                    installation.put("user", ParseUser.getCurrentUser().getObjectId());
+                    installation.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+
+                            } else {
+
+                            }
+                        }
+                    });
+                }
             }
         });
     }
