@@ -3,10 +3,12 @@ package com.middleendien.middrides.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -86,6 +88,10 @@ public class SettingsFragment extends PreferenceFragment {
                                     requestToBeDeleted.deleteInBackground();
                                     ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
                                     ParseUser.getCurrentUser().saveInBackground();
+
+                                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                                    editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
+
                                     cancelRequestPref.setEnabled(false);
 
                                     Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();

@@ -25,6 +25,7 @@ package com.middleendien.middrides;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.NotificationManager;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -74,6 +75,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
+    private static final int NOTIFICATION_ID                                = 0x026;
+
     private static final int SETTINGS_SCREEN_REQUEST_CODE                   = 0x201;
     private static final int LOGIN_REQUEST_CODE                             = 0x202;
 
@@ -106,6 +109,11 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
             startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
         }
+
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        manager.cancel(NOTIFICATION_ID);
+
+
 
         //TODO: check all status: e-mail verified and so on
 
@@ -324,22 +332,23 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     public void onLocationSelected(Location locationSelected) {
-
         Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
 
+
         final ParseObject parseUserRequest = new ParseObject(getString(R.string.parse_class_request));
-
         parseUserRequest.put(getString(R.string.parse_request_request_time), new Date());                       // time
-
         parseUserRequest.put(getString(R.string.parse_request_user_id),
                 ParseUser.getCurrentUser().getObjectId());                                                      // userId
-
         parseUserRequest.put(getString(R.string.parse_request_user_email),
                 ParseUser.getCurrentUser().get(getString(R.string.parse_user_email)));                          // email
-
         parseUserRequest.put(getString(R.string.parse_request_pickup_location), locationSelected.getName());    // origin
-
         parseUserRequest.put(getString(R.string.parse_request_locationID),locationSelected.getLocationId());
+
+        // save to sharedPreference
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        editor.putString(getString(R.string.parse_request_pickup_location), locationSelected.getName())
+                .putBoolean(getString(R.string.parse_user_pending_request), true)
+                .apply();
 
         parseUserRequest.saveInBackground(new SaveCallback() {
             @Override
@@ -377,7 +386,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
                     // TODO: to login screen
                     Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
-                    startActivity(toLoginScreen);
+                    startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
                 }
             case LOGIN_REQUEST_CODE:
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {

@@ -54,6 +54,9 @@
     <string name="login_fail_msg">Login Fail Message</string>
     <string name="reg_fail_msg">Register Fail Message</string>
 
+    <!--Notifications-->
+    <string name="van_is_coming">Your van is coming to</string>
+
     <!--Others-->
     <string name="email_not_verified">Email Not Verified</string>
     <string name="email_verified">Email Verified</string>
