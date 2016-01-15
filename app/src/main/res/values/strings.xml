@@ -30,6 +30,8 @@
     <string name="dialog_btn_cancel">Cancel</string>
     <string name="dialog_logging_in">Signing In…</string>
     <string name="dialog_registering">Registering…</string>
+    <string name="dialog_title_request_confirm">Request Confirmation</string>
+    <string name="dialog_request_msg">Pick up at</string>
 
     <!--Intent Bundle keys-->
     <string name="current_user">User</string>
@@ -60,6 +62,7 @@
     <!--Others-->
     <string name="email_not_verified">Email Not Verified</string>
     <string name="email_verified">Email Verified</string>
+    <string name="app_logo">App Logo</string>
 
     <!--Parse Classes-->
     <string name="parse_class_status">Status</string>

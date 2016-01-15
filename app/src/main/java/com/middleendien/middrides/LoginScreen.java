@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -23,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.middleendien.middrides.utils.LoginAgent;
@@ -66,6 +68,15 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             startActivity(toMainScreen);
             finish();
         }
+
+        // adjust logo
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        ImageView splashLogo = (ImageView) findViewById(R.id.login_app_logo);
+
+        splashLogo.getLayoutParams().width = (int)(metrics.widthPixels * 0.5);
+        splashLogo.getLayoutParams().height = (int)(metrics.heightPixels * 0.4);
 
         initData();
 
@@ -192,7 +203,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void requestPermission(String permission, int requestCode) {
-        ActivityCompat.requestPermissions(this, new String[] { permission }, requestCode);
+        ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
     }
 
     /**

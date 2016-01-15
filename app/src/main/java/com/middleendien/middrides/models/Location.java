@@ -31,6 +31,12 @@ public class Location implements Serializable{
         this.locationID = locationID;
     }
 
+    public Location(String name, double latitude, double longitude ){
+        this.name = name;
+        this.latitude =  latitude;
+        this.longitude = longitude;
+    }
+
     public Location(String name, double latitude, double longitude, String locationID ){
         this.name = name;
         this.latitude =  latitude;

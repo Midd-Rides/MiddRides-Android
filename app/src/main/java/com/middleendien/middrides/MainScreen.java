@@ -26,6 +26,7 @@ package com.middleendien.middrides;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.NotificationManager;
+import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,8 +47,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.fragment.LocationSelectDialogFragment;
-import com.middleendien.middrides.fragment.LocationSelectDialogFragment.SelectLocationDialogListener;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
 import com.parse.ParseException;
@@ -55,12 +54,12 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainScreen extends AppCompatActivity implements SelectLocationDialogListener,
-        OnSynchronizeListener {
+public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
 
     private Synchronizer synchronizer;
 
@@ -93,7 +92,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     // location spinners
     private Spinner pickUpSpinner;
-    private Spinner dstSpinner;
+    private Location selectedLocation;
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -114,7 +113,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         manager.cancel(NOTIFICATION_ID);
 
 
-
         //TODO: check all status: e-mail verified and so on
 
         initData();
@@ -130,8 +128,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         synchronizer = Synchronizer.getInstance(this);
         synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
-
-
         /**
          * Deal with everything in callback
          */
@@ -146,9 +142,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private void initView() {
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
-        dstSpinner = (Spinner) findViewById(R.id.dst_spinner);
 
-        pickUpSpinner.setPrompt("This is a prompt");
+        pickUpSpinner.setPrompt(getString(R.string.spinner_pick_up));
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
@@ -169,9 +164,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
                     Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
-
                 } else { //initialize Location Dialog
-                    showLocationDialog();
+                    showRequestDialog();
                 }
             }
         });
@@ -183,11 +177,12 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         spinnerAdapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_activated_1, locationList);
 
         pickUpSpinner.setAdapter(spinnerAdapter);
-        dstSpinner.setAdapter(spinnerAdapter);
 
         pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedLocation = (Location) spinnerAdapter.getItem(position);
+
                 Log.d("Origin Spinner", position + "");
             }
 
@@ -197,31 +192,27 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             }
         });
 
-        dstSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("Desti Spinner", position + "");
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                dstSpinner.setSelection(0);
-            }
-        });
-
         spinnerAdapter.notifyDataSetChanged();
     }
 
-    private void showLocationDialog(){
-        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        DialogFragment locationFragment =  new LocationSelectDialogFragment();
-
-        locationDialogFragmentId = locationFragment.getId();
-        locationFragment.show(fm, "Select Location");
-    }
-
-    private boolean hasAnnouncement() {
-        return true;
+    private void showRequestDialog(){
+        new Builder(this)
+                .setTitle(getString(R.string.dialog_title_request_confirm))
+                .setMessage(getString(R.string.dialog_request_msg) + " " + selectedLocation.getName() + "?")
+                .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // perform request
+                        onLocationSelected(selectedLocation);
+                    }
+                })
+                .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // sorry to see you go punk
+                    }
+                })
+                .create().show();
     }
 
     @Override
@@ -289,10 +280,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             case LOCATION_GET_LASTEST_VERSION_REQUEST_CODE:         // update from server
                 for (ParseObject obj : objectList) {
                     obj.pinInBackground();      // save locally
-<<<<<<< HEAD
-                    spinnerAdapter.notifyDataSetChanged();      // was updated
-=======
->>>>>>> master
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
 
@@ -306,30 +293,14 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
             case LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE:           // update from local
                 Log.d("MainScreen", "updateFromLocal");
-                LocationSelectDialogFragment fragment = (LocationSelectDialogFragment) getSupportFragmentManager().
-                        findFragmentById(locationDialogFragmentId);
-
-                if (fragment != null)
-                    fragment.updateLocations(objectList);
 
                 if (objectList.size() > 1) {
-<<<<<<< HEAD
-                    if (fragment != null)
-                        fragment.updateLocations(objectList);
-                    else {          // not called from fragment
-                        locationList.clear();
-                        for (ParseObject obj : objectList)
-                            locationList.add(new Location().setName(obj.getString(getString(R.string.parse_location_name)))
-                                                            .setLatitude(obj.getDouble(getString(R.string.parse_location_lat)))
-                                                            .setLongitude(obj.getDouble(getString(R.string.parse_location_lng)))
-                                                            .setObjectId(obj.getObjectId()));
-=======
                     locationList.clear();
                     for (ParseObject obj : objectList) {
                         locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                                 obj.getDouble(getString(R.string.parse_location_lat)),
-                                obj.getDouble(getString(R.string.parse_location_lng))));
->>>>>>> master
+                                obj.getDouble(getString(R.string.parse_location_lng)),
+                                obj.getObjectId()));
                     }
                     spinnerAdapter.notifyDataSetChanged();
                 } else {
@@ -339,7 +310,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         }
 
         Log.d("MainScreen", (locationList == null) + "");
-        Log.d("MainScreen", spinnerAdapter.getCount() + "");
+        Log.d("MainScreen", "Adapter Count " + spinnerAdapter.getCount() + "");
     }
 
     @Override
@@ -348,8 +319,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     public void onLocationSelected(Location locationSelected) {
-        Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
 
+        Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
 
         final ParseObject parseUserRequest = new ParseObject(getString(R.string.parse_class_request));
         parseUserRequest.put(getString(R.string.parse_request_request_time), new Date());                       // time
@@ -358,7 +329,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         parseUserRequest.put(getString(R.string.parse_request_user_email),
                 ParseUser.getCurrentUser().get(getString(R.string.parse_user_email)));                          // email
         parseUserRequest.put(getString(R.string.parse_request_pickup_location), locationSelected.getName());    // origin
-        parseUserRequest.put(getString(R.string.parse_request_locationID),locationSelected.getLocationId());
+        parseUserRequest.put(getString(R.string.parse_request_locationID), locationSelected.getLocationId());
 
         // save to sharedPreference
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -380,19 +351,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 }
             }
         });
-    }
-
-
-    private AlertDialog showDialog(String title, String msg, String btnPosTxt, String btnNegTxt,
-                                   OnClickListener btnPosListener, OnClickListener btnNegListener) {
-
-        Builder builder = new Builder(this);
-
-        return builder.setTitle(title)
-                .setMessage(msg)
-                .setPositiveButton(btnPosTxt, btnPosListener)
-                .setNegativeButton(btnNegTxt, btnNegListener)
-                .create();
     }
 
     @Override
