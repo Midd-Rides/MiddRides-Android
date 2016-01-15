@@ -74,6 +74,13 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
+    private static final int SETTINGS_SCREEN_REQUEST_CODE                   = 0x201;
+    private static final int LOGIN_REQUEST_CODE                             = 0x202;
+
+    private static final int LOGIN_CANCEL_RESULT_CODE                       = 0x301;
+
+    private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
+
     // for double click exit
     private long backFirstPressed;
 
@@ -94,6 +101,11 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
         Log.d("MainScreen", "Create");
+
+        if (ParseUser.getCurrentUser() == null) {
+            Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
+            startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
+        }
 
         //TODO: check all status: e-mail verified and so on
 
@@ -122,9 +134,6 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
         // check location list version
         synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_LOCATION_VERSION_REQUEST_CODE);
-
-        // TODO: we should react to these results
-        // - Peter
     }
 
     private void initView() {
@@ -191,6 +200,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 dstSpinner.setSelection(0);
             }
         });
+
+        spinnerAdapter.notifyDataSetChanged();
     }
 
     private void showLocationDialog(){
@@ -219,8 +230,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
         switch (id) {
             case R.id.action_settings:
-                Intent intentSettings = new Intent(MainScreen.this, SettingsScreen.class);
-                startActivity(intentSettings);
+                Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
+                startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
                 return true;
         }
 
@@ -229,6 +240,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private void updateLocations() {
         synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+        if (spinnerAdapter != null)
+            spinnerAdapter.notifyDataSetChanged();
         Log.d("updateLocations()", "Called");
     }
 
@@ -243,6 +256,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 editor.putBoolean(getString(R.string.parse_status_is_running),
                         object.getBoolean(getString(R.string.parse_status_is_running))).apply();
                 Log.i("QueryInfo", "Service Running: " + object.getBoolean(getString(R.string.parse_status_is_running)));
+                // TODO: disable app if not running
                 break;
 
             case STATUS_LOCATION_VERSION_REQUEST_CODE:
@@ -262,6 +276,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     @Override
     public void onGetListObjectsComplete(List<ParseObject> objectList, int requestCode) {
+        Log.d("MainScreen", "onGetListObjectsComplete");
         switch (requestCode) {
             case LOCATION_GET_LASTEST_VERSION_REQUEST_CODE:         // update from server
                 for (ParseObject obj : objectList) {
@@ -278,6 +293,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 break;
 
             case LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE:           // update from local
+                Log.d("MainScreen", "updateFromLocal");
                 LocationSelectDialogFragment fragment = (LocationSelectDialogFragment) getSupportFragmentManager().
                         findFragmentById(locationDialogFragmentId);
 
@@ -285,6 +301,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     fragment.updateLocations(objectList);
 
                 if (objectList.size() > 1) {
+                    locationList.clear();
                     for (ParseObject obj : objectList) {
                         locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                                 obj.getDouble(getString(R.string.parse_location_lat)),
@@ -296,6 +313,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 }
                 break;
         }
+
+        Log.d("MainScreen", (locationList == null) + "");
+        Log.d("MainScreen", spinnerAdapter.getCount() + "");
     }
 
     @Override
@@ -351,6 +371,26 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case SETTINGS_SCREEN_REQUEST_CODE:
+                if (resultCode == USER_LOGOUT_RESULT_CODE) {
+                    // TODO: to login screen
+                    Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
+                    startActivity(toLoginScreen);
+                }
+            case LOGIN_REQUEST_CODE:
+                if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
+                    finish();
+                    int pid = android.os.Process.myPid();
+                    android.os.Process.killProcess(pid);
+                }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
@@ -364,6 +404,8 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 }
                 else {
                     finish();
+                    int pid = android.os.Process.myPid();
+                    android.os.Process.killProcess(pid);
                     //TODO: do something with backstack
                     // problem is that if someone switches between MainScreen and LoginScreen
                     // there will be multiple copies of the activites

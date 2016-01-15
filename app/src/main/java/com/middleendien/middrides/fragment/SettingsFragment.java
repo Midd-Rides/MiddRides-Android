@@ -3,7 +3,6 @@ package com.middleendien.middrides.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -11,11 +10,9 @@ import android.preference.PreferenceFragment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.middleendien.middrides.LoginScreen;
 import com.middleendien.middrides.R;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -34,6 +31,7 @@ public class SettingsFragment extends PreferenceFragment {
     private PreferenceCategory userPrefCat;
 
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
+    private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -115,9 +113,12 @@ public class SettingsFragment extends PreferenceFragment {
                                 installation.put("user","0");
                                 installation.saveInBackground();
 
-                                Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
-                                toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(toLoginScreen);
+//                                Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
+//                                toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                startActivity(toLoginScreen);
+//                                getActivity().finish();
+                                getActivity().setResult(USER_LOGOUT_RESULT_CODE);
+                                getActivity().finish();
                             }
                         })
                         .setNegativeButton(R.string.dialog_btn_cancel, null)
