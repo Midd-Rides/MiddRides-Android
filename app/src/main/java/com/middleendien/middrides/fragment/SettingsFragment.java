@@ -3,20 +3,20 @@ package com.middleendien.middrides.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.middleendien.middrides.LoginScreen;
 import com.middleendien.middrides.R;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -33,6 +33,7 @@ public class SettingsFragment extends PreferenceFragment {
     private PreferenceCategory userPrefCat;
 
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
+    private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,6 +88,10 @@ public class SettingsFragment extends PreferenceFragment {
                                     requestToBeDeleted.deleteInBackground();
                                     ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
                                     ParseUser.getCurrentUser().saveInBackground();
+
+                                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                                    editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
+
                                     cancelRequestPref.setEnabled(false);
 
                                     Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();
@@ -110,9 +115,16 @@ public class SettingsFragment extends PreferenceFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ParseUser.logOut();
-                                Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
-                                toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(toLoginScreen);
+                                ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                                installation.put("user","0");
+                                installation.saveInBackground();
+
+//                                Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
+//                                toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                startActivity(toLoginScreen);
+//                                getActivity().finish();
+                                getActivity().setResult(USER_LOGOUT_RESULT_CODE);
+                                getActivity().finish();
                             }
                         })
                         .setNegativeButton(R.string.dialog_btn_cancel, null)

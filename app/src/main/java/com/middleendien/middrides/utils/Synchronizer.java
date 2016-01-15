@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.middleendien.middrides.R;
-import com.middleendien.middrides.models.Location;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.Parse;
@@ -31,7 +30,7 @@ public class Synchronizer {
     private Context context;                    // for editing SharedPreferences
     private OnSynchronizeListener callback;
 
-    public static Synchronizer getInstance(Context context) {       // TODO: threading unsafe, fix
+    public static Synchronizer getInstance(Context context) {
         if (synchronizer == null) {
             synchronizer = new Synchronizer(context);
         }
@@ -64,14 +63,14 @@ public class Synchronizer {
         }
     }
 
-    public void getListObjectsServer(String className, final int requestCode) {
+    public void getListObjects (String className, final int requestCode) {
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
         parseQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
                     callback.onGetListObjectsComplete(objects, requestCode);
-                    Log.d("getListObjectsServer", "Success");
+                    Log.d("getListObjects", "Success");
                 } else {            // error syncing
                     e.printStackTrace();
                 }
@@ -115,4 +114,26 @@ public class Synchronizer {
         void onResetPasswordComplete(boolean resetSuccess, int requestCode);
 
     }
+
+
+
+
+
+
+//    // Async Task to get Double type value
+//    class GetDoubleTaskAsync extends AsyncTask<String, Void, Double> {
+//        private OnSynchronizeListener callback;
+//
+//        @Override
+//        protected Double doInBackground(String... params) {         // please make sure that you query one at a time
+//
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Double aDouble) {
+//            super.onPostExecute(aDouble);
+//        }
+//    }
+
 }

@@ -14,48 +14,53 @@ import java.io.Serializable;
 public class Location implements Serializable{
 
     private String name;
-    private String objectId;
     private double latitude;
     private double longitude;
+    private String locationID;
+
 
     public Location() {
 
+    }
+
+    public String getLocationId() {
+        return locationID;
+    }
+
+    public void setLocationID(String locationID) {
+        this.locationID = locationID;
+    }
+
+    public Location(String name, double latitude, double longitude, String locationID ){
+        this.name = name;
+        this.latitude =  latitude;
+        this.longitude = longitude;
+
+        this.locationID = locationID;
     }
 
     public double getLatitude() {
         return latitude;
     }
 
-    public Location setLatitude(double latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
-        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public Location setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 
     public double getLongitude() {
         return longitude;
     }
 
-    public Location setLongitude(double longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
-        return this;
-    }
-
-    public String getObjectId() {
-        return objectId;
-    }
-
-    public Location setObjectId(String objectId) {
-        this.objectId = objectId;
-        return this;
     }
 
     public String toString(){

@@ -35,8 +35,6 @@ public class LocationSelectDialogFragment extends DialogFragment {
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
 
-    ArrayAdapter<Location> locationsArrayListAdapter;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,17 +64,24 @@ public class LocationSelectDialogFragment extends DialogFragment {
     public void updateLocations(List<ParseObject> objectList) {
         locationList.clear();
         for (ParseObject obj : objectList) {
+<<<<<<< HEAD
             locationList.add(new Location().setName(obj.getString(getString(R.string.parse_location_name)))
                                             .setLatitude(obj.getDouble(getString(R.string.parse_location_lat)))
                                             .setLongitude(obj.getDouble(getString(R.string.parse_location_lng)))
                                             .setObjectId(obj.getObjectId()));
+=======
+            locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
+                    obj.getDouble(getString(R.string.parse_location_lat)),
+                    obj.getDouble(getString(R.string.parse_location_lng)),
+                    obj.getObjectId()));
+>>>>>>> master
         }
-        locationsArrayListAdapter.notifyDataSetChanged();
+        initEvent();
     }
 
-    // configures adapter and sets item click listener for List
-    private void initEvent() {
-        locationsArrayListAdapter = new ArrayAdapter<Location>
+    //Configures adapter and sets Item click listener for List
+    private void initEvent(){
+        ArrayAdapter<Location> locationsArrayListAdapter = new ArrayAdapter<Location>
                 (getActivity(), android.R.layout.simple_list_item_activated_1, locationList);
 
         locationsListView.setAdapter(locationsArrayListAdapter);
@@ -86,9 +91,9 @@ public class LocationSelectDialogFragment extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Location locationSelected = (Location) locationsListView.getItemAtPosition(position);
 
-                // return selected Location to caller Activity and dismiss dialog
-                SelectLocationDialogListener callback = (SelectLocationDialogListener) getActivity();
-                callback.onLocationSelected(locationSelected);
+                //Return selected Location to caller Activity and dismiss dialog
+                SelectLocationDialogListener mainScreenActivity = (SelectLocationDialogListener) getActivity();
+                mainScreenActivity.onLocationSelected(locationSelected);
 
                 dismiss();
             }
