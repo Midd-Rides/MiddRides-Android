@@ -12,7 +12,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.middleendien.middrides.MainScreen;
 import com.middleendien.middrides.R;
+import com.middleendien.middrides.SettingsScreen;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -95,6 +97,9 @@ public class SettingsFragment extends PreferenceFragment {
                                     cancelRequestPref.setEnabled(false);
 
                                     Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();
+
+                                    // MainScreen stop animation
+                                    MainScreen.cancelAnimation();
                                 } else {
                                     e.printStackTrace();
                                     Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
@@ -178,5 +183,4 @@ public class SettingsFragment extends PreferenceFragment {
             cancelRequestPref.setEnabled(false);
         }
     }
-
 }

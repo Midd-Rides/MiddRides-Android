@@ -8,21 +8,31 @@
     android:background="@color/colorPrimary"
     tools:context=".MainScreen">
 
-    <Spinner
-        android:id="@+id/pick_up_spinner"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_centerInParent="true"
-        android:background="@android:color/white"
-        android:fadingEdge="horizontal"
-        android:labelFor="@string/spinner_pick_up"
-        android:spinnerMode="dropdown" />
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/logo_with_background"
-        android:contentDescription="@string/app_logo" />
+        <Spinner
+            android:id="@+id/pick_up_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@android:color/white"
+            android:fadingEdge="horizontal"
+            android:labelFor="@string/spinner_pick_up"
+            android:spinnerMode="dropdown" />
+
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/main_screen_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/pick_up_spinner"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimary"
+            android:src="@drawable/logo_with_background"
+            android:visibility="visible"
+            android:contentDescription="@string/app_logo" />
+
+    </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

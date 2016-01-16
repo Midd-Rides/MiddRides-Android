@@ -32,11 +32,11 @@
             android:background="@color/colorWhite">
 
             <AutoCompleteTextView
-                android:id="@+id/usernameBox"
+                android:id="@+id/login_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:inputType="textEmailAddress"
                 android:hint="@string/text_hint_email"/>
 
@@ -49,11 +49,11 @@
             android:layout_marginTop="10dp">
 
             <EditText
-                android:id="@+id/passwdBox"
+                android:id="@+id/login_passwd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:inputType="textPassword"
                 android:hint="@string/text_hint_passwd"/>
 
@@ -72,7 +72,7 @@
         android:id="@+id/relativeLayout">
 
         <Button
-            android:id="@+id/login_button"
+            android:id="@+id/login_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/login_button"
@@ -82,7 +82,7 @@
             style="?android:attr/borderlessButtonStyle"/>
 
         <Button
-            android:id="@+id/register_button"
+            android:id="@+id/login_register"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/register_button"

@@ -43,6 +43,7 @@
     <string name="wrong_email">Incorrect Email Format</string>
     <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
     <string name="pending_request_error">You can only make one request at a time</string>
+    <string name="passwd_not_match">Your passwords don\'t match</string>
 
     <string name="connection_fail">Connection Failed</string>
     <string name="account_linked">Account Already Linked</string>
@@ -123,6 +124,7 @@
     <!--TextViews-->
     <string name="text_hint_email">Email</string>
     <string name="text_hint_passwd">Password</string>
+    <string name="text_hint_passwd_confirm">Confirm Password</string>
 
     <!--Toast-->
     <string name="already_verified">E-mail Already Verified</string>

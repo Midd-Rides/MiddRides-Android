@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -91,11 +90,11 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void initView() {
-        btnLogIn = (Button) findViewById(R.id.login_button);
-        btnRegister = (Button) findViewById(R.id.register_button);
+        btnLogIn = (Button) findViewById(R.id.login_login);
+        btnRegister = (Button) findViewById(R.id.login_register);
 
-        usernameBox = (AutoCompleteTextView) findViewById(R.id.usernameBox);
-        passwdBox = (EditText) findViewById(R.id.passwdBox);
+        usernameBox = (AutoCompleteTextView) findViewById(R.id.login_email);
+        passwdBox = (EditText) findViewById(R.id.login_passwd);
     }
 
     private void initEvent() {

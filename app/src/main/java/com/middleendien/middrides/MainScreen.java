@@ -23,7 +23,6 @@ package com.middleendien.middrides;
 //                    Buddha Keeps Bugs Away                      //
 ////////////////////////////////////////////////////////////////////
 
-import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
@@ -31,6 +30,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -43,6 +43,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -54,10 +55,11 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
-import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import pl.droidsonroids.gif.GifImageView;
 
 public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
 
@@ -86,13 +88,15 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     // for double click exit
     private long backFirstPressed;
 
-    // I only do this nasty thing because the dialog was not made with an id attached to it
-    private int locationDialogFragmentId;
     private int serverVersion;
 
     // location spinners
     private Spinner pickUpSpinner;
     private Location selectedLocation;
+
+    private static GifImageView mainImage;
+    private static Handler handler;
+    private static Runnable runnable;
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -123,7 +127,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     }
 
     private void initData() {
-        locationList = new ArrayList<Location>();
+        locationList = new ArrayList<>();
 
         synchronizer = Synchronizer.getInstance(this);
         synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
@@ -169,6 +173,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 }
             }
         });
+
+        mainImage = (GifImageView) findViewById(R.id.main_screen_image);
     }
 
     private void initEvent() {
@@ -204,6 +210,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     public void onClick(DialogInterface dialog, int which) {
                         // perform request
                         onLocationSelected(selectedLocation);
+                        showAnimation();
                     }
                 })
                 .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
@@ -213,6 +220,30 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     }
                 })
                 .create().show();
+    }
+
+    public static void cancelAnimation() {
+        handler.removeCallbacks(runnable);
+        mainImage.setImageResource(R.drawable.logo_with_background);
+    }
+
+    private static void showAnimation() {
+        mainImage.setImageResource(R.drawable.animation_gif);
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mainImage.setImageResource(R.drawable.animation_gif);
+                } catch (Exception e) {
+                    mainImage.setImageResource(R.drawable.animation_gif);
+                } finally {
+                    handler.postDelayed(this, 4000);
+                }
+            }
+        };
+        handler.postDelayed(runnable, 4000);
     }
 
     @Override
