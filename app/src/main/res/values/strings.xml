@@ -3,6 +3,8 @@
     <string name="title_activity_login_page">Log In</string>
     <string name="title_activity_register_page">Register</string>
     <string name="title_activity_main_page">MiddRides</string>
+    <string name="title_activity_main_select_pickup_location">Select your pick up location</string>
+    <string name="title_activity_main_van_on_way">Your van is on its way</string>
     
     <!--Action Bars & SnackBar-->
     <string name="action_settings">Settings</string>

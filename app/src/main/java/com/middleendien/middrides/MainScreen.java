@@ -84,6 +84,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private static final int LOGIN_CANCEL_RESULT_CODE                       = 0x301;
 
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
+    private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
 
     // for double click exit
     private long backFirstPressed;
@@ -94,9 +95,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private Spinner pickUpSpinner;
     private Location selectedLocation;
 
-    private static GifImageView mainImage;
-    private static Handler handler;
-    private static Runnable runnable;
+    private GifImageView mainImage;
+    private Handler handler;
+    private Runnable runnable;
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -158,7 +159,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 if (ParseUser.getCurrentUser() == null) {                   // not logged in
                     Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
-                    return;             // do nothing
+                    return;                     // do nothing
                 } else {
                     Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -168,19 +169,31 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
                     Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
-                } else { //initialize Location Dialog
+                } else {                        //initialize Location Dialog
                     showRequestDialog();
                 }
             }
         });
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
+
+        // check if there is request pending
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
+            mainImage.setImageResource(R.drawable.animation_gif);
+            setTitle(getString(R.string.title_activity_main_van_on_way));
+            pickUpSpinner.setEnabled(false);
+        } else {                                                          // no
+            mainImage.setImageResource(R.drawable.logo_with_background);
+            setTitle(getString(R.string.title_activity_main_select_pickup_location));
+            pickUpSpinner.setEnabled(true);
+        }
     }
 
     private void initEvent() {
         backFirstPressed = System.currentTimeMillis() - 2000;
 
-        spinnerAdapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_activated_1, locationList);
+        spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, locationList);
 
         pickUpSpinner.setAdapter(spinnerAdapter);
 
@@ -210,6 +223,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     public void onClick(DialogInterface dialog, int which) {
                         // perform request
                         onLocationSelected(selectedLocation);
+                        setTitle(getString(R.string.title_activity_main_van_on_way));
                         showAnimation();
                     }
                 })
@@ -222,13 +236,18 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 .create().show();
     }
 
-    public static void cancelAnimation() {
-        handler.removeCallbacks(runnable);
+    public void cancelAnimation() {
+        if (runnable != null)
+            handler.removeCallbacks(runnable);
+        pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
     }
 
-    private static void showAnimation() {
+    private void showAnimation() {
         mainImage.setImageResource(R.drawable.animation_gif);
+
+        // disable spinner
+        pickUpSpinner.setEnabled(false);
 
         handler = new Handler();
         runnable = new Runnable() {
@@ -389,15 +408,22 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
-                    // TODO: to login screen
                     Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
                     startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
+                }
+                if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
+                    setTitle(getString(R.string.title_activity_main_select_pickup_location));
+                    cancelAnimation();
                 }
             case LOGIN_REQUEST_CODE:
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
                     finish();
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
+                }
+
+                if (ParseUser.getCurrentUser() != null) {
+                    // TODO: check for pending request
                 }
         }
 

@@ -36,6 +36,7 @@ public class SettingsFragment extends PreferenceFragment {
 
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
+    private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,16 +97,16 @@ public class SettingsFragment extends PreferenceFragment {
 
                                     cancelRequestPref.setEnabled(false);
 
-                                    Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();
+                                    getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
 
-                                    // MainScreen stop animation
-                                    MainScreen.cancelAnimation();
+                                    Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();
                                 } else {
                                     e.printStackTrace();
                                     Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
+
                 return true;
             }
         });
@@ -119,15 +120,11 @@ public class SettingsFragment extends PreferenceFragment {
                         .setPositiveButton(R.string.dialog_btn_yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                // TODO: cancel request, and move below code to callback
                                 ParseUser.logOut();
                                 ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-                                installation.put("user","0");
+                                installation.put("user", "0");
                                 installation.saveInBackground();
-
-//                                Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
-//                                toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                startActivity(toLoginScreen);
-//                                getActivity().finish();
                                 getActivity().setResult(USER_LOGOUT_RESULT_CODE);
                                 getActivity().finish();
                             }

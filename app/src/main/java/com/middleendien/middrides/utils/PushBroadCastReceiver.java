@@ -34,7 +34,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     boolean isLoggedIn;
     boolean requestPending;
-    String pickUpLoaction;
+    String pickUpLocation;
     String arrivingLocation;
 
     Notification notification = null;
@@ -61,10 +61,10 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         isLoggedIn = ParseUser.getCurrentUser() != null;
         requestPending = sharedPreferences.getBoolean(context.getString(R.string.parse_user_pending_request), false);
-        pickUpLoaction = sharedPreferences.getString(context.getString(R.string.parse_request_pickup_location), "Nowhere");
+        pickUpLocation = sharedPreferences.getString(context.getString(R.string.parse_request_pickup_location), "Nowhere");
 
         if (isLoggedIn && requestPending
-                && pickUpLoaction.equals(arrivingLocation)) {
+                && pickUpLocation.equals(arrivingLocation)) {
             Intent toMainScreen = new Intent(context, MainScreen.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntent(toMainScreen);
