@@ -85,17 +85,20 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
                     .build();
             notification.defaults |= Notification.DEFAULT_VIBRATE;
             notification.defaults |= Notification.DEFAULT_LIGHTS;
-            if (Build.VERSION.SDK_INT >= 21)
-                notification.defaults |= Notification.VISIBILITY_PUBLIC;
+            notification.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
+            if (Build.VERSION.SDK_INT >= 21) {
+                notification.defaults |= Notification.VISIBILITY_PUBLIC;
+                notification.category = Notification.CATEGORY_ALARM;
+            }
             // show notification
             NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(NOTIFICATION_ID, notification);
 
-            // play sound, whatever type
-            Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            ringtone = RingtoneManager.getRingtone(context, notificationUri);
-            ringtone.play();
+//            // play sound, whatever type
+//            Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+//            ringtone = RingtoneManager.getRingtone(context, notificationUri);
+//            ringtone.play();
         } else {
             Log.d("PushReceiver", "Van not for me");
             notification = null;

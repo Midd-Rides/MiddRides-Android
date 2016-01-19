@@ -392,7 +392,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 break;
         }
 
-        Log.d("MainScreen", (locationList == null) + "");
+        Log.d("MainScreen", "locationList is null: " + (locationList == null) + "");
         Log.d("MainScreen", "Adapter Count " + spinnerAdapter.getCount() + "");
     }
 
