@@ -61,6 +61,7 @@
 
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>
+    <string name="i_got_it">Got it!</string>
 
     <!--Others-->
     <string name="email_not_verified">Email Not Verified</string>
@@ -80,6 +81,7 @@
     <string name="parse_request_user_id">userId</string>
     <string name="parse_request_user_email">email</string>
     <string name="parse_request_pickup_location">pickUpLocation</string>
+    <string name="parse_request_arriving_location">arrivalLocation</string>
     <string name="parse_request_dst_location">dstLocation</string>
     <string name="parse_request_request_id">requestId</string>
 
@@ -112,6 +114,7 @@
     <string name="pref_verfied">Email Verified</string>
     <string name="pref_not_verifed">Email Not Verified</string>
     <string name="pref_screen_announcements">Announcements</string>
+    <string name="pref_request_spinner_position">spinnerPosition</string>
 
     <!--Spinners-->
     <string name="spinner_pick_up">Pick Up Location</string>

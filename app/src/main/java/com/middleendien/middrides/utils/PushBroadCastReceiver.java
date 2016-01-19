@@ -11,6 +11,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -38,6 +42,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
     String arrivingLocation;
 
     Notification notification = null;
+    Ringtone ringtone = null;
 
     private static final int NOTIFICATION_ID = 0x026;
 
@@ -66,6 +71,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
         if (isLoggedIn && requestPending
                 && pickUpLocation.equals(arrivingLocation)) {
             Intent toMainScreen = new Intent(context, MainScreen.class);
+            toMainScreen.putExtra(context.getString(R.string.parse_request_arriving_location), arrivingLocation);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntent(toMainScreen);
             PendingIntent resultPendingIntent =
@@ -77,8 +83,19 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
                     .setSmallIcon(R.drawable.ic_notification)
                     .setContentIntent(resultPendingIntent)
                     .build();
+            notification.defaults |= Notification.DEFAULT_VIBRATE;
+            notification.defaults |= Notification.DEFAULT_LIGHTS;
+            if (Build.VERSION.SDK_INT >= 21)
+                notification.defaults |= Notification.VISIBILITY_PUBLIC;
+
+            // show notification
             NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(NOTIFICATION_ID, notification);
+
+            // play sound, whatever type
+            Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            ringtone = RingtoneManager.getRingtone(context, notificationUri);
+            ringtone.play();
         } else {
             Log.d("PushReceiver", "Van not for me");
             notification = null;
@@ -87,6 +104,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     @Override
     protected void onPushOpen(Context context, Intent intent) {
+        ringtone.stop();
         super.onPushOpen(context, intent);
     }
 

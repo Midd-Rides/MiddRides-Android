@@ -34,7 +34,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -59,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import pl.droidsonroids.gif.GifImageView;
 
 public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
@@ -114,6 +114,18 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
         }
 
+        if (getIntent().getExtras() != null) {
+            try {
+                String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
+                showVanComingDialog(arrivingAt);
+                Log.d("PushNotification", "Coming to " + arrivingAt);
+            } catch (Exception e) {
+                // forget it
+            }
+        } else {
+            Log.d("PushNotification", "Not from push");
+        }
+
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
 
@@ -148,8 +160,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private void initView() {
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
 
-        pickUpSpinner.setPrompt(getString(R.string.spinner_pick_up));
-
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
 
@@ -180,13 +190,12 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         // check if there is request pending
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
-            mainImage.setImageResource(R.drawable.animation_gif);
+            showAnimation();
             setTitle(getString(R.string.title_activity_main_van_on_way));
-            pickUpSpinner.setEnabled(false);
         } else {                                                          // no
+            cancelAnimation();
             mainImage.setImageResource(R.drawable.logo_with_background);
             setTitle(getString(R.string.title_activity_main_select_pickup_location));
-            pickUpSpinner.setEnabled(true);
         }
     }
 
@@ -201,8 +210,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedLocation = (Location) spinnerAdapter.getItem(position);
-
-                Log.d("Origin Spinner", position + "");
+                Log.d("PickupSpinner", position + "");
             }
 
             @Override
@@ -214,7 +222,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         spinnerAdapter.notifyDataSetChanged();
     }
 
-    private void showRequestDialog(){
+    private void showRequestDialog() {
         new Builder(this)
                 .setTitle(getString(R.string.dialog_title_request_confirm))
                 .setMessage(getString(R.string.dialog_request_msg) + " " + selectedLocation.getName() + "?")
@@ -224,6 +232,12 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         // perform request
                         onLocationSelected(selectedLocation);
                         setTitle(getString(R.string.title_activity_main_van_on_way));
+
+                        // for spinner position when re-entering
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
+                        editor.putInt(getString(R.string.pref_request_spinner_position), pickUpSpinner.getSelectedItemPosition())
+                                .apply();
+
                         showAnimation();
                     }
                 })
@@ -236,19 +250,33 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 .create().show();
     }
 
+    private void showVanComingDialog(String arrivingLocatoin) {
+        final SweetAlertDialog dialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
+        dialog.setTitleText(getString(R.string.van_is_coming) + " " + arrivingLocatoin);
+        dialog.setConfirmText(getString(R.string.i_got_it));
+        dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                dialog.dismissWithAnimation();
+            }
+        });
+
+
+        dialog.show();
+    }
+
     public void cancelAnimation() {
         if (runnable != null)
             handler.removeCallbacks(runnable);
+        // enable spinner
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
     }
 
     private void showAnimation() {
         mainImage.setImageResource(R.drawable.animation_gif);
-
         // disable spinner
         pickUpSpinner.setEnabled(false);
-
         handler = new Handler();
         runnable = new Runnable() {
             @Override
@@ -353,6 +381,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                                 obj.getObjectId()));
                     }
                     spinnerAdapter.notifyDataSetChanged();
+
+                    // if has pending request, set spinner position accordingly
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                    if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false))
+                        pickUpSpinner.setSelection(sharedPreferences.getInt(getString(R.string.pref_request_spinner_position), 0), true);
                 } else {
                     synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
                 }
