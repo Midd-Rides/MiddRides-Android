@@ -23,12 +23,15 @@ package com.middleendien.middrides;
 //                    Buddha Keeps Bugs Away                      //
 ////////////////////////////////////////////////////////////////////
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog.Builder;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -54,11 +57,13 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
 public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
@@ -265,16 +270,27 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         dialog.show();
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void cancelAnimation() {
         if (runnable != null)
             handler.removeCallbacks(runnable);
         // enable spinner
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
+        mainImage.setBackground(null);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void showAnimation() {
-        mainImage.setImageResource(R.drawable.animation_gif);
+        try {
+            GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
+            mainImage.setBackground(newDrawable);
+            mainImage.setImageResource(0);
+            newDrawable.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // disable spinner
         pickUpSpinner.setEnabled(false);
         handler = new Handler();
@@ -282,9 +298,24 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void run() {
                 try {
-                    mainImage.setImageResource(R.drawable.animation_gif);
+//                    mainImage.setImageResource(R.drawable.animation_gif);
+                    try {
+                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
+                        mainImage.setBackground(newDrawable);
+                        mainImage.setImageResource(0);
+                        newDrawable.start();
+                    } catch (IOException err1) {
+                        err1.printStackTrace();
+                    }
                 } catch (Exception e) {
-                    mainImage.setImageResource(R.drawable.animation_gif);
+                    try {
+                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
+                        mainImage.setBackground(newDrawable);
+                        mainImage.setImageResource(0);
+                        newDrawable.start();
+                    } catch (IOException err2) {
+                        err2.printStackTrace();
+                    }
                 } finally {
                     handler.postDelayed(this, 4000);
                 }

@@ -10,7 +10,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="50dp">
 
         <Spinner
             android:id="@+id/pick_up_spinner"
@@ -24,9 +25,8 @@
         <pl.droidsonroids.gif.GifImageView
             android:id="@+id/main_screen_image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/pick_up_spinner"
-            android:adjustViewBounds="true"
             android:background="@color/colorPrimary"
             android:src="@drawable/logo_with_background"
             android:visibility="visible"
