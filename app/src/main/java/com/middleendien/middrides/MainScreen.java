@@ -238,7 +238,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     @Override
                     public void onClick(SweetAlertDialog sweetAlertDialog) {
                         // perform request
-                        onLocationSelected(selectedLocation);
+                        makeRequest(selectedLocation);
                         setTitle(getString(R.string.title_activity_main_van_on_way));
 
                         // for spinner position when re-entering
@@ -448,7 +448,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         // do nothing
     }
 
-    public void onLocationSelected(Location locationSelected) {
+    public void makeRequest(final Location locationSelected) {
 
         Log.i("RequestMade", locationSelected.toString());
 
@@ -476,6 +476,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     setPendingRequestUser.put(getString(R.string.parse_user_pending_request), true);
                     setPendingRequestUser.put(getString(R.string.parse_request_request_id), parseUserRequest.getObjectId());
                     setPendingRequestUser.saveInBackground();
+                    synchronizer.incrementFieldBy(getString(R.string.parse_class_locaton), locationSelected.getLocationId(), 1);
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
@@ -562,6 +563,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             checkEmailHandler.postDelayed(checkEmailRunnable, 1000);           // check every minute
             // for testing purpose, we can change the 30000's here to 1000's just to see
         }
+
+        // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
 
         super.onResume();
     }

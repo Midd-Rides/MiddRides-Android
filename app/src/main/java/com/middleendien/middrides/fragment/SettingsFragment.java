@@ -34,8 +34,6 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference resetPasswdPref;
     private Preference veriStatusPref;
 
-    private PreferenceCategory userPrefCat;
-
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
     private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
@@ -68,7 +66,7 @@ public class SettingsFragment extends PreferenceFragment {
             veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
         }
 
-        userPrefCat             = (PreferenceCategory) findPreference(getString(R.string.cat_user));
+        PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
         userPrefCat.setTitle("User - " + ParseUser.getCurrentUser().getEmail());
     }
 
@@ -102,6 +100,11 @@ public class SettingsFragment extends PreferenceFragment {
                                     editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
 
                                     cancelRequestPref.setEnabled(false);
+
+                                    Synchronizer.getInstance(getActivity()).incrementFieldBy(
+                                            getString(R.string.parse_class_locaton),
+                                            requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
+                                            -1);
 
                                     getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
 

@@ -100,6 +100,7 @@
     <string name="parse_location_name">name</string>
     <string name="parse_location_lat">lat</string>
     <string name="parse_location_lng">lng</string>
+    <string name="parse_location_passengers_waiting">passengersWaiting</string>
 
     <string name="parse_installation_email">email</string>
 

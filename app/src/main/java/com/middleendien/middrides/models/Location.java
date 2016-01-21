@@ -17,6 +17,7 @@ public class Location implements Serializable{
     private double latitude;
     private double longitude;
     private String locationID;
+    private int passengersWaiting;
 
 
     public Location() {
@@ -35,14 +36,17 @@ public class Location implements Serializable{
         this.name = name;
         this.latitude =  latitude;
         this.longitude = longitude;
+        passengersWaiting = 0;
     }
 
-    public Location(String name, double latitude, double longitude, String locationID ){
+    public Location(String name, double latitude, double longitude, String locationID){
         this.name = name;
         this.latitude =  latitude;
         this.longitude = longitude;
 
         this.locationID = locationID;
+
+        passengersWaiting = 0;
     }
 
     public double getLatitude() {
@@ -67,6 +71,14 @@ public class Location implements Serializable{
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public void setPassengersWaiting(int value) {
+        this.passengersWaiting = value;
+    }
+
+    public int getPassengersWaiting() {
+        return passengersWaiting;
     }
 
     public String toString(){
