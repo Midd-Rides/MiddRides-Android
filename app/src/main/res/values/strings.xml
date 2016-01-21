@@ -30,9 +30,11 @@
     <string name="dialog_msg_are_you_sure">Are you sure?</string>
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_cancel">Cancel</string>
+    <string name="dialog_btn_dismiss">Dismiss</string>
     <string name="dialog_logging_in">Signing In…</string>
     <string name="dialog_registering">Registering…</string>
     <string name="dialog_title_request_confirm">Request Confirmation</string>
+    <string name="dialog_title_request_success">Request Success</string>
     <string name="dialog_request_msg">Pick up at</string>
 
     <!--Intent Bundle keys-->
@@ -137,7 +139,7 @@
     <string name="reset_email_sent">Reset Password Email Sent</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="version_not_updated">Your local data might not be up to date</string>
-    <string name="request_cancelled">Your current request has been cancelled</string>
+    <string name="request_cancelled">Request Cancelled</string>
     <string name="permission_internet_denied">MiddRides needs Internet access to log in and send requests</string>
     <string name="parse_request_locationID">locationId</string>
 

@@ -228,12 +228,14 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     }
 
     private void showRequestDialog() {
-        new Builder(this)
-                .setTitle(getString(R.string.dialog_title_request_confirm))
-                .setMessage(getString(R.string.dialog_request_msg) + " " + selectedLocation.getName() + "?")
-                .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
+        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_request_confirm))
+                .setContentText(getString(R.string.dialog_request_msg) + " " + selectedLocation.getName() + "?")
+                .setConfirmText(getString(R.string.dialog_btn_yes))
+                .setCancelText(getString(R.string.dialog_btn_cancel))
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
                         // perform request
                         onLocationSelected(selectedLocation);
                         setTitle(getString(R.string.title_activity_main_van_on_way));
@@ -243,16 +245,21 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         editor.putInt(getString(R.string.pref_request_spinner_position), pickUpSpinner.getSelectedItemPosition())
                                 .apply();
 
-                        showAnimation();
+                        // change alert type
+                        sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                        sweetAlertDialog.setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                .setTitleText(getString(R.string.dialog_title_request_success))
+                                .showContentText(false)
+                                .showCancelButton(false)
+                                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                    @Override
+                                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                        showAnimation();
+                                        sweetAlertDialog.dismissWithAnimation();
+                                    }
+                                });
                     }
-                })
-                .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // sorry to see you go punk
-                    }
-                })
-                .create().show();
+                }).show();
     }
 
     private void showVanComingDialog(String arrivingLocatoin) {
@@ -434,7 +441,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     public void onLocationSelected(Location locationSelected) {
 
-        Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
+        Log.i("RequestMade", locationSelected.toString());
 
         final ParseObject parseUserRequest = new ParseObject(getString(R.string.parse_class_request));
         parseUserRequest.put(getString(R.string.parse_request_request_time), new Date());                       // time
@@ -462,6 +469,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     setPendingRequestUser.saveInBackground();
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
                 }
             }
         });

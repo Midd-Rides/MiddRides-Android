@@ -23,6 +23,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 import static android.preference.Preference.*;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -99,7 +101,12 @@ public class SettingsFragment extends PreferenceFragment {
 
                                     getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
 
-                                    Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();
+                                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                                            .setTitleText(getString(R.string.request_cancelled))
+                                            .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                            .show();
+
+                                    Log.i("SettingsFragment", "Request Cancelled");
                                 } else {
                                     e.printStackTrace();
                                     Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
@@ -115,12 +122,14 @@ public class SettingsFragment extends PreferenceFragment {
         logOutPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(getString(R.string.dialog_msg_are_you_sure))
-                        .setPositiveButton(R.string.dialog_btn_yes, new DialogInterface.OnClickListener() {
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+                        .setConfirmText(getString(R.string.dialog_btn_yes))
+                        .setCancelText(getString(R.string.dialog_btn_cancel))
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // TODO: cancel request, and move below code to callback
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                // TODO: check for cancel request
                                 ParseUser.logOut();
                                 ParseInstallation installation = ParseInstallation.getCurrentInstallation();
                                 installation.put("user", "0");
@@ -128,10 +137,7 @@ public class SettingsFragment extends PreferenceFragment {
                                 getActivity().setResult(USER_LOGOUT_RESULT_CODE);
                                 getActivity().finish();
                             }
-                        })
-                        .setNegativeButton(R.string.dialog_btn_cancel, null)
-                        .create()
-                        .show();
+                        }).show();
 
                 return false;
             }
@@ -140,19 +146,19 @@ public class SettingsFragment extends PreferenceFragment {
         resetPasswdPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(getString(R.string.dialog_msg_are_you_sure))
-                        .setPositiveButton(R.string.dialog_btn_yes, new DialogInterface.OnClickListener() {
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+                        .setConfirmText(getString(R.string.dialog_btn_yes))
+                        .setCancelText(getString(R.string.dialog_btn_cancel))
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
                                 Synchronizer.getInstance(getActivity()).resetPassword(ParseUser.getCurrentUser().getEmail(),
                                         USER_RESET_PASSWORD_REQUEST_CODE);
                                 Log.i("SettingsFragment", "Reset Password");
                             }
-                        })
-                        .setNegativeButton(R.string.dialog_btn_cancel, null)
-                        .create()
-                        .show();
+                        }).show();
+
                 return false;
             }
         });
@@ -162,7 +168,11 @@ public class SettingsFragment extends PreferenceFragment {
             public boolean onPreferenceClick(Preference preference) {
                 if (!ParseUser.getCurrentUser().isAuthenticated()) {            // email not verified
                     ParseUser.getCurrentUser().saveInBackground();
-                    Toast.makeText(getActivity(), getString(R.string.resent_email), Toast.LENGTH_SHORT).show();
+                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                            .setTitleText(getString(R.string.resent_email))
+                            .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                            .show();
+                    Log.i("SettingsFragment", "Re-sent Email Verification");
                 }
                 return false;
             }
