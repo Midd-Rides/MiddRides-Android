@@ -1,8 +1,6 @@
 package com.middleendien.middrides.fragment;
 
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -12,9 +10,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.middleendien.middrides.MainScreen;
 import com.middleendien.middrides.R;
-import com.middleendien.middrides.SettingsScreen;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -34,7 +30,9 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference resetPasswdPref;
     private Preference veriStatusPref;
 
+    private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
+
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
     private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
 
@@ -101,10 +99,11 @@ public class SettingsFragment extends PreferenceFragment {
 
                                     cancelRequestPref.setEnabled(false);
 
-                                    Synchronizer.getInstance(getActivity()).incrementFieldBy(
-                                            getString(R.string.parse_class_locaton),
+                                    Synchronizer.getInstance(getActivity()).getObject(
+                                            null,
                                             requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
-                                            -1);
+                                            getString(R.string.parse_class_location),
+                                            INCREMENT_FIELD_REQUEST_CODE);
 
                                     getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
 

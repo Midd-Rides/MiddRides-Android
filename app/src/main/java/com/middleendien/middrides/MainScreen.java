@@ -75,6 +75,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private static final int LOCATION_GET_LASTEST_VERSION_REQUEST_CODE      = 0x003;
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
+    private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
 
     private static final int NOTIFICATION_ID                                = 0x026;
 
@@ -144,7 +145,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         locationList = new ArrayList<>();
 
         synchronizer = Synchronizer.getInstance(this);
-        synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+        synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
         /**
          * Deal with everything in callback
@@ -363,7 +364,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     }
 
     private void updateLocations() {
-        synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+        synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
         if (spinnerAdapter != null)
             spinnerAdapter.notifyDataSetChanged();
         Log.d("updateLocations()", "Called");
@@ -395,6 +396,15 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 }
                 break;
 
+            case INCREMENT_FIELD_REQUEST_CODE:
+                // this step seems redundant but I don't know how to make it shorter
+                String pointer = object.getParseObject(getString(R.string.parse_location_status)).getObjectId();
+                synchronizer.incrementFieldBy(
+                        getString(R.string.parse_class_locationstatus),
+                        pointer,
+                        getString(R.string.parse_locationstatus_passengers_waiting),
+                        sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false) ? 1 : -1
+                );
         }
     }
 
@@ -408,7 +418,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
 
-                synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+                synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
                 editor.putInt(getString(R.string.parse_status_location_version), serverVersion)         // should be initialised by now
@@ -425,7 +435,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                                 obj.getDouble(getString(R.string.parse_location_lat)),
                                 obj.getDouble(getString(R.string.parse_location_lng)),
-                                obj.getObjectId()));
+                                obj.getObjectId(),
+                                obj.getString(getString(R.string.parse_location_status))));
                     }
                     spinnerAdapter.notifyDataSetChanged();
 
@@ -434,7 +445,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false))
                         pickUpSpinner.setSelection(sharedPreferences.getInt(getString(R.string.request_spinner_position), 0), true);
                 } else {
-                    synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+                    synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
                 }
                 break;
         }
@@ -476,7 +487,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     setPendingRequestUser.put(getString(R.string.parse_user_pending_request), true);
                     setPendingRequestUser.put(getString(R.string.parse_request_request_id), parseUserRequest.getObjectId());
                     setPendingRequestUser.saveInBackground();
-                    synchronizer.incrementFieldBy(getString(R.string.parse_class_locaton), locationSelected.getLocationId(), 1);
+                    synchronizer.getObject(
+                            null,
+                            locationSelected.getLocationId(),
+                            getString(R.string.parse_class_location),
+                            INCREMENT_FIELD_REQUEST_CODE);
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     e.printStackTrace();

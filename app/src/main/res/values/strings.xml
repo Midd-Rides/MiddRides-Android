@@ -75,7 +75,8 @@
     <!--Parse Classes-->
     <string name="parse_class_status">Status</string>
     <string name="parse_class_request">UserRequest</string>
-    <string name="parse_class_locaton">Location</string>
+    <string name="parse_class_location">Location</string>
+    <string name="parse_class_locationstatus">LocationStatus</string>
     <string name="parse_class_user">User</string>
 
     <!--Parse Objects-->
@@ -100,7 +101,10 @@
     <string name="parse_location_name">name</string>
     <string name="parse_location_lat">lat</string>
     <string name="parse_location_lng">lng</string>
-    <string name="parse_location_passengers_waiting">passengersWaiting</string>
+    <string name="parse_location_status">status</string>
+
+    <string name="parse_locationstatus_name">name</string>
+    <string name="parse_locationstatus_passengers_waiting">passengersWaiting</string>
 
     <string name="parse_installation_email">email</string>
 
