@@ -1,7 +1,6 @@
 package com.middleendien.middrides;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -31,6 +30,8 @@ import com.middleendien.middrides.utils.LoginAgent.OnLoginListener;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 /**
  * A login screen that offers login via email/password.
  *
@@ -47,14 +48,14 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
     private static final int REGISTER_REQUEST_CODE = 0x001;
 
-    private static final int REGISTER_SUCCESS_CODE = 0x101;
-    private static final int REGISTER_FAILURE_CODE = 0x102;
+    private static final int REGISTER_SUCCESS_RESULT_CODE = 0x101;
+//    private static final int REGISTER_FAILURE_RESULT_CODE = 0x102;
 
     private static final int LOGIN_CANCEL_RESULT_CODE = 0x301;
 
     private static final int PERMISSION_INTERNET_REQUEST_CODE = 0x201;
 
-    private ProgressDialog progressDialog;
+    private SweetAlertDialog progressDialog;
 
     private LoginAgent loginAgent;
     @Override
@@ -85,7 +86,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void initData() {
-        loginAgent = LoginAgent.getInstance();
+        loginAgent = LoginAgent.getInstance(this);
         loginAgent.registerListener(LoginAgent.LOGIN, this);
     }
 
@@ -168,14 +169,15 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
     private void setDialogShowing(boolean showing) {
         if (showing) {
-            progressDialog = new ProgressDialog(LoginScreen.this);
-            progressDialog.setMessage(getString(R.string.dialog_logging_in));
-            progressDialog.setIndeterminate(true);
+            progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+                    .setTitleText(getString(R.string.dialog_logging_in));
             progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.showCancelButton(false);
+            progressDialog.getProgressHelper().setBarColor(ContextCompat.getColor(this, R.color.colorAccent));
             progressDialog.show();
         } else {
             if (progressDialog.isShowing())
-                progressDialog.dismiss();
+                progressDialog.dismissWithAnimation();
         }
     }
 
@@ -183,7 +185,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case REGISTER_REQUEST_CODE:
-                if(resultCode == REGISTER_SUCCESS_CODE){
+                if(resultCode == REGISTER_SUCCESS_RESULT_CODE){
                     Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
                     startActivity(toMainScreen);
                     finish();
@@ -197,8 +199,12 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        try {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        } catch (Exception e) {
+            // so you have a keyboard, so what?
+        }
     }
 
     private void requestPermission(String permission, int requestCode) {

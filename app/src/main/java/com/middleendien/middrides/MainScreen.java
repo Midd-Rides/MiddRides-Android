@@ -24,13 +24,9 @@ package com.middleendien.middrides;
 ////////////////////////////////////////////////////////////////////
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog.Builder;
 import android.app.NotificationManager;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,7 +41,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -101,8 +96,12 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private Location selectedLocation;
 
     private GifImageView mainImage;
-    private Handler handler;
-    private Runnable runnable;
+    private Handler animationHandler;
+    private Runnable animationRunnable;
+
+    // to periodically check email verification status
+    private Handler checkEmailHandler;
+    private Runnable checkEmailRunnable;
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -133,9 +132,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
-
-
-        //TODO: check all status: e-mail verified and so on
 
         initData();
 
@@ -168,28 +164,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
 
-        callService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ParseUser.getCurrentUser() == null) {                   // not logged in
-                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    return;                     // do nothing
-                } else {
-                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-
-                //If user has already requested the van
-                if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
-                } else {                        //initialize Location Dialog
-                    showRequestDialog();
-                }
-            }
-        });
-
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
 
         // check if there is request pending
@@ -215,7 +189,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedLocation = (Location) spinnerAdapter.getItem(position);
-                Log.d("PickupSpinner", position + "");
+                Log.d("PickupSpinner", "Selected: " + position + "");
             }
 
             @Override
@@ -225,12 +199,39 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         });
 
         spinnerAdapter.notifyDataSetChanged();
+
+        callService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ParseUser.getCurrentUser() == null) {                   // not logged in
+                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;                     // do nothing
+                } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+                    Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
+                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;
+                } else {
+                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+
+                //If user has already requested the van
+                if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
+                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                } else {                        //initialize Location Dialog
+                    showRequestDialog();
+                }
+            }
+        });
     }
 
     private void showRequestDialog() {
         new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
                 .setTitleText(getString(R.string.dialog_title_request_confirm))
-                .setContentText(getString(R.string.dialog_request_msg) + " " + selectedLocation.getName() + "?")
+                .setContentText(getString(R.string.dialog_request_message) + " " + selectedLocation.getName() + "?")
                 .setConfirmText(getString(R.string.dialog_btn_yes))
                 .setCancelText(getString(R.string.dialog_btn_cancel))
                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -242,7 +243,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
                         // for spinner position when re-entering
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
-                        editor.putInt(getString(R.string.pref_request_spinner_position), pickUpSpinner.getSelectedItemPosition())
+                        editor.putInt(getString(R.string.request_spinner_position), pickUpSpinner.getSelectedItemPosition())
                                 .apply();
 
                         // change alert type
@@ -277,10 +278,18 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         dialog.show();
     }
 
+    private void showEmailVerifiedDialog() {
+        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_congrats))
+                .setContentText(getString(R.string.dialog_msg_email_verified))
+                .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                .show();
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void cancelAnimation() {
-        if (runnable != null)
-            handler.removeCallbacks(runnable);
+        if (animationRunnable != null)
+            animationHandler.removeCallbacks(animationRunnable);
         // enable spinner
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
@@ -300,8 +309,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
         // disable spinner
         pickUpSpinner.setEnabled(false);
-        handler = new Handler();
-        runnable = new Runnable() {
+        animationHandler = new Handler();
+        animationRunnable = new Runnable() {
             @Override
             public void run() {
                 try {
@@ -324,11 +333,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         err2.printStackTrace();
                     }
                 } finally {
-                    handler.postDelayed(this, 4000);
+                    animationHandler.postDelayed(this, 4000);
                 }
             }
         };
-        handler.postDelayed(runnable, 4000);
+        animationHandler.postDelayed(animationRunnable, 4000);
     }
 
     @Override
@@ -423,7 +432,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     // if has pending request, set spinner position accordingly
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
                     if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false))
-                        pickUpSpinner.setSelection(sharedPreferences.getInt(getString(R.string.pref_request_spinner_position), 0), true);
+                        pickUpSpinner.setSelection(sharedPreferences.getInt(getString(R.string.request_spinner_position), 0), true);
                 } else {
                     synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
                 }
@@ -494,9 +503,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     android.os.Process.killProcess(pid);
                 }
 
-                if (ParseUser.getCurrentUser() != null) {
-                    // TODO: check for pending request
-                }
+//                if (ParseUser.getCurrentUser() != null) {
+//                    // TODO: check for pending request
+//                }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -518,16 +527,56 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     finish();
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
-                    //TODO: do something with backstack
-                    // problem is that if someone switches between MainScreen and LoginScreen
-                    // there will be multiple copies of the activites
-                    // need to check backstack before start the intent          - Peter
                 }
         }
 
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    protected void onResume() {
+        Log.d("MainScreen", "Resume");
+
+        // if email not verified, periodically check for email verification status
+        if (ParseUser.getCurrentUser() != null && !ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+            Log.i("MainScreen", "Handler started, checking email verification status...");
+
+            checkEmailHandler = new Handler();
+
+            checkEmailRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+                        // email still not verified
+                        synchronizer.refreshObject(ParseUser.getCurrentUser());
+                        checkEmailHandler.postDelayed(this, 1000);
+                        Log.i("MainScreen", "Email still not verified " + (new Date()).toString());
+                    } else {
+                        // email verified now
+                        checkEmailHandler.removeCallbacks(this);
+                        showEmailVerifiedDialog();
+                        Log.i("MainScreen", "Finally verified email");
+                    }
+                }
+            };
+            checkEmailHandler.postDelayed(checkEmailRunnable, 1000);           // check every minute
+            // for testing purpose, we can change the 30000's here to 1000's just to see
+        }
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("MainScreen", "Pause");
+
+        if (checkEmailHandler != null) {
+            checkEmailHandler.removeCallbacks(checkEmailRunnable);
+            Log.i("MainScreen", "Handler stopped");
+        }
+
+        super.onPause();
+    }
 
 
 
@@ -550,21 +599,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     }
 
     @Override
-    protected void onResume() {
-        Log.d("MainScreen", "Resume");
-        super.onResume();
-    }
-
-    @Override
     protected void onRestart() {
         Log.d("MainScreen", "Restart");
         super.onRestart();
-    }
-
-    @Override
-    protected void onPause() {
-        Log.d("MainScreen", "Pause");
-        super.onPause();
     }
 
     @Override

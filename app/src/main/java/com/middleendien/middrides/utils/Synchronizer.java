@@ -103,6 +103,10 @@ public class Synchronizer {
         });
     }
 
+    public void refreshObject (ParseObject object) {
+        object.fetchInBackground();
+    }
+
 
 
     public interface OnSynchronizeListener {

@@ -1,13 +1,8 @@
 package com.middleendien.middrides.utils;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.util.Patterns;
-import android.widget.Toast;
 
-import com.middleendien.middrides.MainScreen;
 import com.middleendien.middrides.R;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
@@ -38,12 +33,15 @@ public class LoginAgent {
     public static final int LOGIN       = 0x021;
     public static final int REGISTER    = 0x022;
 
+    private Context context;
 
     private LoginAgent() { }
 
-    public static LoginAgent getInstance(){
+    public static LoginAgent getInstance(Context context){
         if (loginAgent == null)
             loginAgent = new LoginAgent();
+
+        loginAgent.context = context;
 
         return loginAgent;
     }
@@ -83,6 +81,7 @@ public class LoginAgent {
         parseUser.setEmail(email);
         parseUser.setUsername(email);
         parseUser.setPassword(password);
+        parseUser.put(context.getString(R.string.parse_user_is_dispatcher), false);
 
         parseUser.signUpInBackground(new SignUpCallback() {
             @Override

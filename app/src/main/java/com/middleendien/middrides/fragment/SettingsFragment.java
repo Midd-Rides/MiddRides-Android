@@ -52,13 +52,17 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private void getPrefs() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         cancelRequestPref       = findPreference(getString(R.string.pref_cancel_request));
         logOutPref              = findPreference(getString(R.string.pref_log_out));
         resetPasswdPref         = findPreference(getString(R.string.pref_reset_passwd));
         veriStatusPref          = findPreference(getString(R.string.pref_verification_status_unavailable));
 
+        // email verification
         if (ParseUser.getCurrentUser() != null) {
-            veriStatusPref.setTitle(ParseUser.getCurrentUser().isAuthenticated() ?
+            // default true
+            veriStatusPref.setTitle(ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)) ?
                     getString(R.string.pref_verfied) : getString(R.string.pref_not_verifed));
         } else {
             veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
@@ -166,11 +170,11 @@ public class SettingsFragment extends PreferenceFragment {
         veriStatusPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                if (!ParseUser.getCurrentUser().isAuthenticated()) {            // email not verified
+                if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {    // email not verified
                     ParseUser.getCurrentUser().saveInBackground();
                     new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
                             .setTitleText(getString(R.string.resent_email))
-                            .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                            .setConfirmText(getString(R.string.dialog_btn_got_it))
                             .show();
                     Log.i("SettingsFragment", "Re-sent Email Verification");
                 }
