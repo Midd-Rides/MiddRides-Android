@@ -47,6 +47,8 @@ import android.widget.Toast;
 import com.middleendien.middrides.models.Location;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
+import com.parse.LogOutCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -492,6 +494,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                             getString(R.string.parse_class_location),
                             INCREMENT_FIELD_REQUEST_CODE);
                 } else {
+                    cancelAnimation();
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
@@ -501,22 +504,28 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("MainScreen", "ActivityResultCode: 0x" + Integer.toHexString(resultCode).toUpperCase());
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
+                Log.d("MainScreen", "Entering from SettingsScreen, LoggedIn: " + (ParseUser.getCurrentUser() != null));
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
+                    cancelAnimation();
+                    Log.d("MainScreen", "Logged out, user is null: " + (ParseUser.getCurrentUser() == null));
                     Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
                     startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
-                }
-                if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
+                } else if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
                 }
+                return;
             case LOGIN_REQUEST_CODE:
+                Log.d("MainScreen", "Entering from LoginScreen, LoggedIn: " + (ParseUser.getCurrentUser() != null));
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
                     finish();
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
                 }
+                return;
 
 //                if (ParseUser.getCurrentUser() != null) {
 //                    // TODO: check for pending request

@@ -63,6 +63,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
 
+        Log.d("LoginScreen", "User LoggedIn: " + (ParseUser.getCurrentUser() != null) + " " + (ParseUser.getCurrentUser() == null ? null : ParseUser.getCurrentUser().getUsername()));
         if(ParseUser.getCurrentUser() != null){
             Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
             startActivity(toMainScreen);

@@ -6,6 +6,7 @@ import android.util.Log;
 import com.middleendien.middrides.R;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
+import com.parse.LogOutCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
