@@ -30,6 +30,7 @@
     <string name="dialog_select_location">Select Location</string>
     <string name="dialog_msg_are_you_sure">Are you sure?</string>
     <string name="dialog_msg_email_verified">You have successfully verified your email</string>
+    <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_cancel">Cancel</string>
     <string name="dialog_btn_dismiss">Dismiss</string>

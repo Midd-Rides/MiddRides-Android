@@ -251,7 +251,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
                         sweetAlertDialog.setConfirmText(getString(R.string.dialog_btn_dismiss))
                                 .setTitleText(getString(R.string.dialog_title_request_success))
-                                .showContentText(false)
+                                .setContentText(getString(R.string.dialog_msg_you_will_be_notified))
                                 .showCancelButton(false)
                                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                                     @Override
@@ -435,8 +435,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                                 obj.getDouble(getString(R.string.parse_location_lat)),
                                 obj.getDouble(getString(R.string.parse_location_lng)),
-                                obj.getObjectId(),
-                                obj.getString(getString(R.string.parse_location_status))));
+                                obj.getObjectId()));
                     }
                     spinnerAdapter.notifyDataSetChanged();
 
