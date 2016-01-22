@@ -48,8 +48,6 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private void getPrefs() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
         cancelRequestPref       = findPreference(getString(R.string.pref_cancel_request));
         logOutPref              = findPreference(getString(R.string.pref_log_out));
         resetPasswdPref         = findPreference(getString(R.string.pref_reset_passwd));
@@ -73,7 +71,7 @@ public class SettingsFragment extends PreferenceFragment {
         if (ParseUser.getCurrentUser() == null) {                   // not logged in
             cancelRequestPref.setEnabled(false);
         } else {
-            Log.d("CurrentUser Pending", ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) + "");
+            Log.d("SettingsFragment", "Current user pending request: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) + "");
             cancelRequestPref.setEnabled(ParseUser.getCurrentUser()
                     .getBoolean(getString(R.string.parse_user_pending_request)));
         }

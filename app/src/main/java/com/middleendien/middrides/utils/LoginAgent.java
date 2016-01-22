@@ -103,7 +103,7 @@ public class LoginAgent {
             installation.saveInBackground();
 
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-            editor.putBoolean(context.getString(R.string.waiting_to_log_out), false);
+            editor.putBoolean(context.getString(R.string.waiting_to_log_out), false).apply();
 
             logoutListener.onLogoutComplete();
         }

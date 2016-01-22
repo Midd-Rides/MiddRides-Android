@@ -169,17 +169,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         callService = (FloatingActionButton) findViewById(R.id.fab);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
-
-        // check if there is request pending
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
-            showAnimation();
-            setTitle(getString(R.string.title_activity_main_van_on_way));
-        } else {                                                          // no
-            cancelAnimation();
-            mainImage.setImageResource(R.drawable.logo_with_background);
-            setTitle(getString(R.string.title_activity_main_select_pickup_location));
-        }
     }
 
     private void initEvent() {
@@ -353,13 +342,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         // Action Bar items' click events
         int id = item.getItemId();
 
         switch (id) {
             case R.id.action_settings:
-                Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
-                startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                if (ParseUser.getCurrentUser() != null) {
+                    Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
+                    startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                }
                 return true;
         }
 
@@ -531,19 +524,13 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 Log.d("MainScreen", "Entering from SettingsScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
                     cancelAnimation();
-
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-                    if (!sharedPreferences.getBoolean(getString(R.string.waiting_to_log_out), false)) {
-                        // no pending task
-                        Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
-                        startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
-                    }
-                    // else, is waiting for increment to complete, do nothing
+                    // do nothing because we will deal with the log out in the callback
                 }
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
                 }
+                return;
             case LOGIN_REQUEST_CODE:
                 Log.d("MainScreen", "Entering from LoginScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
@@ -551,6 +538,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
                 }
+                return;
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -608,6 +596,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             };
             checkEmailHandler.postDelayed(checkEmailRunnable, 1000);           // check every minute
             // for testing purpose, we can change the 30000's here to 1000's just to see
+        }
+
+        // check if there is request pending
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
+            showAnimation();
+            setTitle(getString(R.string.title_activity_main_van_on_way));
+        } else {                                                          // no
+            cancelAnimation();
+            mainImage.setImageResource(R.drawable.logo_with_background);
+            setTitle(getString(R.string.title_activity_main_select_pickup_location));
         }
 
         // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station

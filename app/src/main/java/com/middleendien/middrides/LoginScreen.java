@@ -51,7 +51,6 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     private static final int REGISTER_REQUEST_CODE = 0x001;
 
     private static final int REGISTER_SUCCESS_RESULT_CODE = 0x101;
-//    private static final int REGISTER_FAILURE_RESULT_CODE = 0x102;
 
     private static final int LOGIN_CANCEL_RESULT_CODE = 0x301;
 
@@ -66,6 +65,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
         setContentView(R.layout.activity_login_screen);
 
         if(ParseUser.getCurrentUser() != null){
+            Log.d("LoginScreen", "Already has user");
             Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
             startActivity(toMainScreen);
             finish();
