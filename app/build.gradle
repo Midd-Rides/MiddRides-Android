@@ -19,7 +19,7 @@ android {
     productFlavors {
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_6
+        sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
 }
@@ -32,4 +32,6 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.parse:parse-android:1.12.0'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.11'
+    compile 'cn.pedant.sweetalert:library:1.3'
 }

@@ -103,6 +103,33 @@ public class Synchronizer {
         });
     }
 
+    public void incrementFieldBy(String className, final String objectId, final String fieldName, final int increment) {
+        Log.d("Synchronizer", "Incrementing " + className + "." + objectId + "." + fieldName + " by " + increment);
+        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
+        parseQuery.getInBackground(objectId, new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    object.increment(fieldName, increment);
+                    object.saveInBackground();
+                    Log.i("Synchronizer", "Currently " + object.getInt(fieldName) + " waiting at " + object.getString(context.getString(R.string.parse_location_name)));
+                }
+            }
+        });
+    }
+
+    public void refreshObject (ParseObject object) {
+        object.fetchInBackground();
+    }
+
+    /***
+     * Not implemented
+     * @param className
+     */
+    public void refreshListObjects (String className) {
+
+    }
+
 
 
     public interface OnSynchronizeListener {

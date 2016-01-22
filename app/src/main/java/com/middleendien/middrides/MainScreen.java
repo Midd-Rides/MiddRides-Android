@@ -23,17 +23,16 @@ package com.middleendien.middrides;
 //                    Buddha Keeps Bugs Away                      //
 ////////////////////////////////////////////////////////////////////
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
+import android.annotation.TargetApi;
 import android.app.NotificationManager;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -46,8 +45,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.fragment.LocationSelectDialogFragment;
-import com.middleendien.middrides.fragment.LocationSelectDialogFragment.SelectLocationDialogListener;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
 import com.parse.ParseException;
@@ -55,12 +52,16 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainScreen extends AppCompatActivity implements SelectLocationDialogListener,
-        OnSynchronizeListener {
+import cn.pedant.SweetAlert.SweetAlertDialog;
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
+
+public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
 
     private Synchronizer synchronizer;
 
@@ -74,6 +75,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     private static final int LOCATION_GET_LASTEST_VERSION_REQUEST_CODE      = 0x003;
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
+    private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
 
     private static final int NOTIFICATION_ID                                = 0x026;
 
@@ -83,17 +85,24 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     private static final int LOGIN_CANCEL_RESULT_CODE                       = 0x301;
 
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
+    private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
 
     // for double click exit
     private long backFirstPressed;
 
-    // I only do this nasty thing because the dialog was not made with an id attached to it
-    private int locationDialogFragmentId;
     private int serverVersion;
 
     // location spinners
     private Spinner pickUpSpinner;
-    private Spinner dstSpinner;
+    private Location selectedLocation;
+
+    private GifImageView mainImage;
+    private Handler animationHandler;
+    private Runnable animationRunnable;
+
+    // to periodically check email verification status
+    private Handler checkEmailHandler;
+    private Runnable checkEmailRunnable;
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -110,12 +119,20 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
         }
 
+        if (getIntent().getExtras() != null) {
+            try {
+                String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
+                showVanComingDialog(arrivingAt);
+                Log.d("PushNotification", "Coming to " + arrivingAt);
+            } catch (Exception e) {
+                // forget it
+            }
+        } else {
+            Log.d("PushNotification", "Not from push");
+        }
+
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
-
-
-
-        //TODO: check all status: e-mail verified and so on
 
         initData();
 
@@ -125,12 +142,10 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     private void initData() {
-        locationList = new ArrayList<Location>();
+        locationList = new ArrayList<>();
 
         synchronizer = Synchronizer.getInstance(this);
-        synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
-
-
+        synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
         /**
          * Deal with everything in callback
@@ -146,49 +161,36 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
     private void initView() {
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
-        dstSpinner = (Spinner) findViewById(R.id.dst_spinner);
-
-        pickUpSpinner.setPrompt("This is a prompt");
 
         // define the floating action button
         callService = (FloatingActionButton) findViewById(R.id.fab);
 
-        callService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ParseUser.getCurrentUser() == null) {                   // not logged in
-                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    return;             // do nothing
-                } else {
-                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
+        mainImage = (GifImageView) findViewById(R.id.main_screen_image);
 
-                //If user has already requested the van
-                if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
-
-                } else { //initialize Location Dialog
-                    showLocationDialog();
-                }
-            }
-        });
+        // check if there is request pending
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
+            showAnimation();
+            setTitle(getString(R.string.title_activity_main_van_on_way));
+        } else {                                                          // no
+            cancelAnimation();
+            mainImage.setImageResource(R.drawable.logo_with_background);
+            setTitle(getString(R.string.title_activity_main_select_pickup_location));
+        }
     }
 
     private void initEvent() {
         backFirstPressed = System.currentTimeMillis() - 2000;
 
-        spinnerAdapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_activated_1, locationList);
+        spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, locationList);
 
         pickUpSpinner.setAdapter(spinnerAdapter);
-        dstSpinner.setAdapter(spinnerAdapter);
 
         pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("Origin Spinner", position + "");
+                selectedLocation = (Location) spinnerAdapter.getItem(position);
+                Log.d("PickupSpinner", "Selected: " + position + "");
             }
 
             @Override
@@ -197,31 +199,146 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
             }
         });
 
-        dstSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("Desti Spinner", position + "");
-            }
+        spinnerAdapter.notifyDataSetChanged();
 
+        callService.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                dstSpinner.setSelection(0);
+            public void onClick(View view) {
+                if (ParseUser.getCurrentUser() == null) {                   // not logged in
+                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;                     // do nothing
+                } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+                    Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
+                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;
+                } else {
+                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+
+                //If user has already requested the van
+                if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
+                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                } else {                        //initialize Location Dialog
+                    showRequestDialog();
+                }
+            }
+        });
+    }
+
+    private void showRequestDialog() {
+        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_request_confirm))
+                .setContentText(getString(R.string.dialog_request_message) + " " + selectedLocation.getName() + "?")
+                .setConfirmText(getString(R.string.dialog_btn_yes))
+                .setCancelText(getString(R.string.dialog_btn_cancel))
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        // perform request
+                        makeRequest(selectedLocation);
+                        setTitle(getString(R.string.title_activity_main_van_on_way));
+
+                        // for spinner position when re-entering
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
+                        editor.putInt(getString(R.string.request_spinner_position), pickUpSpinner.getSelectedItemPosition())
+                                .apply();
+
+                        // change alert type
+                        sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                        sweetAlertDialog.setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                .setTitleText(getString(R.string.dialog_title_request_success))
+                                .setContentText(getString(R.string.dialog_msg_you_will_be_notified))
+                                .showCancelButton(false)
+                                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                    @Override
+                                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                        showAnimation();
+                                        sweetAlertDialog.dismissWithAnimation();
+                                    }
+                                });
+                    }
+                }).show();
+    }
+
+    private void showVanComingDialog(String arrivingLocatoin) {
+        final SweetAlertDialog dialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
+        dialog.setTitleText(getString(R.string.van_is_coming) + " " + arrivingLocatoin);
+        dialog.setConfirmText(getString(R.string.i_got_it));
+        dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                dialog.dismissWithAnimation();
             }
         });
 
-        spinnerAdapter.notifyDataSetChanged();
+
+        dialog.show();
     }
 
-    private void showLocationDialog(){
-        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
-        DialogFragment locationFragment =  new LocationSelectDialogFragment();
-
-        locationDialogFragmentId = locationFragment.getId();
-        locationFragment.show(fm, "Select Location");
+    private void showEmailVerifiedDialog() {
+        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_congrats))
+                .setContentText(getString(R.string.dialog_msg_email_verified))
+                .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                .show();
     }
 
-    private boolean hasAnnouncement() {
-        return true;
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public void cancelAnimation() {
+        if (animationRunnable != null)
+            animationHandler.removeCallbacks(animationRunnable);
+        // enable spinner
+        pickUpSpinner.setEnabled(true);
+        mainImage.setImageResource(R.drawable.logo_with_background);
+        mainImage.setBackground(null);
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void showAnimation() {
+        try {
+            GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
+            mainImage.setBackground(newDrawable);
+            mainImage.setImageResource(0);
+            newDrawable.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // disable spinner
+        pickUpSpinner.setEnabled(false);
+        animationHandler = new Handler();
+        animationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+//                    mainImage.setImageResource(R.drawable.animation_gif);
+                    try {
+                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
+                        mainImage.setBackground(newDrawable);
+                        mainImage.setImageResource(0);
+                        newDrawable.start();
+                    } catch (IOException err1) {
+                        err1.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    try {
+                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
+                        mainImage.setBackground(newDrawable);
+                        mainImage.setImageResource(0);
+                        newDrawable.start();
+                    } catch (IOException err2) {
+                        err2.printStackTrace();
+                    }
+                } finally {
+                    animationHandler.postDelayed(this, 4000);
+                }
+            }
+        };
+        animationHandler.postDelayed(animationRunnable, 4000);
     }
 
     @Override
@@ -247,7 +364,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     private void updateLocations() {
-        synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+        synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
         if (spinnerAdapter != null)
             spinnerAdapter.notifyDataSetChanged();
         Log.d("updateLocations()", "Called");
@@ -279,6 +396,15 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                 }
                 break;
 
+            case INCREMENT_FIELD_REQUEST_CODE:
+                // this step seems redundant but I don't know how to make it shorter
+                String pointer = object.getParseObject(getString(R.string.parse_location_status)).getObjectId();
+                synchronizer.incrementFieldBy(
+                        getString(R.string.parse_class_locationstatus),
+                        pointer,
+                        getString(R.string.parse_locationstatus_passengers_waiting),
+                        sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false) ? 1 : -1
+                );
         }
     }
 
@@ -292,7 +418,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 //                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
 
-                synchronizer.getListObjectsLocal(getString(R.string.parse_class_locaton), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+                synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
                 editor.putInt(getString(R.string.parse_status_location_version), serverVersion)         // should be initialised by now
@@ -302,28 +428,29 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
 
             case LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE:           // update from local
                 Log.d("MainScreen", "updateFromLocal");
-                LocationSelectDialogFragment fragment = (LocationSelectDialogFragment) getSupportFragmentManager().
-                        findFragmentById(locationDialogFragmentId);
-
-                if (fragment != null)
-                    fragment.updateLocations(objectList);
 
                 if (objectList.size() > 1) {
                     locationList.clear();
                     for (ParseObject obj : objectList) {
                         locationList.add(new Location(obj.getString(getString(R.string.parse_location_name)),
                                 obj.getDouble(getString(R.string.parse_location_lat)),
-                                obj.getDouble(getString(R.string.parse_location_lng))));
+                                obj.getDouble(getString(R.string.parse_location_lng)),
+                                obj.getObjectId()));
                     }
                     spinnerAdapter.notifyDataSetChanged();
+
+                    // if has pending request, set spinner position accordingly
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                    if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false))
+                        pickUpSpinner.setSelection(sharedPreferences.getInt(getString(R.string.request_spinner_position), 0), true);
                 } else {
-                    synchronizer.getListObjects(getString(R.string.parse_class_locaton), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+                    synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
                 }
                 break;
         }
 
-        Log.d("MainScreen", (locationList == null) + "");
-        Log.d("MainScreen", spinnerAdapter.getCount() + "");
+        Log.d("MainScreen", "locationList is null: " + (locationList == null) + "");
+        Log.d("MainScreen", "Adapter Count " + spinnerAdapter.getCount() + "");
     }
 
     @Override
@@ -331,9 +458,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         // do nothing
     }
 
-    public void onLocationSelected(Location locationSelected) {
-        Toast.makeText(getApplicationContext(), locationSelected.toString(), Toast.LENGTH_SHORT).show();
+    public void makeRequest(final Location locationSelected) {
 
+        Log.i("RequestMade", locationSelected.toString());
 
         final ParseObject parseUserRequest = new ParseObject(getString(R.string.parse_class_request));
         parseUserRequest.put(getString(R.string.parse_request_request_time), new Date());                       // time
@@ -342,7 +469,7 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         parseUserRequest.put(getString(R.string.parse_request_user_email),
                 ParseUser.getCurrentUser().get(getString(R.string.parse_user_email)));                          // email
         parseUserRequest.put(getString(R.string.parse_request_pickup_location), locationSelected.getName());    // origin
-        parseUserRequest.put(getString(R.string.parse_request_locationID),locationSelected.getLocationId());
+        parseUserRequest.put(getString(R.string.parse_request_locationID), locationSelected.getLocationId());
 
         // save to sharedPreference
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -359,24 +486,17 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     setPendingRequestUser.put(getString(R.string.parse_user_pending_request), true);
                     setPendingRequestUser.put(getString(R.string.parse_request_request_id), parseUserRequest.getObjectId());
                     setPendingRequestUser.saveInBackground();
+                    synchronizer.getObject(
+                            null,
+                            locationSelected.getLocationId(),
+                            getString(R.string.parse_class_location),
+                            INCREMENT_FIELD_REQUEST_CODE);
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
                 }
             }
         });
-    }
-
-
-    private AlertDialog showDialog(String title, String msg, String btnPosTxt, String btnNegTxt,
-                                   OnClickListener btnPosListener, OnClickListener btnNegListener) {
-
-        Builder builder = new Builder(this);
-
-        return builder.setTitle(title)
-                .setMessage(msg)
-                .setPositiveButton(btnPosTxt, btnPosListener)
-                .setNegativeButton(btnNegTxt, btnNegListener)
-                .create();
     }
 
     @Override
@@ -384,9 +504,12 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
-                    // TODO: to login screen
                     Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
                     startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
+                }
+                if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
+                    setTitle(getString(R.string.title_activity_main_select_pickup_location));
+                    cancelAnimation();
                 }
             case LOGIN_REQUEST_CODE:
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
@@ -394,6 +517,10 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
                 }
+
+//                if (ParseUser.getCurrentUser() != null) {
+//                    // TODO: check for pending request
+//                }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -415,16 +542,58 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
                     finish();
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
-                    //TODO: do something with backstack
-                    // problem is that if someone switches between MainScreen and LoginScreen
-                    // there will be multiple copies of the activites
-                    // need to check backstack before start the intent          - Peter
                 }
         }
 
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    protected void onResume() {
+        Log.d("MainScreen", "Resume");
+
+        // if email not verified, periodically check for email verification status
+        if (ParseUser.getCurrentUser() != null && !ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+            Log.i("MainScreen", "Handler started, checking email verification status...");
+
+            checkEmailHandler = new Handler();
+
+            checkEmailRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+                        // email still not verified
+                        synchronizer.refreshObject(ParseUser.getCurrentUser());
+                        checkEmailHandler.postDelayed(this, 1000);
+                        Log.i("MainScreen", "Email still not verified " + (new Date()).toString());
+                    } else {
+                        // email verified now
+                        checkEmailHandler.removeCallbacks(this);
+                        showEmailVerifiedDialog();
+                        Log.i("MainScreen", "Finally verified email");
+                    }
+                }
+            };
+            checkEmailHandler.postDelayed(checkEmailRunnable, 1000);           // check every minute
+            // for testing purpose, we can change the 30000's here to 1000's just to see
+        }
+
+        // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("MainScreen", "Pause");
+
+        if (checkEmailHandler != null) {
+            checkEmailHandler.removeCallbacks(checkEmailRunnable);
+            Log.i("MainScreen", "Handler stopped");
+        }
+
+        super.onPause();
+    }
 
 
 
@@ -447,21 +616,9 @@ public class MainScreen extends AppCompatActivity implements SelectLocationDialo
     }
 
     @Override
-    protected void onResume() {
-        Log.d("MainScreen", "Resume");
-        super.onResume();
-    }
-
-    @Override
     protected void onRestart() {
         Log.d("MainScreen", "Restart");
         super.onRestart();
-    }
-
-    @Override
-    protected void onPause() {
-        Log.d("MainScreen", "Pause");
-        super.onPause();
     }
 
     @Override

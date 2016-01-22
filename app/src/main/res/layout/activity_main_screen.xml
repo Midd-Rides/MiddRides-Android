@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@color/colorPrimary"
     tools:context=".MainScreen">
 
     <RelativeLayout
-        android:id="@+id/spinner_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="50dp">
 
         <Spinner
             android:id="@+id/pick_up_spinner"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_centerHorizontal="true"
+            android:background="@android:color/white"
+            android:fadingEdge="horizontal"
             android:labelFor="@string/spinner_pick_up"
-            android:spinnerMode="dialog" />
+            android:spinnerMode="dropdown" />
 
-        <Spinner
-            android:id="@+id/dst_spinner"
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/main_screen_image"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_centerHorizontal="true"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/pick_up_spinner"
-            android:labelFor="@string/spinner_dst"
-            android:spinnerMode="dropdown"/>
+            android:background="@color/colorPrimary"
+            android:src="@drawable/logo_with_background"
+            android:visibility="visible"
+            android:contentDescription="@string/app_logo" />
 
     </RelativeLayout>
 

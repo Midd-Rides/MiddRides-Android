@@ -1,8 +1,6 @@
 package com.middleendien.middrides.fragment;
 
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -21,6 +19,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 import static android.preference.Preference.*;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -30,10 +30,11 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference resetPasswdPref;
     private Preference veriStatusPref;
 
-    private PreferenceCategory userPrefCat;
-
+    private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
+
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
+    private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,19 +48,23 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private void getPrefs() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         cancelRequestPref       = findPreference(getString(R.string.pref_cancel_request));
         logOutPref              = findPreference(getString(R.string.pref_log_out));
         resetPasswdPref         = findPreference(getString(R.string.pref_reset_passwd));
         veriStatusPref          = findPreference(getString(R.string.pref_verification_status_unavailable));
 
+        // email verification
         if (ParseUser.getCurrentUser() != null) {
-            veriStatusPref.setTitle(ParseUser.getCurrentUser().isAuthenticated() ?
+            // default true
+            veriStatusPref.setTitle(ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)) ?
                     getString(R.string.pref_verfied) : getString(R.string.pref_not_verifed));
         } else {
             veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
         }
 
-        userPrefCat             = (PreferenceCategory) findPreference(getString(R.string.cat_user));
+        PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
         userPrefCat.setTitle("User - " + ParseUser.getCurrentUser().getEmail());
     }
 
@@ -94,13 +99,27 @@ public class SettingsFragment extends PreferenceFragment {
 
                                     cancelRequestPref.setEnabled(false);
 
-                                    Toast.makeText(getActivity(), getString(R.string.request_cancelled), Toast.LENGTH_SHORT).show();
+                                    Synchronizer.getInstance(getActivity()).getObject(
+                                            null,
+                                            requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
+                                            getString(R.string.parse_class_location),
+                                            INCREMENT_FIELD_REQUEST_CODE);
+
+                                    getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
+
+                                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                                            .setTitleText(getString(R.string.request_cancelled))
+                                            .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                            .show();
+
+                                    Log.i("SettingsFragment", "Request Cancelled");
                                 } else {
                                     e.printStackTrace();
                                     Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
+
                 return true;
             }
         });
@@ -109,27 +128,22 @@ public class SettingsFragment extends PreferenceFragment {
         logOutPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(getString(R.string.dialog_msg_are_you_sure))
-                        .setPositiveButton(R.string.dialog_btn_yes, new DialogInterface.OnClickListener() {
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+                        .setConfirmText(getString(R.string.dialog_btn_yes))
+                        .setCancelText(getString(R.string.dialog_btn_cancel))
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                // TODO: check for cancel request
                                 ParseUser.logOut();
                                 ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-                                installation.put("user","0");
+                                installation.put("user", "0");
                                 installation.saveInBackground();
-
-//                                Intent toLoginScreen = new Intent(getActivity(), LoginScreen.class);
-//                                toLoginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                startActivity(toLoginScreen);
-//                                getActivity().finish();
                                 getActivity().setResult(USER_LOGOUT_RESULT_CODE);
                                 getActivity().finish();
                             }
-                        })
-                        .setNegativeButton(R.string.dialog_btn_cancel, null)
-                        .create()
-                        .show();
+                        }).show();
 
                 return false;
             }
@@ -138,19 +152,19 @@ public class SettingsFragment extends PreferenceFragment {
         resetPasswdPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage(getString(R.string.dialog_msg_are_you_sure))
-                        .setPositiveButton(R.string.dialog_btn_yes, new DialogInterface.OnClickListener() {
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+                        .setConfirmText(getString(R.string.dialog_btn_yes))
+                        .setCancelText(getString(R.string.dialog_btn_cancel))
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
                                 Synchronizer.getInstance(getActivity()).resetPassword(ParseUser.getCurrentUser().getEmail(),
                                         USER_RESET_PASSWORD_REQUEST_CODE);
                                 Log.i("SettingsFragment", "Reset Password");
                             }
-                        })
-                        .setNegativeButton(R.string.dialog_btn_cancel, null)
-                        .create()
-                        .show();
+                        }).show();
+
                 return false;
             }
         });
@@ -158,9 +172,13 @@ public class SettingsFragment extends PreferenceFragment {
         veriStatusPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                if (!ParseUser.getCurrentUser().isAuthenticated()) {            // email not verified
+                if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {    // email not verified
                     ParseUser.getCurrentUser().saveInBackground();
-                    Toast.makeText(getActivity(), getString(R.string.resent_email), Toast.LENGTH_SHORT).show();
+                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                            .setTitleText(getString(R.string.resent_email))
+                            .setConfirmText(getString(R.string.dialog_btn_got_it))
+                            .show();
+                    Log.i("SettingsFragment", "Re-sent Email Verification");
                 }
                 return false;
             }
@@ -178,5 +196,4 @@ public class SettingsFragment extends PreferenceFragment {
             cancelRequestPref.setEnabled(false);
         }
     }
-
 }

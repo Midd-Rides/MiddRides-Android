@@ -1,10 +1,8 @@
 package com.middleendien.middrides;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -23,12 +22,15 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnLoginListener;
 import com.parse.ParseException;
 import com.parse.ParseUser;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * A login screen that offers login via email/password.
@@ -46,14 +48,14 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
     private static final int REGISTER_REQUEST_CODE = 0x001;
 
-    private static final int REGISTER_SUCCESS_CODE = 0x101;
-    private static final int REGISTER_FAILURE_CODE = 0x102;
+    private static final int REGISTER_SUCCESS_RESULT_CODE = 0x101;
+//    private static final int REGISTER_FAILURE_RESULT_CODE = 0x102;
 
     private static final int LOGIN_CANCEL_RESULT_CODE = 0x301;
 
     private static final int PERMISSION_INTERNET_REQUEST_CODE = 0x201;
 
-    private ProgressDialog progressDialog;
+    private SweetAlertDialog progressDialog;
 
     private LoginAgent loginAgent;
     @Override
@@ -67,6 +69,15 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             finish();
         }
 
+        // adjust logo
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        ImageView splashLogo = (ImageView) findViewById(R.id.login_app_logo);
+
+        splashLogo.getLayoutParams().width = (int)(metrics.widthPixels * 0.5);
+        splashLogo.getLayoutParams().height = (int)(metrics.heightPixels * 0.4);
+
         initData();
 
         initView();
@@ -75,16 +86,16 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void initData() {
-        loginAgent = LoginAgent.getInstance();
+        loginAgent = LoginAgent.getInstance(this);
         loginAgent.registerListener(LoginAgent.LOGIN, this);
     }
 
     private void initView() {
-        btnLogIn = (Button) findViewById(R.id.login_button);
-        btnRegister = (Button) findViewById(R.id.register_button);
+        btnLogIn = (Button) findViewById(R.id.login_login);
+        btnRegister = (Button) findViewById(R.id.login_register);
 
-        usernameBox = (AutoCompleteTextView) findViewById(R.id.usernameBox);
-        passwdBox = (EditText) findViewById(R.id.passwdBox);
+        usernameBox = (AutoCompleteTextView) findViewById(R.id.login_email);
+        passwdBox = (EditText) findViewById(R.id.login_passwd);
     }
 
     private void initEvent() {
@@ -158,14 +169,15 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
     private void setDialogShowing(boolean showing) {
         if (showing) {
-            progressDialog = new ProgressDialog(LoginScreen.this);
-            progressDialog.setMessage(getString(R.string.dialog_logging_in));
-            progressDialog.setIndeterminate(true);
+            progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+                    .setTitleText(getString(R.string.dialog_logging_in));
             progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.showCancelButton(false);
+            progressDialog.getProgressHelper().setBarColor(ContextCompat.getColor(this, R.color.colorAccent));
             progressDialog.show();
         } else {
             if (progressDialog.isShowing())
-                progressDialog.dismiss();
+                progressDialog.dismissWithAnimation();
         }
     }
 
@@ -173,7 +185,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case REGISTER_REQUEST_CODE:
-                if(resultCode == REGISTER_SUCCESS_CODE){
+                if(resultCode == REGISTER_SUCCESS_RESULT_CODE){
                     Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
                     startActivity(toMainScreen);
                     finish();
@@ -187,12 +199,16 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        try {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        } catch (Exception e) {
+            // so you have a keyboard, so what?
+        }
     }
 
     private void requestPermission(String permission, int requestCode) {
-        ActivityCompat.requestPermissions(this, new String[] { permission }, requestCode);
+        ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
     }
 
     /**
