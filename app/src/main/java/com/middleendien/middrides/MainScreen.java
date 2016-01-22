@@ -25,14 +25,13 @@ package com.middleendien.middrides;
 
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -60,14 +59,16 @@ import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import info.hoang8f.widget.FButton;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainScreen extends AppCompatActivity implements OnSynchronizeListener, OnLogoutListener {
 
     private Synchronizer synchronizer;
 
-    private FloatingActionButton callService;
+    private FButton callService;
 
     /**
      * request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
@@ -166,9 +167,16 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
 
         // define the floating action button
-        callService = (FloatingActionButton) findViewById(R.id.fab);
+        callService = (FButton) findViewById(R.id.flat_button);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
+
+//        DisplayMetrics metrics = new DisplayMetrics();
+//        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+//
+//        pickUpSpinner.getLayoutParams().height = (int) (metrics.heightPixels * 0.1);
+//        callService.getLayoutParams().height = (int) (metrics.heightPixels * 0.08);
+//        mainImage.getLayoutParams().height = (int) (metrics.heightPixels * 0.72);
     }
 
     private void initEvent() {
@@ -197,23 +205,36 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void onClick(View view) {
                 if (ParseUser.getCurrentUser() == null) {                   // not logged in
-                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showWarningDialog(
+                            getString(R.string.not_logged_in),
+                            null,
+                            getString(R.string.dialog_btn_dismiss));
+//                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
                     return;                     // do nothing
                 } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
                     Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
-                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showWarningDialog(
+                            getString(R.string.not_logged_in),
+                            null,
+                            getString(R.string.dialog_btn_dismiss));
+//                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
                     return;
                 } else {
-                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
+                    Toast.makeText(MainScreen.this, ParseUser.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+//                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
+//                            .setAction("Action", null).show();
                 }
 
                 //If user has already requested the van
                 if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
+                    showWarningDialog(
+                            getString(R.string.pending_request_error),
+                            null,
+                            getString(R.string.dialog_btn_dismiss));
+//                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
+//                            .setAction("Action", null).show();
                 } else {                        //initialize Location Dialog
                     showRequestDialog();
                 }
@@ -279,10 +300,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 .show();
     }
 
+    private void showWarningDialog(String title, String contentText, String confirmText) {
+        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText(title)
+                .setContentText(contentText)
+                .showContentText(contentText != null)
+                .setConfirmText(confirmText)
+                .show();
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void cancelAnimation() {
-        if (animationRunnable != null)
-            animationHandler.removeCallbacks(animationRunnable);
         // enable spinner
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
@@ -302,35 +330,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
         // disable spinner
         pickUpSpinner.setEnabled(false);
-        animationHandler = new Handler();
-        animationRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-//                    mainImage.setImageResource(R.drawable.animation_gif);
-                    try {
-                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
-                        mainImage.setBackground(newDrawable);
-                        mainImage.setImageResource(0);
-                        newDrawable.start();
-                    } catch (IOException err1) {
-                        err1.printStackTrace();
-                    }
-                } catch (Exception e) {
-                    try {
-                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
-                        mainImage.setBackground(newDrawable);
-                        mainImage.setImageResource(0);
-                        newDrawable.start();
-                    } catch (IOException err2) {
-                        err2.printStackTrace();
-                    }
-                } finally {
-                    animationHandler.postDelayed(this, 4000);
-                }
-            }
-        };
-        animationHandler.postDelayed(animationRunnable, 4000);
     }
 
     @Override
@@ -550,9 +549,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             case KeyEvent.KEYCODE_BACK:
                 long backSecondPressed = System.currentTimeMillis();
                 if(backSecondPressed - backFirstPressed >= 2000){
-                    Snackbar.make(callService, getResources().getString(R.string.press_again_exit), Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null)
-                            .show();
+                    Toast.makeText(MainScreen.this, getString(R.string.press_again_exit), Toast.LENGTH_SHORT).show();
+//                    Snackbar.make(callService, getString(R.string.press_again_exit), Snackbar.LENGTH_SHORT)
+//                            .setAction("Action", null)
+//                            .show();
                     backFirstPressed = backSecondPressed;
                     return true;
                 }
@@ -626,6 +626,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         super.onPause();
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
 
 
