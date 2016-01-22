@@ -25,6 +25,7 @@ package com.middleendien.middrides;
 
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -62,6 +63,7 @@ import java.util.List;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
 
@@ -602,6 +604,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         }
 
         super.onPause();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
 

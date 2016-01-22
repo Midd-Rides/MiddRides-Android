@@ -1,5 +1,6 @@
 package com.middleendien.middrides;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import com.middleendien.middrides.utils.LoginAgent.OnRegisterListener;
 import com.parse.ParseException;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Peter on 10/5/15.
@@ -190,5 +192,10 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
             }
             setResult(REGISTER_FAILURE_CODE);
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 }

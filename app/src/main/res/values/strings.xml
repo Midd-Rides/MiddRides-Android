@@ -128,6 +128,8 @@
     <string name="pref_verfied">Email Verified</string>
     <string name="pref_not_verifed">Resend Verification Email</string>
     <string name="pref_screen_announcements">Announcements</string>
+    <string name="pref_key_no_announcement">NoAnnouncement</string>
+    <string name="pref_announcements_no_announcement">No Announcement</string>
 
     <!--Spinners-->
     <string name="spinner_pick_up">Pick Up Location</string>

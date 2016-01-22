@@ -1,6 +1,7 @@
 package com.middleendien.middrides;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -31,6 +32,7 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * A login screen that offers login via email/password.
@@ -291,6 +293,11 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 Toast.makeText(LoginScreen.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 }
 
