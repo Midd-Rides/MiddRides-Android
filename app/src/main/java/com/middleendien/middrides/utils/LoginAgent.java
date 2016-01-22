@@ -1,6 +1,8 @@
 package com.middleendien.middrides.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Patterns;
 
 import com.middleendien.middrides.R;
@@ -29,9 +31,11 @@ public class LoginAgent {
     private static LoginAgent loginAgent;
     private OnLoginListener loginListener;
     private OnRegisterListener registerListener;
+    private OnLogoutListener logoutListener;
 
     public static final int LOGIN       = 0x021;
     public static final int REGISTER    = 0x022;
+    public static final int LOGOUT      = 0x023;
 
     private Context context;
 
@@ -58,7 +62,7 @@ public class LoginAgent {
             @Override
             public void done(ParseUser user, ParseException e) {
                 loginListener.onLoginComplete(e == null, e);
-                if(e==null){
+                if (e == null) {
                     ParseInstallation installation = ParseInstallation.getCurrentInstallation();
                     installation.put("user", ParseUser.getCurrentUser().getObjectId());
                     installation.saveInBackground(new SaveCallback() {
@@ -91,6 +95,20 @@ public class LoginAgent {
         });
     }
 
+    public void logOutInBackground() {
+        if (ParseUser.getCurrentUser() != null) {
+            ParseUser.logOutInBackground();
+            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+            installation.put("user", "0");
+            installation.saveInBackground();
+
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+            editor.putBoolean(context.getString(R.string.waiting_to_log_out), false);
+
+            logoutListener.onLogoutComplete();
+        }
+    }
+
     public void registerListener(int requestCode, Context context) {
         switch (requestCode) {
             case LOGIN:
@@ -98,6 +116,9 @@ public class LoginAgent {
                 break;
             case REGISTER:
                 registerListener = (OnRegisterListener) context;
+                break;
+            case LOGOUT:
+                logoutListener = (OnLogoutListener) context;
                 break;
         }
     }
@@ -113,6 +134,12 @@ public class LoginAgent {
     public interface OnRegisterListener {
 
         void onRegisterComplete (boolean registerSuccess, ParseException e);
+
+    }
+
+    public interface OnLogoutListener {
+
+        void onLogoutComplete ();
 
     }
 }

@@ -17,9 +17,7 @@ import java.util.List;
  * TODO: pass the parent activity in with intent
  * TODO: so that when user logs out, the parent activity finishes as well
  */
-public class SettingsScreen extends AppCompatActivity implements OnSynchronizeListener {
-
-    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
+public class SettingsScreen extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,28 +38,5 @@ public class SettingsScreen extends AppCompatActivity implements OnSynchronizeLi
             actionBar.setDisplayHomeAsUpEnabled(true);
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onGetObjectComplete(ParseObject object, int requestCode) {
-
-    }
-
-    @Override
-    public void onGetListObjectsComplete(List<ParseObject> objects, int requestCode) {
-
-    }
-
-    @Override
-    public void onResetPasswordComplete(boolean resetSuccess, int requestCode) {
-        switch (requestCode) {
-            case USER_RESET_PASSWORD_REQUEST_CODE:
-                //TODO: this toast is not shown, figure out why         - Peter
-                Toast.makeText(SettingsScreen.this,
-                        resetSuccess ? getString(R.string.reset_email_sent) : getString(R.string.something_went_wrong),
-                        Toast.LENGTH_SHORT)
-                        .show();
-                break;
-        }
     }
 }

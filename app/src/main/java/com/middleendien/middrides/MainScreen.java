@@ -45,6 +45,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
+import com.middleendien.middrides.utils.LoginAgent;
+import com.middleendien.middrides.utils.LoginAgent.OnLogoutListener;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
 import com.parse.ParseException;
@@ -61,7 +63,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
-public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
+public class MainScreen extends AppCompatActivity implements OnSynchronizeListener, OnLogoutListener {
 
     private Synchronizer synchronizer;
 
@@ -76,6 +78,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
     private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
+    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
 
     private static final int NOTIFICATION_ID                                = 0x026;
 
@@ -455,7 +458,29 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public void onResetPasswordComplete(boolean resetSuccess, int requestCode) {
-        // do nothing
+        switch (requestCode) {
+            case USER_RESET_PASSWORD_REQUEST_CODE:
+                Toast.makeText(
+                        MainScreen.this,
+                        resetSuccess ? getString(R.string.reset_email_sent) : getString(R.string.something_went_wrong),
+                        Toast.LENGTH_SHORT)
+                        .show();
+                break;
+        }
+    }
+
+    @Override
+    public void onIncrementComplete() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.waiting_to_log_out), false)) {
+            LoginAgent.getInstance(this).logOutInBackground();
+        }
+    }
+
+    @Override
+    public void onLogoutComplete() {
+        Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
+        startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
     }
 
     public void makeRequest(final Location locationSelected) {
@@ -503,24 +528,29 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
+                Log.d("MainScreen", "Entering from SettingsScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
-                    Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
-                    startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
+                    cancelAnimation();
+
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    if (!sharedPreferences.getBoolean(getString(R.string.waiting_to_log_out), false)) {
+                        // no pending task
+                        Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
+                        startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
+                    }
+                    // else, is waiting for increment to complete, do nothing
                 }
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
                 }
             case LOGIN_REQUEST_CODE:
+                Log.d("MainScreen", "Entering from LoginScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
                     finish();
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
                 }
-
-//                if (ParseUser.getCurrentUser() != null) {
-//                    // TODO: check for pending request
-//                }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -551,6 +581,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     @Override
     protected void onResume() {
         Log.d("MainScreen", "Resume");
+
+        LoginAgent.getInstance(this).registerListener(LoginAgent.LOGOUT, this);
 
         // if email not verified, periodically check for email verification status
         if (ParseUser.getCurrentUser() != null && !ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {

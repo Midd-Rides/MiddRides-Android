@@ -2,7 +2,9 @@ package com.middleendien.middrides;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -88,6 +90,9 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     private void initData() {
         loginAgent = LoginAgent.getInstance(this);
         loginAgent.registerListener(LoginAgent.LOGIN, this);
+
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
     }
 
     private void initView() {

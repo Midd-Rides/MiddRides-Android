@@ -23,6 +23,9 @@ import java.util.List;
  * All classes that wish to sync data will implement this
  *
  * Singleton pattern
+ *
+ * Also, at this stage, we don't have a list of callbacks,
+ * which can be done with a registerListener function
  */
 public class Synchronizer {
 
@@ -44,6 +47,7 @@ public class Synchronizer {
 
     @SuppressWarnings("all")
     public void getObject (String varName, String objectId, String className, final int requestCode) {
+        Log.d("Synchronizer", "Getting " + className + "." + objectId + "." + requestCode);
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
         if (varName != null) {      // search by name
             // haven't thought of a scenario where this would be useful
@@ -64,6 +68,7 @@ public class Synchronizer {
     }
 
     public void getListObjects (String className, final int requestCode) {
+        Log.d("Synchronizer", "Getting List " + className + "." + requestCode);
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
         parseQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -79,6 +84,7 @@ public class Synchronizer {
     }
 
     public void getListObjectsLocal (String className, final int requestCode) {
+        Log.d("Synchronizer", "Getting List Local" + className + "." + requestCode);
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
         parseQuery.fromLocalDatastore();
         parseQuery.findInBackground(new FindCallback<ParseObject>() {
@@ -113,6 +119,7 @@ public class Synchronizer {
                     object.increment(fieldName, increment);
                     object.saveInBackground();
                     Log.i("Synchronizer", "Currently " + object.getInt(fieldName) + " waiting at " + object.getString(context.getString(R.string.parse_location_name)));
+                    callback.onIncrementComplete();
                 }
             }
         });
@@ -139,6 +146,8 @@ public class Synchronizer {
         void onGetListObjectsComplete(List<ParseObject> objects, int requestCode);
 
         void onResetPasswordComplete(boolean resetSuccess, int requestCode);
+
+        void onIncrementComplete();
 
     }
 

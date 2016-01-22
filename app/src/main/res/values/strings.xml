@@ -31,6 +31,7 @@
     <string name="dialog_msg_are_you_sure">Are you sure?</string>
     <string name="dialog_msg_email_verified">You have successfully verified your email</string>
     <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
+    <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_cancel">Cancel</string>
     <string name="dialog_btn_dismiss">Dismiss</string>
@@ -116,6 +117,7 @@
     <string name="login_status">LoginStatus</string>
     <string name="location_version">LocationVersion</string>
     <string name="request_spinner_position">spinnerPosition</string>
+    <string name="waiting_to_log_out">waitingToLogOut</string>
 
     <string name="cat_request">Request</string>
     <string name="cat_user">User</string>
