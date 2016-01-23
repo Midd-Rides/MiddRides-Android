@@ -6,6 +6,7 @@
     <color name="colorTransparent">@android:color/transparent</color>
 
     <color name="colorWarning">#F44336</color>
+    <color name="colorButtons">#AEDEF4</color>
 
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlack">#000000</color>

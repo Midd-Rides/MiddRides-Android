@@ -25,7 +25,7 @@
     <string name="nearestLocation_button">Click this if Drunk</string>
     <string name="resend_email_button">Re-send verification e-mail</string>
     <string name="reset_passwd_button">Reset Password</string>
-    <string name="make_request">Make Request</string>
+    <string name="request_pick_up">Request Pick Up</string>
 
     <!--Dialogs-->
     <string name="dialog_select_location">Select Location</string>

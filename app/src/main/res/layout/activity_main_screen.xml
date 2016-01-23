@@ -10,10 +10,10 @@
     tools:context=".MainScreen">
 
     <RelativeLayout
-        android:id="@+id/container"
+        android:id="@+id/image_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/flat_button">
+        android:layout_above="@+id/button_container">
 
         <Spinner
             android:id="@+id/pick_up_spinner"
@@ -36,25 +36,32 @@
 
     </RelativeLayout>
 
-    <info.hoang8f.widget.FButton
-        android:id="@+id/flat_button"
+    <LinearLayout
+        android:id="@+id/button_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="10dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_alignParentBottom="true"
-        android:text="@string/make_request"
-        android:textSize="36sp"
-        android:textColor="@android:color/white"
-        android:textColorHighlight="@color/colorPrimaryDark"
-        android:textAppearance="@style/TextAppearance.FontPath"
-        app:buttonColor="@color/colorAccent"
-        app:shadowColor="@color/colorPrimaryDark"
-        app:shadowEnabled="true"
-        app:shadowHeight="2dp"
-        app:cornerRadius="5dp"/>
+        android:layout_alignParentBottom="true">
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/flat_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:text="@string/request_pick_up"
+            android:textSize="36sp"
+            android:textColor="@android:color/white"
+            android:textColorHighlight="@color/colorPrimaryDark"
+            android:textAppearance="@style/TextAppearance.FontPath"
+            app:buttonColor="@color/colorButtons"
+            app:shadowColor="@color/colorPrimaryDark"
+            app:shadowEnabled="true"
+            app:shadowHeight="2dp"
+            app:cornerRadius="5dp"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
