@@ -11,15 +11,13 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.middleendien.middrides.R;
+import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.parse.GetCallback;
-import com.parse.LogOutCallback;
 import com.parse.ParseException;
-import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -73,9 +71,9 @@ public class SettingsFragment extends PreferenceFragment {
         if (ParseUser.getCurrentUser() == null) {                   // not logged in
             cancelRequestPref.setEnabled(false);
         } else {
-            Log.d("SettingsFragment", "CurrentUser pending request: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) + "");
-                    cancelRequestPref.setEnabled(ParseUser.getCurrentUser()
-                            .getBoolean(getString(R.string.parse_user_pending_request)));
+            Log.d("SettingsFragment", "Current user pending request: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) + "");
+            cancelRequestPref.setEnabled(ParseUser.getCurrentUser()
+                    .getBoolean(getString(R.string.parse_user_pending_request)));
         }
 
         // initialise click events
@@ -83,7 +81,6 @@ public class SettingsFragment extends PreferenceFragment {
         cancelRequestPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                // does not log out after cancellation
                 cancelCurrentRequest(false);
 
                 return true;
@@ -94,26 +91,26 @@ public class SettingsFragment extends PreferenceFragment {
         logOutPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Boolean hasPendingRequest = ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request));
+                final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                final Boolean hasPendingRequest = ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request));
 
                 new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                         .setTitleText(getString(R.string.dialog_msg_are_you_sure))
-                        .setConfirmText(getString(R.string.dialog_btn_yes))
-                        // show warning if has pending request
-                        .showContentText(hasPendingRequest)
                         .setContentText(hasPendingRequest ? getString(R.string.dialog_msg_will_cancel_request) : null)
+                        .showContentText(hasPendingRequest)
+                        .setConfirmText(getString(R.string.dialog_btn_yes))
                         .setCancelText(getString(R.string.dialog_btn_cancel))
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
                             public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-                                    // has pending request, so cancel and log out
+                                if (hasPendingRequest) {
+                                    // cancel the request first
                                     cancelCurrentRequest(true);
                                 } else {
-                                    // no pending request
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
                                     logUserOut();
                                 }
-
                             }
                         }).show();
 
@@ -157,6 +154,17 @@ public class SettingsFragment extends PreferenceFragment {
         });
     }
 
+    /***
+     * Okay so what happens here is:
+     * incrementing needs the user alive, for some reason
+     * we cancel the request, knowing that it's bound to take longer than returning to MainScreen
+     * and return to MainScreen, what a surprise
+     * the increment will check upon finish whether we are waiting to log out
+     * and will perform log out accordingly
+     * and if it logs out, MainScreen will hear it, and return to LoginScreen
+     * and they live happily ever since
+     * @param andLogOut whether to log out after cancelling current request
+     */
     private void cancelCurrentRequest(final Boolean andLogOut) {
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_request));          // class name
         parseQuery.getInBackground(ParseUser.getCurrentUser().getString(getString(R.string.parse_request_request_id)),
@@ -164,7 +172,6 @@ public class SettingsFragment extends PreferenceFragment {
                     @Override
                     public void done(ParseObject requestToBeDeleted, ParseException e) {
                         if (e == null) {
-                            String locationId = requestToBeDeleted.getString(getString(R.string.parse_request_locationID));
 
                             //Delete pending requests and set pending requests to false
                             requestToBeDeleted.deleteInBackground();
@@ -176,46 +183,29 @@ public class SettingsFragment extends PreferenceFragment {
 
                             cancelRequestPref.setEnabled(false);
 
-//                            Synchronizer.getInstance(getActivity()).getObject(
-//                                    null,
-//                                    locationId,
-//                                    getString(R.string.parse_class_location),
-//                                    INCREMENT_FIELD_REQUEST_CODE);
+                            Synchronizer.getInstance(getActivity()).getObject(
+                                    null,
+                                    requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
+                                    getString(R.string.parse_class_location),
+                                    INCREMENT_FIELD_REQUEST_CODE);
 
-                            // have to do it here, the Async will log user back in
-                            ParseQuery<ParseObject> incrementQuery = new ParseQuery<>(getString(R.string.parse_class_location));
-                            incrementQuery.getInBackground(locationId, new GetCallback<ParseObject>() {
-                                @Override
-                                public void done(ParseObject object, ParseException e) {
-                                    ParseObject status = (ParseObject) object.get(getString(R.string.parse_location_status));
-                                    status.increment(getString(R.string.parse_locationstatus_passengers_waiting), -1);
-                                    status.saveInBackground(new SaveCallback() {
-                                        @Override
-                                        public void done(ParseException e) {
-                                            if (andLogOut) {
-                                                logUserOut();
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-
-                            Log.i("SettingsFragment", "Request Cancelled");
-//
-//                            if (andLogOut) {
-//                                logUserOut();
-//                                return;
-//                            } else {
-//                                getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
-//                            }
-
-                            if (!andLogOut) {
+                            if (andLogOut) {
+                                // change SharedPreferences, waitingToLogOut to true
+                                // and do nothing just go to MainScreen
+                                // after increment is complete
+                                editor.putBoolean(getString(R.string.waiting_to_log_out), true).apply();
+                                getActivity().setResult(USER_LOGOUT_RESULT_CODE);
+                                getActivity().finish();
+                            } else {
                                 getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
+
                                 new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
                                         .setTitleText(getString(R.string.request_cancelled))
                                         .setConfirmText(getString(R.string.dialog_btn_dismiss))
                                         .show();
                             }
+
+                            Log.i("SettingsFragment", "Request Cancelled");
                         } else {
                             e.printStackTrace();
                             Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
@@ -225,21 +215,9 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private void logUserOut() {
-        ParseUser.logOutInBackground(new LogOutCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    Log.d("SettingsFragment", "Log out success: " + ParseUser.getCurrentUser());
-                    ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-                    installation.put("user", "0");
-                    installation.saveInBackground();
-                    getActivity().setResult(USER_LOGOUT_RESULT_CODE);
-                    getActivity().finish();
-                } else {
-                    Log.d("SettingsFragment", "Log out failed");
-                }
-            }
-        });
+        LoginAgent.getInstance(getActivity()).logOutInBackground();
+        getActivity().setResult(USER_LOGOUT_RESULT_CODE);
+        getActivity().finish();
     }
 
     @Override

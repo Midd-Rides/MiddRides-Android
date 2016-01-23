@@ -25,14 +25,13 @@ package com.middleendien.middrides;
 
 import android.annotation.TargetApi;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,10 +44,10 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
+import com.middleendien.middrides.utils.LoginAgent;
+import com.middleendien.middrides.utils.LoginAgent.OnLogoutListener;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
-import com.parse.LogOutCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -60,14 +59,16 @@ import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import info.hoang8f.widget.FButton;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MainScreen extends AppCompatActivity implements OnSynchronizeListener {
+public class MainScreen extends AppCompatActivity implements OnSynchronizeListener, OnLogoutListener {
 
     private Synchronizer synchronizer;
 
-    private FloatingActionButton callService;
+    private FButton callService;
 
     /**
      * request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
@@ -78,6 +79,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
     private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
+    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
 
     private static final int NOTIFICATION_ID                                = 0x026;
 
@@ -165,20 +167,16 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
 
         // define the floating action button
-        callService = (FloatingActionButton) findViewById(R.id.fab);
+        callService = (FButton) findViewById(R.id.flat_button);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
 
-        // check if there is request pending
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
-            showAnimation();
-            setTitle(getString(R.string.title_activity_main_van_on_way));
-        } else {                                                          // no
-            cancelAnimation();
-            mainImage.setImageResource(R.drawable.logo_with_background);
-            setTitle(getString(R.string.title_activity_main_select_pickup_location));
-        }
+//        DisplayMetrics metrics = new DisplayMetrics();
+//        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+//
+//        pickUpSpinner.getLayoutParams().height = (int) (metrics.heightPixels * 0.1);
+//        callService.getLayoutParams().height = (int) (metrics.heightPixels * 0.08);
+//        mainImage.getLayoutParams().height = (int) (metrics.heightPixels * 0.72);
     }
 
     private void initEvent() {
@@ -207,23 +205,36 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void onClick(View view) {
                 if (ParseUser.getCurrentUser() == null) {                   // not logged in
-                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showWarningDialog(
+                            getString(R.string.not_logged_in),
+                            null,
+                            getString(R.string.dialog_btn_dismiss));
+//                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
                     return;                     // do nothing
                 } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
                     Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
-                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    showWarningDialog(
+                            getString(R.string.not_logged_in),
+                            null,
+                            getString(R.string.dialog_btn_dismiss));
+//                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
                     return;
                 } else {
-                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
+                    Toast.makeText(MainScreen.this, ParseUser.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+//                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
+//                            .setAction("Action", null).show();
                 }
 
                 //If user has already requested the van
                 if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
+                    showWarningDialog(
+                            getString(R.string.pending_request_error),
+                            null,
+                            getString(R.string.dialog_btn_dismiss));
+//                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
+//                            .setAction("Action", null).show();
                 } else {                        //initialize Location Dialog
                     showRequestDialog();
                 }
@@ -289,10 +300,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 .show();
     }
 
+    private void showWarningDialog(String title, String contentText, String confirmText) {
+        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText(title)
+                .setContentText(contentText)
+                .showContentText(contentText != null)
+                .setConfirmText(confirmText)
+                .show();
+    }
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void cancelAnimation() {
-        if (animationRunnable != null)
-            animationHandler.removeCallbacks(animationRunnable);
         // enable spinner
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
@@ -312,35 +330,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
         // disable spinner
         pickUpSpinner.setEnabled(false);
-        animationHandler = new Handler();
-        animationRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-//                    mainImage.setImageResource(R.drawable.animation_gif);
-                    try {
-                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
-                        mainImage.setBackground(newDrawable);
-                        mainImage.setImageResource(0);
-                        newDrawable.start();
-                    } catch (IOException err1) {
-                        err1.printStackTrace();
-                    }
-                } catch (Exception e) {
-                    try {
-                        GifDrawable newDrawable = new GifDrawable(getResources(), R.drawable.animation_gif);
-                        mainImage.setBackground(newDrawable);
-                        mainImage.setImageResource(0);
-                        newDrawable.start();
-                    } catch (IOException err2) {
-                        err2.printStackTrace();
-                    }
-                } finally {
-                    animationHandler.postDelayed(this, 4000);
-                }
-            }
-        };
-        animationHandler.postDelayed(animationRunnable, 4000);
     }
 
     @Override
@@ -352,13 +341,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         // Action Bar items' click events
         int id = item.getItemId();
 
         switch (id) {
             case R.id.action_settings:
-                Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
-                startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                if (ParseUser.getCurrentUser() != null) {
+                    Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
+                    startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                }
                 return true;
         }
 
@@ -457,7 +450,29 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public void onResetPasswordComplete(boolean resetSuccess, int requestCode) {
-        // do nothing
+        switch (requestCode) {
+            case USER_RESET_PASSWORD_REQUEST_CODE:
+                Toast.makeText(
+                        MainScreen.this,
+                        resetSuccess ? getString(R.string.reset_email_sent) : getString(R.string.something_went_wrong),
+                        Toast.LENGTH_SHORT)
+                        .show();
+                break;
+        }
+    }
+
+    @Override
+    public void onIncrementComplete() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.waiting_to_log_out), false)) {
+            LoginAgent.getInstance(this).logOutInBackground();
+        }
+    }
+
+    @Override
+    public void onLogoutComplete() {
+        Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
+        startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
     }
 
     public void makeRequest(final Location locationSelected) {
@@ -494,7 +509,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                             getString(R.string.parse_class_location),
                             INCREMENT_FIELD_REQUEST_CODE);
                 } else {
-                    cancelAnimation();
                     Toast.makeText(getApplicationContext(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
@@ -504,32 +518,26 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("MainScreen", "ActivityResultCode: 0x" + Integer.toHexString(resultCode).toUpperCase());
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
-                Log.d("MainScreen", "Entering from SettingsScreen, LoggedIn: " + (ParseUser.getCurrentUser() != null));
+                Log.d("MainScreen", "Entering from SettingsScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
                     cancelAnimation();
-                    Log.d("MainScreen", "Logged out, user is null: " + (ParseUser.getCurrentUser() == null));
-                    Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
-                    startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
-                } else if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
+                    // do nothing because we will deal with the log out in the callback
+                }
+                if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
                 }
                 return;
             case LOGIN_REQUEST_CODE:
-                Log.d("MainScreen", "Entering from LoginScreen, LoggedIn: " + (ParseUser.getCurrentUser() != null));
+                Log.d("MainScreen", "Entering from LoginScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
                     finish();
                     int pid = android.os.Process.myPid();
                     android.os.Process.killProcess(pid);
                 }
                 return;
-
-//                if (ParseUser.getCurrentUser() != null) {
-//                    // TODO: check for pending request
-//                }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -541,9 +549,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             case KeyEvent.KEYCODE_BACK:
                 long backSecondPressed = System.currentTimeMillis();
                 if(backSecondPressed - backFirstPressed >= 2000){
-                    Snackbar.make(callService, getResources().getString(R.string.press_again_exit), Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null)
-                            .show();
+                    Toast.makeText(MainScreen.this, getString(R.string.press_again_exit), Toast.LENGTH_SHORT).show();
+//                    Snackbar.make(callService, getString(R.string.press_again_exit), Snackbar.LENGTH_SHORT)
+//                            .setAction("Action", null)
+//                            .show();
                     backFirstPressed = backSecondPressed;
                     return true;
                 }
@@ -560,6 +569,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     @Override
     protected void onResume() {
         Log.d("MainScreen", "Resume");
+
+        LoginAgent.getInstance(this).registerListener(LoginAgent.LOGOUT, this);
 
         // if email not verified, periodically check for email verification status
         if (ParseUser.getCurrentUser() != null && !ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
@@ -587,6 +598,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             // for testing purpose, we can change the 30000's here to 1000's just to see
         }
 
+        // check if there is request pending
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
+            showAnimation();
+            setTitle(getString(R.string.title_activity_main_van_on_way));
+        } else {                                                          // no
+            cancelAnimation();
+            mainImage.setImageResource(R.drawable.logo_with_background);
+            setTitle(getString(R.string.title_activity_main_select_pickup_location));
+        }
+
         // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
 
         super.onResume();
@@ -604,6 +626,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         super.onPause();
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
 
 
