@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnRegisterListener;
+import com.middleendien.middrides.utils.MiddRidesUtils;
 import com.parse.ParseException;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -34,8 +35,6 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
 
 
     private Button registerButton;
-
-//    private LoginAgent loginAgent;
 
     private static final int REGISTER_SUCCESS_CODE = 0x101;
     private static final int REGISTER_FAILURE_CODE = 0x102;
@@ -86,6 +85,11 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
                     return;
                 }
 
+                if (!MiddRidesUtils.isNetworkAvailable(getApplicationContext())){
+                    Toast.makeText(RegisterScreen.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 setDialogShowing(true);
                 loginAgent.registerInBackground(usernameBox.getText().toString(), passwdBox.getText().toString());
 
@@ -104,12 +108,12 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
                 if (s.toString().length() > 0 && s.charAt(s.length() - 1) == '@') {             // ends with "@"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
                             RegisterScreen.this,
-                            android.R.layout.simple_dropdown_item_1line, new String[] { s + "middlebury.edu" });
+                            android.R.layout.simple_dropdown_item_1line, new String[]{s + "middlebury.edu"});
                     usernameBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 2 && !s.toString().contains("@")) {         // "sth"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
                             RegisterScreen.this,
-                            android.R.layout.simple_dropdown_item_1line, new String[] { s + "@middlebury.edu" });
+                            android.R.layout.simple_dropdown_item_1line, new String[]{s + "@middlebury.edu"});
                     usernameBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 15 && s.toString().substring(s.length() - 15).equals("@middlebury.edu")) {
                     // completed format
@@ -127,6 +131,10 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
         });
     }
 
+    /**
+     * Displays an animation while a background process is taking place
+     * @param showing
+     */
     private void setDialogShowing(boolean showing) {
         if (showing) {
             progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)

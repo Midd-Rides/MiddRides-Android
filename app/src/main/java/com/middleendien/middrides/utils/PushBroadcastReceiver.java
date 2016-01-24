@@ -56,6 +56,8 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
     @Override
     protected void onPushReceive(Context context, Intent intent) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(context.getString(R.string.push_received), true).apply();
 
         String jsonData = intent.getExtras().getString("com.parse.Data");
         Log.d("PushReceiver", jsonData);
@@ -73,15 +75,20 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         Log.d("PushBroadcastReceiver", context.getPackageName());
         if (isRunning(context)) {
+            System.out.println("RUNNING");
+            callback.onReceivePushWhileActive(arrivingLocation);
             if (sharedPreferences.getBoolean(context.getString(R.string.screen_on), false)) {
                 // screen is on
+                System.out.println("SCREEN ON");
                 screenIsOn = true;
-                callback.onReceivePushWhileActive(arrivingLocation);
                 return;
             } else {
+                System.out.println("SCREEN OFF");
                 screenIsOn = false;
                 killActivity = true;
             }
+        }else{
+            System.out.println("NOT RUNNING");
         }
 
         isLoggedIn = ParseUser.getCurrentUser() != null;

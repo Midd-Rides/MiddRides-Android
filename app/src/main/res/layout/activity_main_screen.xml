@@ -34,6 +34,29 @@
             android:visibility="visible"
             android:contentDescription="@string/app_logo" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your van is almost at"
+            android:id="@+id/vanArrivingText"
+            android:alpha="0"
+            android:textSize="32sp"
+            android:layout_below="@+id/pick_up_spinner"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:textColor="#ffffff" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/vanArrivingLocation"
+            android:alpha="0"
+            android:textSize="32sp"
+            android:text="Track Lot/KDR"
+            android:layout_below="@+id/vanArrivingText"
+            android:layout_centerHorizontal="true"
+            android:textColor="#ffffff" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -52,7 +75,7 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:text="@string/request_pick_up"
-            android:textSize="36sp"
+            android:textSize="32sp"
             android:textColor="@android:color/white"
             android:textColorHighlight="@color/colorPrimaryDark"
             android:textAppearance="@style/TextAppearance.FontPath"

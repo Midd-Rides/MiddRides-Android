@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnLoginListener;
+import com.middleendien.middrides.utils.MiddRidesUtils;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
@@ -144,12 +145,17 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
         btnLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {               // login business is implemented with the LoginAgent class
+            public void onClick(View v) {
+            // login logic is implemented with the LoginAgent class
                 if (ContextCompat.checkSelfPermission(LoginScreen.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
                     // check e-mail validity
                     if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
                         Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!MiddRidesUtils.isNetworkAvailable(getApplicationContext())){
+                        Toast.makeText(LoginScreen.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
