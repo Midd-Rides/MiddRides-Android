@@ -24,14 +24,25 @@ package com.middleendien.middrides;
 ////////////////////////////////////////////////////////////////////
 
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -46,10 +57,13 @@ import android.widget.Toast;
 import com.middleendien.middrides.models.Location;
 import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnLogoutListener;
+import com.middleendien.middrides.utils.PushBroadcastReceiver;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -64,7 +78,10 @@ import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MainScreen extends AppCompatActivity implements OnSynchronizeListener, OnLogoutListener {
+import static com.middleendien.middrides.utils.PushBroadcastReceiver.*;
+
+public class MainScreen extends AppCompatActivity implements OnSynchronizeListener,
+        OnLogoutListener, OnPushNotificationListener {
 
     private Synchronizer synchronizer;
 
@@ -81,7 +98,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
 
-    private static final int NOTIFICATION_ID                                = 0x026;
+    private static final int NOTIFICATION_ID                                = 0x128;
 
     private static final int SETTINGS_SCREEN_REQUEST_CODE                   = 0x201;
     private static final int LOGIN_REQUEST_CODE                             = 0x202;
@@ -90,6 +107,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
     private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
+
+    private static final int BUTTON_MAKE_REQUEST                            = 0x26;
+    private static final int BUTTON_CANCEL_REQUEST                          = 0x09;
+
+
 
     // for double click exit
     private long backFirstPressed;
@@ -101,8 +123,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private Location selectedLocation;
 
     private GifImageView mainImage;
-    private Handler animationHandler;
-    private Runnable animationRunnable;
 
     // to periodically check email verification status
     private Handler checkEmailHandler;
@@ -138,9 +158,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
 
-        initData();
-
         initView();
+
+        initData();
 
         initEvent();
     }
@@ -166,17 +186,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private void initView() {
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
 
-        // define the floating action button
+        // make request button
         callService = (FButton) findViewById(R.id.flat_button);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
-
-//        DisplayMetrics metrics = new DisplayMetrics();
-//        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-//
-//        pickUpSpinner.getLayoutParams().height = (int) (metrics.heightPixels * 0.1);
-//        callService.getLayoutParams().height = (int) (metrics.heightPixels * 0.08);
-//        mainImage.getLayoutParams().height = (int) (metrics.heightPixels * 0.72);
     }
 
     private void initEvent() {
@@ -201,45 +214,99 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
         spinnerAdapter.notifyDataSetChanged();
 
-        callService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ParseUser.getCurrentUser() == null) {                   // not logged in
-                    showWarningDialog(
-                            getString(R.string.not_logged_in),
-                            null,
-                            getString(R.string.dialog_btn_dismiss));
-//                    Snackbar.make(view, R.string.not_logged_in, Snackbar.LENGTH_LONG)
-//                            .setAction("Action", null).show();
-                    return;                     // do nothing
-                } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
-                    Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
-                    showWarningDialog(
-                            getString(R.string.not_logged_in),
-                            null,
-                            getString(R.string.dialog_btn_dismiss));
-//                    Snackbar.make(view, R.string.not_email_verified, Snackbar.LENGTH_LONG)
-//                            .setAction("Action", null).show();
-                    return;
-                } else {
-                    Toast.makeText(MainScreen.this, ParseUser.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
-//                    Snackbar.make(view, ParseUser.getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT)
-//                            .setAction("Action", null).show();
-                }
+        toggleCallButton(BUTTON_MAKE_REQUEST);
+    }
 
-                //If user has already requested the van
-                if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-                    showWarningDialog(
-                            getString(R.string.pending_request_error),
-                            null,
-                            getString(R.string.dialog_btn_dismiss));
-//                    Snackbar.make(view, R.string.pending_request_error, Snackbar.LENGTH_SHORT)
-//                            .setAction("Action", null).show();
-                } else {                        //initialize Location Dialog
-                    showRequestDialog();
-                }
-            }
-        });
+    private void toggleCallButton(int changeTo) {
+        switch (changeTo) {
+            case BUTTON_MAKE_REQUEST:
+                callService.setText(getString(R.string.request_pick_up));
+                callService.setButtonColor(ContextCompat.getColor(this, R.color.colorButtons));
+
+                callService.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        if (ParseUser.getCurrentUser() == null) {                   // not logged in
+                            showWarningDialog(
+                                    getString(R.string.not_logged_in),
+                                    null,
+                                    getString(R.string.dialog_btn_dismiss));
+                            return;                     // do nothing
+                        } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
+                            Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
+                            showWarningDialog(
+                                    getString(R.string.not_logged_in),
+                                    null,
+                                    getString(R.string.dialog_btn_dismiss));
+                            return;
+                        }
+
+                        // I guess we won't be needing this part of the code
+                        // if user has already requested the van
+                        if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
+                            showWarningDialog(
+                                    getString(R.string.pending_request_error),
+                                    null,
+                                    getString(R.string.dialog_btn_dismiss));
+                        } else {                        //initialize Location Dialog
+                            showRequestDialog();
+                        }
+                    }
+                });
+                break;
+            case BUTTON_CANCEL_REQUEST:
+                callService.setText(getString(R.string.cancel_request));
+                callService.setButtonColor(ContextCompat.getColor(this, R.color.colorAccent));
+
+                callService.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cancelCurrentRequest();
+                    }
+                });
+                break;
+        }
+    }
+
+    private void cancelCurrentRequest() {
+        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_request));          // class name
+        parseQuery.getInBackground(ParseUser.getCurrentUser().getString(getString(R.string.parse_request_request_id)),
+                new GetCallback<ParseObject>() {
+                    @Override
+                    public void done(ParseObject requestToBeDeleted, ParseException e) {
+                        if (e == null) {
+                            //Delete pending requests and set pending requests to false
+                            requestToBeDeleted.deleteInBackground();
+                            ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
+                            ParseUser.getCurrentUser().saveInBackground();
+
+                            // I don't remember where else I use this preference
+                            // but I'm too scared to take it out
+                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
+                            editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
+
+                            Synchronizer.getInstance(MainScreen.this).getObject(
+                                    null,
+                                    requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
+                                    getString(R.string.parse_class_location),
+                                    INCREMENT_FIELD_REQUEST_CODE);
+
+                            new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
+                                    .setTitleText(getString(R.string.request_cancelled))
+                                    .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                    .show();
+
+                            Log.i("SettingsFragment", "Request Cancelled");
+
+                            toggleCallButton(BUTTON_MAKE_REQUEST);
+                            cancelAnimation();
+                        } else {
+                            e.printStackTrace();
+                            Toast.makeText(MainScreen.this, getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     private void showRequestDialog() {
@@ -254,6 +321,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         // perform request
                         makeRequest(selectedLocation);
                         setTitle(getString(R.string.title_activity_main_van_on_way));
+                        toggleCallButton(BUTTON_CANCEL_REQUEST);
 
                         // for spinner position when re-entering
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
@@ -315,6 +383,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
         mainImage.setBackground(null);
+        setTitle(getString(R.string.title_activity_main_select_pickup_location));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -324,12 +393,45 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             mainImage.setBackground(newDrawable);
             mainImage.setImageResource(0);
             newDrawable.start();
+            setTitle(getString(R.string.title_activity_main_van_on_way));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // disable spinner
         pickUpSpinner.setEnabled(false);
+    }
+
+    @Override
+    public void onReceivePushWhileActive(String arrivingLocation) {
+        showVanComingDialog(arrivingLocation);
+        Log.d("MainScreen", "Received Push");
+    }
+
+    @Override
+    public void onReceivePushWhileDormant() {
+        killSelf();
+        Log.d("MainScreen", "Received Push");
+    }
+
+    private void killSelf() {
+        finish();
+        int pid = android.os.Process.myPid();
+        android.os.Process.killProcess(pid);
+    }
+
+    @SuppressWarnings("unused")
+    private void bringSelfToFront() {
+        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+        for (RunningTaskInfo task : tasks) {
+            if (task.baseActivity.getPackageName().equalsIgnoreCase(getPackageName())) {
+                activityManager.moveTaskToFront(task.id, 0);
+                break;
+            }
+        }
+
     }
 
     @Override
@@ -376,7 +478,16 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 editor.putBoolean(getString(R.string.parse_status_is_running),
                         object.getBoolean(getString(R.string.parse_status_is_running))).apply();
                 Log.i("QueryInfo", "Service Running: " + object.getBoolean(getString(R.string.parse_status_is_running)));
-                // TODO: disable app if not running
+
+                // disable app when MiddRides service is down
+                if (!object.getBoolean(getString(R.string.parse_status_is_running))) {
+                    callService.setEnabled(false);
+                    setTitle(getString(R.string.title_activity_main_service_down));
+                    cancelAnimation();
+                } else {
+                    callService.setEnabled(true);
+                }
+
                 break;
 
             case STATUS_LOCATION_VERSION_REQUEST_CODE:
@@ -422,7 +533,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 break;
 
             case LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE:           // update from local
-                Log.d("MainScreen", "updateFromLocal");
+                Log.d("MainScreen", "Update From Local");
 
                 if (objectList.size() > 1) {
                     locationList.clear();
@@ -432,6 +543,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                                 obj.getDouble(getString(R.string.parse_location_lng)),
                                 obj.getObjectId()));
                     }
+
                     spinnerAdapter.notifyDataSetChanged();
 
                     // if has pending request, set spinner position accordingly
@@ -444,8 +556,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 break;
         }
 
-        Log.d("MainScreen", "locationList is null: " + (locationList == null) + "");
-        Log.d("MainScreen", "Adapter Count " + spinnerAdapter.getCount() + "");
+        Log.d("MainScreen", "locationList is null: " + (locationList == null));
+        Log.d("MainScreen", "locationList Count" + locationList.size());
+        Log.d("MainScreen", "Adapter Count " + spinnerAdapter.getCount());
     }
 
     @Override
@@ -526,7 +639,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     // do nothing because we will deal with the log out in the callback
                 }
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
-                    setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
                 }
                 return;
@@ -544,15 +656,19 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        Log.d("MainScreen", "onNewIntent");
+        Synchronizer.getInstance(this).getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+        super.onNewIntent(intent);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 long backSecondPressed = System.currentTimeMillis();
                 if(backSecondPressed - backFirstPressed >= 2000){
                     Toast.makeText(MainScreen.this, getString(R.string.press_again_exit), Toast.LENGTH_SHORT).show();
-//                    Snackbar.make(callService, getString(R.string.press_again_exit), Snackbar.LENGTH_SHORT)
-//                            .setAction("Action", null)
-//                            .show();
                     backFirstPressed = backSecondPressed;
                     return true;
                 }
@@ -602,12 +718,18 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
             showAnimation();
-            setTitle(getString(R.string.title_activity_main_van_on_way));
+            toggleCallButton(BUTTON_CANCEL_REQUEST);
         } else {                                                          // no
             cancelAnimation();
+            toggleCallButton(BUTTON_MAKE_REQUEST);
             mainImage.setImageResource(R.drawable.logo_with_background);
-            setTitle(getString(R.string.title_activity_main_select_pickup_location));
         }
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(getString(R.string.screen_on), true).apply();
+
+        // for push notification
+        registerListener(this);
 
         // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
 
@@ -622,6 +744,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             checkEmailHandler.removeCallbacks(checkEmailRunnable);
             Log.i("MainScreen", "Handler stopped");
         }
+
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        editor.putBoolean(getString(R.string.screen_on), false).apply();
 
         super.onPause();
     }

@@ -5,6 +5,7 @@
     <string name="title_activity_main_page">MiddRides</string>
     <string name="title_activity_main_select_pickup_location">Select your pick up location</string>
     <string name="title_activity_main_van_on_way">Your van is on its way</string>
+    <string name="title_activity_main_service_down">MiddRides is not running</string>
     
     <!--Action Bars & SnackBar-->
     <string name="action_settings">Settings</string>
@@ -26,6 +27,7 @@
     <string name="resend_email_button">Re-send verification e-mail</string>
     <string name="reset_passwd_button">Reset Password</string>
     <string name="request_pick_up">Request Pick Up</string>
+    <string name="cancel_request">Cancel Request</string>
 
     <!--Dialogs-->
     <string name="dialog_select_location">Select Location</string>
@@ -119,6 +121,7 @@
     <string name="location_version">LocationVersion</string>
     <string name="request_spinner_position">spinnerPosition</string>
     <string name="waiting_to_log_out">waitingToLogOut</string>
+    <string name="screen_on">screenOn</string>
 
     <string name="cat_request">Request</string>
     <string name="cat_user">User</string>
