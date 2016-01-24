@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
@@ -69,8 +70,9 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
         if(ParseUser.getCurrentUser() != null){
             Log.d("LoginScreen", "Already has user");
             Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-            startActivity(toMainScreen);
-            finish();
+            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            NavUtils.navigateUpTo(this, toMainScreen);
         }
 
         // adjust logo
@@ -194,8 +196,9 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             case REGISTER_REQUEST_CODE:
                 if(resultCode == REGISTER_SUCCESS_RESULT_CODE){
                     Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-                    startActivity(toMainScreen);
-                    finish();
+                    toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    NavUtils.navigateUpTo(this, toMainScreen);
                 } else {
                     // Register not successful, do nothing
                 }
@@ -260,19 +263,9 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             Log.i("Login Success", "Login Success");
             Toast.makeText(LoginScreen.this, "Login Success", Toast.LENGTH_SHORT).show();
             Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-            startActivity(toMainScreen);
-
-            if (ParseUser.getCurrentUser().getBoolean(getString(R.string.is_dispatcher))) {
-                // TODO: go to dispatcher page (or begin that fragment or what)
-            } else {
-                // cancel pending status
-                ParseUser currentUser = ParseUser.getCurrentUser();
-                currentUser.put(getString(R.string.parse_user_pending_request), false);
-                currentUser.saveInBackground();
-                toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-                startActivity(toMainScreen);
-            }
-            finish();
+            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            NavUtils.navigateUpTo(this, toMainScreen);
         } else {            // login failure
             if (e.getCode() == ParseException.CONNECTION_FAILED) {
                 Toast.makeText(LoginScreen.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();

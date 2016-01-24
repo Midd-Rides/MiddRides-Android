@@ -84,7 +84,7 @@ public class Synchronizer {
     }
 
     public void getListObjectsLocal (String className, final int requestCode) {
-        Log.d("Synchronizer", "Getting List Local" + className + "." + requestCode);
+        Log.d("Synchronizer", "Getting List Local: " + className + ".0x" + Integer.toHexString(requestCode));
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
         parseQuery.fromLocalDatastore();
         parseQuery.findInBackground(new FindCallback<ParseObject>() {

@@ -30,8 +30,8 @@ public class SplashScreen extends AppCompatActivity {
 
         ImageView splashLogo = (ImageView) findViewById(R.id.splash_img);
 
-        splashLogo.getLayoutParams().width = (int)(metrics.widthPixels * 0.5);
-        splashLogo.getLayoutParams().height = (int)(metrics.heightPixels * 0.4);
+        splashLogo.getLayoutParams().width = (int) (metrics.widthPixels * 0.5);
+        splashLogo.getLayoutParams().height = (int) (metrics.heightPixels * 0.4);
 
         int SPLASH_TIME_OUT = 2000;
         new Handler().postDelayed(new Runnable() {
@@ -41,6 +41,7 @@ public class SplashScreen extends AppCompatActivity {
                 // This method will be executed once the timer is over
                 // Start your app main activity
                 Intent i = new Intent(SplashScreen.this, MainScreen.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
 
                 // close this activity

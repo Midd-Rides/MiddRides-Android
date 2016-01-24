@@ -67,9 +67,6 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
         passwdBox = (EditText) findViewById(R.id.register_passwd);
         passwdConfirmBox = (EditText) findViewById(R.id.register_passwd_confirm);
 
-        //TODO: tap and hide keyboard
-
-
         registerButton = (Button) findViewById(R.id.register_register);
     }
 
