@@ -75,21 +75,20 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         Log.d("PushBroadcastReceiver", context.getPackageName());
         if (isRunning(context)) {
-            Log.i("PushReceiver", "Running");
+            System.out.println("RUNNING");
             callback.onReceivePushWhileActive(arrivingLocation);
             if (sharedPreferences.getBoolean(context.getString(R.string.screen_on), false)) {
                 // screen is on
-                Log.i("PushReceiver", "Screen on");
+                System.out.println("SCREEN ON");
                 screenIsOn = true;
                 return;
             } else {
-                // screen is off
-                Log.i("PushReceiver", "Screen off");
+                System.out.println("SCREEN OFF");
                 screenIsOn = false;
                 killActivity = true;
             }
         }else{
-            Log.i("PushReceiver", "Not running");
+            System.out.println("NOT RUNNING");
         }
 
         isLoggedIn = ParseUser.getCurrentUser() != null;
