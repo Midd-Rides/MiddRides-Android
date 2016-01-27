@@ -197,15 +197,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
      * Resets everything in the current view to its initial state
      */
     private void resetView(){
-        System.out.println("RESET VIEW");
+        Log.i("MainScreen", "Reset view");
 
         ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
         ParseUser.getCurrentUser().saveInBackground();
 
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
-        editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
-        editor.putBoolean(getString(R.string.push_received), false).apply();
+        editor.putBoolean(getString(R.string.parse_user_pending_request), false)
+                .putBoolean(getString(R.string.push_received), false)
+                .apply();
 
+        // change views
         toggleCallButton(BUTTON_MAKE_REQUEST);
         vanArrivingText.setAlpha(0);
         vanArrivingLocation.setAlpha(0);
@@ -456,7 +458,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public void onReceivePushWhileActive(String arrivingLocation) {
-        System.out.println("RECEIVE PUSH WHILE ACTIVE");
+        Log.i("PushReceiver", "Receive push while active");
         showVanComingDialog(arrivingLocation);
         displayVanArrivingMessages();
         Log.d("MainScreen", "Received Push");
@@ -483,8 +485,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         vanArrivingLocation.setAlpha(1);
         vanArrivingText.setAlpha(1);
 
-        System.out.println(vanArrivingLocation.getText());
-        System.out.println(vanArrivingText.getText());
+
+        Log.i("MainScreen", "Van arriving" + vanArrivingLocation.getText());
+        Log.i("MainScreen", "Van arriving" + vanArrivingText.getText());
 
         // reset the view after 5 minutes
         // resetView needs to be run from the main thread because it modifies views created
@@ -679,9 +682,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         final ParseObject parseUserRequest = new ParseObject(getString(R.string.parse_class_request));
         parseUserRequest.put(getString(R.string.parse_request_request_time), new Date());                       // time
         parseUserRequest.put(getString(R.string.parse_request_user_id),
-                ParseUser.getCurrentUser().getObjectId());                                                      // userId
+                ParseUser.getCurrentUser().getObjectId());                     // userId
         parseUserRequest.put(getString(R.string.parse_request_user_email),
-                ParseUser.getCurrentUser().get(getString(R.string.parse_user_email)));                          // email
+                ParseUser.getCurrentUser().get(getString(R.string.parse_user_email)));                      // email
         parseUserRequest.put(getString(R.string.parse_request_pickup_location), locationSelected.getName());    // origin
         parseUserRequest.put(getString(R.string.parse_request_locationID), locationSelected.getLocationId());
 
@@ -695,7 +698,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    //Update user entries when done
+                    // update user entries when done
                     ParseUser setPendingRequestUser = ParseUser.getCurrentUser();
                     setPendingRequestUser.put(getString(R.string.parse_user_pending_request), true);
                     setPendingRequestUser.put(getString(R.string.parse_request_request_id), parseUserRequest.getObjectId());
