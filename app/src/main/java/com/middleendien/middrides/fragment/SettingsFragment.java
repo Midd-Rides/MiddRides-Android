@@ -200,7 +200,7 @@ public class SettingsFragment extends PreferenceFragment {
                                 getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
 
                                 new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
-                                        .setTitleText(getString(R.string.request_cancelled))
+                                        .setTitleText(getString(R.string.dialog_title_request_cancelled))
                                         .setConfirmText(getString(R.string.dialog_btn_dismiss))
                                         .show();
                             }
@@ -208,7 +208,11 @@ public class SettingsFragment extends PreferenceFragment {
                             Log.i("SettingsFragment", "Request Cancelled");
                         } else {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                            try {
+                                Toast.makeText(getActivity(), getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
+                            } catch (Exception ridiculous) {
+                                // what can you do
+                            }
                         }
                     }
                 });
