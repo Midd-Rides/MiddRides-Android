@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.input.InputManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -133,12 +134,17 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 } else if (s.toString().length() == 0) {
                     // cleared everything or initial state, without @
                     usernameBox.setAdapter(null);
-                }   // else do nothing
+                }               // else do nothing
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                if (s.toString().endsWith("@middlebury.edu")) {
+                    passwdBox.clearFocus();
+                    passwdBox.requestFocus();
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    inputMethodManager.showSoftInput(passwdBox, InputMethodManager.SHOW_IMPLICIT);
+                }
             }
         });
 

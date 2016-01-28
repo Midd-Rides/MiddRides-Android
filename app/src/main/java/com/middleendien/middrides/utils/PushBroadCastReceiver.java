@@ -7,7 +7,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,7 +29,6 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Peter on 1/14/16.
@@ -49,8 +47,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     static OnPushNotificationListener callback;
 
-    private static Context notificationContext;
-
     Notification notification = null;
     Ringtone ringtone = null;
 
@@ -58,8 +54,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     @Override
     protected void onPushReceive(Context context, Intent intent) {
-        Log.d("PushReceiver", "Same context: " + (context.equals(notificationContext)));
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -198,7 +192,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     public static void registerPushListener(Context context) {
         callback = (OnPushNotificationListener) context;
-        notificationContext = context;
     }
 
     public interface OnPushNotificationListener {

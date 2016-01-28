@@ -130,8 +130,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     // to reset view a while after notification
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
-//    private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
-    private static final long RESET_TIMEOUT = 20000;      // 5 minutes
+    private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -542,6 +541,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone ringtone = RingtoneManager.getRingtone(this, alarm);
         ringtone.play();
+
+
     }
 
     @Override
@@ -933,7 +934,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             Log.i("MainScreen", "Handler stopped");
         }
 
-        resetViewHandler.removeCallbacks(resetViewRunnable);
+        if (resetViewHandler != null)
+            resetViewHandler.removeCallbacks(resetViewRunnable);
 
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putBoolean(getString(R.string.screen_on), false).apply();
