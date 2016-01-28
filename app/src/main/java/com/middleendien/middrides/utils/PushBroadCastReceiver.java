@@ -28,6 +28,7 @@ import com.parse.ParseUser;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -99,8 +100,11 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         if (isLoggedIn && requestPending
                 && pickUpLocation.equals(arrivingLocation)) {
-            // so that reset view will be run
-            editor.putBoolean(context.getString(R.string.request_notified), true).apply();
+            long receivedTime = Calendar.getInstance().getTimeInMillis();
+            editor.putLong(context.getString(R.string.push_receive_time), receivedTime)
+                    // so that reset view will be run
+                    .putBoolean(context.getString(R.string.request_notified), true).apply();
+
             Log.d("PushReceiver", "Notified");
 
             if (screenIsOn) {

@@ -128,6 +128,7 @@
     <string name="waiting_to_log_out">waitingToLogOut</string>
     <string name="screen_on">screenOn</string>
     <string name="request_notified">notified</string>
+    <string name="push_receive_time">pushReceiveTime</string>
     <string name="cat_request">Request</string>
     <string name="cat_user">User</string>
     <string name="cat_others">Others</string>
