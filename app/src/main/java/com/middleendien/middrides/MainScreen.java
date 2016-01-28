@@ -125,6 +125,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private Handler checkEmailHandler;
     private Runnable checkEmailRunnable;
 
+    // to reset view a while after notification
+    private Handler resetViewHandler;
+    private Runnable resetViewTask;
+
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
 
@@ -197,7 +201,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
      * Resets everything in the current view to its initial state
      */
     private void resetView(){
-        System.out.println("RESET VIEW");
+        Log.i("MainScreen", "Reset view");
 
         ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
         ParseUser.getCurrentUser().saveInBackground();
@@ -456,16 +460,15 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public void onReceivePushWhileActive(String arrivingLocation) {
-        System.out.println("RECEIVE PUSH WHILE ACTIVE");
         showVanComingDialog(arrivingLocation);
         displayVanArrivingMessages();
-        Log.d("MainScreen", "Received Push");
+        Log.d("MainScreen", "Received Push while active");
     }
 
     @Override
     public void onReceivePushWhileDormant() {
         killSelf();
-        Log.d("MainScreen", "Received Push");
+        Log.d("MainScreen", "Received Push while dormant");
     }
 
     private void killSelf() {
@@ -483,13 +486,15 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         vanArrivingLocation.setAlpha(1);
         vanArrivingText.setAlpha(1);
 
-        System.out.println(vanArrivingLocation.getText());
-        System.out.println(vanArrivingText.getText());
+        Log.i("MainScreen", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
 
         // reset the view after 5 minutes
         // resetView needs to be run from the main thread because it modifies views created
         // from the main thread. If we try to edit it using a different thread it will throw errors.
-        Runnable task = new Runnable() {
+        // TODO: this is not safe
+        // in resetView(), check whether a request is pending and whether notified
+
+        resetViewTask = new Runnable() {
             @Override
             public void run(){
                 runOnUiThread(new Runnable(){
@@ -501,7 +506,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             }
         };
 
-        worker.schedule(task, 5, TimeUnit.MINUTES);
+        worker.schedule(resetViewTask, 5, TimeUnit.MINUTES);
     }
 
     @SuppressWarnings("unused")
