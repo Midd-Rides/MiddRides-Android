@@ -17,12 +17,11 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat.Builder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.middleendien.middrides.MainScreen;
 import com.middleendien.middrides.R;
-import com.middleendien.middrides.SplashScreen;
 import com.parse.ParsePushBroadcastReceiver;
 import com.parse.ParseUser;
 
@@ -30,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Peter on 1/14/16.
@@ -48,14 +48,19 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     static OnPushNotificationListener callback;
 
+    private static Context notificationContext;
+
     Notification notification = null;
     Ringtone ringtone = null;
 
-    private static final int NOTIFICATION_ID = 0x128;
+    public static final int NOTIFICATION_ID = 123;
 
     @Override
     protected void onPushReceive(Context context, Intent intent) {
+        Log.d("PushReceiver", "Same context: " + (context.equals(notificationContext)));
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
 
         String jsonData = intent.getExtras().getString("com.parse.Data");
         Log.d("PushReceiver", jsonData);
@@ -71,17 +76,21 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
         screenIsOn = false;
         killActivity = false;
 
-        Log.d("PushBroadcastReceiver", context.getPackageName());
+        Log.d("PushReceiver", context.getPackageName());
         if (isRunning(context)) {
+            Log.i("PushReceiver", "App running");
             if (sharedPreferences.getBoolean(context.getString(R.string.screen_on), false)) {
                 // screen is on
+                Log.i("PushReceiver", "Screen on");
                 screenIsOn = true;
-                callback.onReceivePushWhileActive(arrivingLocation);
-                return;
+                killActivity = false;
             } else {
+                Log.i("PushReceiver", "Screen off");
                 screenIsOn = false;
                 killActivity = true;
             }
+        } else {
+            Log.i("PushReceiver", "App not running");
         }
 
         isLoggedIn = ParseUser.getCurrentUser() != null;
@@ -90,12 +99,16 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         if (isLoggedIn && requestPending
                 && pickUpLocation.equals(arrivingLocation)) {
+            // so that reset view will be run
+            editor.putBoolean(context.getString(R.string.request_notified), true).apply();
+            Log.d("PushReceiver", "Notified");
+
             if (screenIsOn) {
-                callback.onReceivePushWhileActive(arrivingLocation);
+                callback.onReceivePushWhileScreenOn(arrivingLocation);
                 return;
             }
 
-            showNotificationWithIntent(context);
+            showNotificationWithIntent(context);            // MainScreen kills self
 
             if (killActivity)
                 callback.onReceivePushWhileDormant();
@@ -107,35 +120,30 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     @TargetApi(16)
     private void showNotificationWithIntent(Context context) {
-        Intent toMainScreen = new Intent(context, SplashScreen.class);
+        Intent toMainScreen = new Intent(context, MainScreen.class);
         toMainScreen.putExtra(context.getString(R.string.parse_request_arriving_location), arrivingLocation);
-        toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        toMainScreen.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, toMainScreen, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addNextIntent(toMainScreen);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Builder builder = new Builder(context)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(context.getString(R.string.app_name))
-                .setContentText(context.getString(R.string.van_is_coming) + " " + arrivingLocation)
+                .setContentText(context.getString(R.string.van_is_coming) + " " + "E Lot")
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentIntent(resultPendingIntent)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
-        notification = builder.build();
+        Notification notification = builder.build();
         notification.defaults |= Notification.DEFAULT_VIBRATE;
         notification.defaults |= Notification.DEFAULT_LIGHTS;
-        notification.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        notification.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         if (Build.VERSION.SDK_INT >= 21) {
             notification.defaults |= Notification.VISIBILITY_PUBLIC;
             notification.category = Notification.CATEGORY_ALARM;
         }
 
-        // show notification
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(NOTIFICATION_ID, notification);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     private Boolean isRunning(Context context) {
@@ -143,7 +151,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
         List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
         for (RunningTaskInfo task : tasks) {
             if (context.getPackageName().equalsIgnoreCase(task.baseActivity.getPackageName())) {
-                Log.d("PushBroadcastReceiver", "Activity Running");
+                Log.d("PushReceiver", "Activity Running");
                 return true;
             }
         }
@@ -154,13 +162,13 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
     @Override
     protected void onPushOpen(Context context, Intent intent) {
         ringtone.stop();
-        Log.d("PushBroadcastReceiver", "Push opened");
+        Log.d("PushReceiver", "Push opened");
         super.onPushOpen(context, intent);
     }
 
     @Override
     protected void onPushDismiss(Context context, Intent intent) {
-        Log.d("PushBroadcastReceiver", "Push dismissed");
+        Log.d("PushReceiver", "Push dismissed");
         super.onPushDismiss(context, intent);
     }
 
@@ -184,15 +192,16 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
         return MainScreen.class;
     }
 
-    public static void registerListener(Context context) {
+    public static void registerPushListener(Context context) {
         callback = (OnPushNotificationListener) context;
+        notificationContext = context;
     }
 
     public interface OnPushNotificationListener {
 
         // will be called if activity is on
 
-        void onReceivePushWhileActive(String arrivingLocation);
+        void onReceivePushWhileScreenOn(String arrivingLocation);
 
         void onReceivePushWhileDormant();
 

@@ -25,7 +25,7 @@ import java.util.List;
  * Singleton pattern
  *
  * Also, at this stage, we don't have a list of callbacks,
- * which can be done with a registerListener function
+ * which can be done with a registerPushListener function
  */
 public class Synchronizer {
 

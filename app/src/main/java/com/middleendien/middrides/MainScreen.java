@@ -26,10 +26,12 @@ package com.middleendien.middrides;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,16 +46,19 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.middleendien.middrides.models.Location;
 import com.middleendien.middrides.utils.LoginAgent;
 import com.middleendien.middrides.utils.LoginAgent.OnLogoutListener;
+import com.middleendien.middrides.utils.MiddRidesUtils;
 import com.middleendien.middrides.utils.Synchronizer;
 import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -89,8 +94,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
     private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
 
-    private static final int NOTIFICATION_ID                                = 0x128;
-
     private static final int SETTINGS_SCREEN_REQUEST_CODE                   = 0x201;
     private static final int LOGIN_REQUEST_CODE                             = 0x202;
 
@@ -99,10 +102,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
     private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
 
+    private static final int CANCEL_REQUEST_FLAG_MANUAL                     = 0x111;
+    private static final int CANCEL_REQUEST_FLAG_TIMEOUT                    = 0x112;
+
     private static final int BUTTON_MAKE_REQUEST                            = 0x26;
     private static final int BUTTON_CANCEL_REQUEST                          = 0x09;
-
-
 
     // for double click exit
     private long backFirstPressed;
@@ -112,6 +116,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     // location spinners
     private Spinner pickUpSpinner;
     private Location selectedLocation;
+    private TextView vanArrivingText;
+    private TextView vanArrivingLocation;
 
     private GifImageView mainImage;
 
@@ -119,9 +125,12 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private Handler checkEmailHandler;
     private Runnable checkEmailRunnable;
 
+    // to reset view a while after notification
+    private Handler resetViewHandler;
+    private Runnable resetViewRunnable;
+
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,16 +147,13 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             try {
                 String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
                 showVanComingDialog(arrivingAt);
-                Log.d("PushNotification", "Coming to " + arrivingAt);
+                Log.d("MainScreen", "Coming to " + arrivingAt);
             } catch (Exception e) {
-                // forget it
+                e.printStackTrace();
             }
         } else {
-            Log.d("PushNotification", "Not from push");
+            Log.d("MainScreen", "Not from push");
         }
-
-        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        manager.cancel(NOTIFICATION_ID);
 
         initView();
 
@@ -176,11 +182,26 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     private void initView() {
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
+        vanArrivingText = (TextView) findViewById(R.id.vanArrivingText);
+        vanArrivingLocation = (TextView) findViewById(R.id.vanArrivingLocation);
 
         // make request button
         callService = (FButton) findViewById(R.id.flat_button);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
+    }
+
+    /**
+     * Resets everything in the current view to its initial state
+     */
+    private void resetView(){
+        Log.i("MainScreen", "Reset view");
+
+        cancelAnimation();
+
+        toggleCallButton(BUTTON_MAKE_REQUEST);
+        vanArrivingText.setAlpha(0);
+        vanArrivingLocation.setAlpha(0);
     }
 
     private void initEvent() {
@@ -194,6 +215,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedLocation = (Location) spinnerAdapter.getItem(position);
+                vanArrivingLocation.setText(selectedLocation.getName());
                 Log.d("PickupSpinner", "Selected: " + position + "");
             }
 
@@ -206,6 +228,37 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         spinnerAdapter.notifyDataSetChanged();
 
         toggleCallButton(BUTTON_MAKE_REQUEST);
+
+        // for notification debug, just leave it
+//        mainImage.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent toMainScreen = new Intent(getApplicationContext(), MainScreen.class);
+//                toMainScreen.putExtra(getString(R.string.parse_request_arriving_location), "Good God");
+//                toMainScreen.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, toMainScreen, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainScreen.this)
+//                        .setContentTitle(getString(R.string.app_name))
+//                        .setContentText(getString(R.string.van_is_coming) + " " + "E Lot")
+//                        .setSmallIcon(R.drawable.ic_notification)
+//                        .setContentIntent(pendingIntent)
+//                        .setAutoCancel(true);
+//
+//                Notification notification = builder.build();
+//                notification.defaults |= Notification.DEFAULT_VIBRATE;
+//                notification.defaults |= Notification.DEFAULT_LIGHTS;
+//                notification.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+//
+//                if (Build.VERSION.SDK_INT >= 21) {
+//                    notification.defaults |= Notification.VISIBILITY_PUBLIC;
+//                    notification.category = Notification.CATEGORY_ALARM;
+//                }
+//
+//                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//                notificationManager.notify(123, notification);
+//            }
+//        });
     }
 
     private void toggleCallButton(int changeTo) {
@@ -231,10 +284,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                                     null,
                                     getString(R.string.dialog_btn_dismiss));
                             return;
-                        }
+                        } else if (warnIfDisconnected())
+                            return;
 
-                        // I guess we won't be needing this part of the code
-                        // if user has already requested the van
                         if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
                             showWarningDialog(
                                     getString(R.string.pending_request_error),
@@ -246,6 +298,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     }
                 });
                 break;
+
             case BUTTON_CANCEL_REQUEST:
                 callService.setText(getString(R.string.cancel_request));
                 callService.setButtonColor(ContextCompat.getColor(this, R.color.colorAccent));
@@ -253,14 +306,33 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 callService.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        cancelCurrentRequest();
+                        if(warnIfDisconnected())
+                            return;
+
+                        cancelCurrentRequest(CANCEL_REQUEST_FLAG_MANUAL);
                     }
                 });
                 break;
         }
     }
 
-    private void cancelCurrentRequest() {
+
+    /**
+     * Displays a warning if there is no internet connection.
+     * @return true if disconnected, false if connected
+     */
+    private boolean warnIfDisconnected(){
+        if (!MiddRidesUtils.isNetworkAvailable(getApplicationContext())){
+            showWarningDialog(
+                    getString(R.string.no_internet_warning),
+                    null,
+                    getString(R.string.dialog_btn_dismiss));
+            return true;
+        }
+        return false;
+    }
+
+    private void cancelCurrentRequest(final int flag) {
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_request));          // class name
         parseQuery.getInBackground(ParseUser.getCurrentUser().getString(getString(R.string.parse_request_request_id)),
                 new GetCallback<ParseObject>() {
@@ -269,33 +341,48 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         if (e == null) {
                             //Delete pending requests and set pending requests to false
                             requestToBeDeleted.deleteInBackground();
-                            ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
-                            ParseUser.getCurrentUser().saveInBackground();
-
-                            // I don't remember where else I use this preference
-                            // but I'm too scared to take it out
-                            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
-                            editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
-
                             Synchronizer.getInstance(MainScreen.this).getObject(
                                     null,
                                     requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
                                     getString(R.string.parse_class_location),
                                     INCREMENT_FIELD_REQUEST_CODE);
 
-                            new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
-                                    .setTitleText(getString(R.string.request_cancelled))
-                                    .setConfirmText(getString(R.string.dialog_btn_dismiss))
-                                    .show();
 
                             Log.i("SettingsFragment", "Request Cancelled");
 
-                            toggleCallButton(BUTTON_MAKE_REQUEST);
-                            cancelAnimation();
                         } else {
                             e.printStackTrace();
+                            Log.e("Cancellation Error", e.getMessage().toString());
                             Toast.makeText(MainScreen.this, getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                         }
+                        ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
+                        ParseUser.getCurrentUser().saveInBackground();
+
+                        // I don't remember where else I use this preference
+                        // but I'm too scared to take it out
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
+                        editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
+
+                        switch (flag) {
+                            case CANCEL_REQUEST_FLAG_MANUAL:
+                                new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
+                                        .setTitleText(getString(R.string.dialog_title_request_cancelled))
+                                        .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                        .show();
+                                break;
+
+                            case CANCEL_REQUEST_FLAG_TIMEOUT:
+                                new SweetAlertDialog(MainScreen.this, SweetAlertDialog.ERROR_TYPE)
+                                        .setTitleText(getString(R.string.dialog_title_request_timeout))
+                                        .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                        .show();
+                                break;
+                        }
+
+                        editor.putBoolean(getString(R.string.parse_user_pending_request), false)
+                                .putBoolean(getString(R.string.request_notified), false)
+                                .apply();
+                        resetView();
                     }
                 });
     }
@@ -309,8 +396,13 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                     @Override
                     public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        // perform request
+                        //make request
                         makeRequest(selectedLocation);
+
+                        // Replace whitespaces and forward slashes in location name with hyphens
+                        String channelName = selectedLocation.getName().replace('/', '-').replace(' ', '-');
+                        ParsePush.subscribeInBackground(channelName);
+
                         setTitle(getString(R.string.title_activity_main_van_on_way));
                         toggleCallButton(BUTTON_CANCEL_REQUEST);
 
@@ -344,9 +436,13 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void onClick(SweetAlertDialog sweetAlertDialog) {
                 dialog.dismissWithAnimation();
+                // Replace whitespaces and forward slashes in location name with hyphens
+                String channelName = selectedLocation.getName().replace('/', '-').replace(' ', '-');
+                ParsePush.unsubscribeInBackground(channelName);
+
+                displayVanArrivingMessages();
             }
         });
-
 
         dialog.show();
     }
@@ -374,6 +470,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         pickUpSpinner.setEnabled(true);
         mainImage.setImageResource(R.drawable.logo_with_background);
         mainImage.setBackground(null);
+
+        // in case is showing
+        vanArrivingText.setAlpha(0);
+        vanArrivingLocation.setAlpha(0);
+
         setTitle(getString(R.string.title_activity_main_select_pickup_location));
     }
 
@@ -394,21 +495,67 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     }
 
     @Override
-    public void onReceivePushWhileActive(String arrivingLocation) {
+    public void onReceivePushWhileScreenOn(String arrivingLocation) {
+        Log.d("MainScreen", "Received Push while active");
         showVanComingDialog(arrivingLocation);
-        Log.d("MainScreen", "Received Push");
+
+        Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone ringtone = RingtoneManager.getRingtone(this, alarm);
+        ringtone.play();
     }
 
     @Override
     public void onReceivePushWhileDormant() {
+        Log.d("MainScreen", "Received Push while dormant");
         killSelf();
-        Log.d("MainScreen", "Received Push");
     }
 
     private void killSelf() {
+        Log.i("MainScreen", "I'm dead");
         finish();
         int pid = android.os.Process.myPid();
         android.os.Process.killProcess(pid);
+    }
+
+    /**
+     * Displays info messages that say the van is heading to the requested stop.
+     * Resets the view after 5 minutes.
+     */
+    private void displayVanArrivingMessages(){
+        Log.d("MainScreen", "DisplayVanArrivingMessages");
+        // Display messages informing the user that the van is coming
+        vanArrivingLocation.setAlpha(1);
+        vanArrivingText.setAlpha(1);
+
+        Log.i("MainScreen", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
+
+        // reset the view after 5 minutes
+        // resetView needs to be run from the main thread because it modifies views created
+        // from the main thread. If we try to edit it using a different thread it will throw errors.
+        // TODO: this is not safe
+        // in resetView(), check whether a request is pending and whether notified
+
+        resetViewHandler = new Handler();
+
+        resetViewRunnable = new Runnable() {
+            @Override
+            public void run(){
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                        if (ParseUser.getCurrentUser() != null &&
+                                ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
+                                sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+                            // logged in && has pending request && notified
+                            cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+                        }
+                    }
+                });
+            }
+        };
+//        resetViewHandler.postDelayed(resetViewRunnable, 5 * 60000);     // 5 minutes
+        resetViewHandler.postDelayed(resetViewRunnable, 5000);     // 5 minutes
     }
 
     @SuppressWarnings("unused")
@@ -434,8 +581,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         // Action Bar items' click events
         int id = item.getItemId();
 
@@ -593,7 +738,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         parseUserRequest.put(getString(R.string.parse_request_locationID), locationSelected.getLocationId());
 
         // save to sharedPreference
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putString(getString(R.string.parse_request_pickup_location), locationSelected.getName())
                 .putBoolean(getString(R.string.parse_user_pending_request), true)
                 .apply();
@@ -602,11 +747,14 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    //Update user entries when done
-                    ParseUser setPendingRequestUser = ParseUser.getCurrentUser();
-                    setPendingRequestUser.put(getString(R.string.parse_user_pending_request), true);
-                    setPendingRequestUser.put(getString(R.string.parse_request_request_id), parseUserRequest.getObjectId());
-                    setPendingRequestUser.saveInBackground();
+                    // update user entries when done
+                    ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), true);
+                    ParseUser.getCurrentUser().put(getString(R.string.parse_request_request_id), parseUserRequest.getObjectId());
+                    ParseUser.getCurrentUser().saveInBackground();
+
+                    // new request, not notified
+                    editor.putBoolean(getString(R.string.request_notified), false).apply();
+
                     synchronizer.getObject(
                             null,
                             locationSelected.getLocationId(),
@@ -650,7 +798,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     @Override
     protected void onNewIntent(Intent intent) {
         Log.d("MainScreen", "onNewIntent");
-        Synchronizer.getInstance(this).getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+//        Synchronizer.getInstance(this).getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+        setIntent(intent);
         super.onNewIntent(intent);
     }
 
@@ -721,7 +870,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         editor.putBoolean(getString(R.string.screen_on), true).apply();
 
         // for push notification
-        registerListener(this);
+        registerPushListener(this);
 
         // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
 

@@ -13,6 +13,7 @@
     <string name="not_logged_in">You have to log in first</string>
     <string name="not_email_verified">You have to verify your email first</string>
     <string name="press_again_exit">Press again to exit</string>
+    <string name="no_internet_warning">Internet connection unavailable</string>
 
     <!--Broadcast-->
     <string name="broadcast_kill_signal">KillActivity</string>
@@ -43,6 +44,8 @@
     <string name="dialog_registering">Registering…</string>
     <string name="dialog_title_request_confirm">Request Confirmation</string>
     <string name="dialog_title_request_success">Request Success</string>
+    <string name="dialog_title_request_cancelled">Request Cancelled</string>
+    <string name="dialog_title_request_timeout">Request Timeout</string>
     <string name="dialog_title_congrats">Congratulations!</string>
     <string name="dialog_request_message">Pick up at</string>
 
@@ -113,6 +116,8 @@
 
     <string name="parse_installation_email">email</string>
 
+    <string name="parse_no_results_found">no results found for query</string>
+
     <!--Permission-->
     <string name="perm_contacts_rationale">We need to access your email account names</string>
 
@@ -122,7 +127,7 @@
     <string name="request_spinner_position">spinnerPosition</string>
     <string name="waiting_to_log_out">waitingToLogOut</string>
     <string name="screen_on">screenOn</string>
-
+    <string name="request_notified">notified</string>
     <string name="cat_request">Request</string>
     <string name="cat_user">User</string>
     <string name="cat_others">Others</string>
@@ -157,7 +162,6 @@
     <string name="reset_email_sent">Reset Password Email Sent</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="version_not_updated">Your local data might not be up to date</string>
-    <string name="request_cancelled">Request Cancelled</string>
     <string name="permission_internet_denied">MiddRides needs Internet access to log in and send requests</string>
     <string name="parse_request_locationID">locationId</string>
 
