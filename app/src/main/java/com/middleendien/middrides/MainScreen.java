@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -205,6 +206,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         toggleCallButton(BUTTON_MAKE_REQUEST);
         vanArrivingText.setAlpha(0);
         vanArrivingLocation.setAlpha(0);
+
+        // don't accidentally reset when later requests are made
+        if (resetViewHandler != null)
+            resetViewHandler.removeCallbacks(resetViewRunnable);
     }
 
     private void initEvent() {
@@ -542,7 +547,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         Ringtone ringtone = RingtoneManager.getRingtone(this, alarm);
         ringtone.play();
 
-
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(800);
     }
 
     @Override
@@ -870,6 +876,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         // check if there is request pending
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
+            if (sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+                displayVanArrivingMessages();
+            }
             showAnimation();
             toggleCallButton(BUTTON_CANCEL_REQUEST);
         } else {                                                          // no
