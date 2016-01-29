@@ -1,16 +1,9 @@
 package com.middleendien.middrides.utils;
 
 import android.app.Application;
-import android.content.SharedPreferences;
 
 import com.middleendien.middrides.R;
 import com.parse.Parse;
-import com.parse.ParseBroadcastReceiver;
-import com.parse.ParseInstallation;
-import com.parse.ParseObject;
-import com.parse.ParsePush;
-import com.parse.ParseUser;
-import com.parse.PushService;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 

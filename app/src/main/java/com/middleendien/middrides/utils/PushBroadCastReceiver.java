@@ -125,7 +125,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(context.getString(R.string.app_name))
-                .setContentText(context.getString(R.string.van_is_coming) + " " + "E Lot")
+                .setContentText(context.getString(R.string.van_is_coming) + " " + arrivingLocation)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
