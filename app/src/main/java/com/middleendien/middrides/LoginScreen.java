@@ -68,7 +68,6 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
 
-        Log.d("LoginScreen", "User LoggedIn: " + (ParseUser.getCurrentUser() != null) + " " + (ParseUser.getCurrentUser() == null ? null : ParseUser.getCurrentUser().getUsername()));
         if(ParseUser.getCurrentUser() != null){
             Log.d("LoginScreen", "Already has user");
             Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
@@ -134,12 +133,17 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 } else if (s.toString().length() == 0) {
                     // cleared everything or initial state, without @
                     usernameBox.setAdapter(null);
-                }   // else do nothing
+                }               // else do nothing
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                if (s.toString().endsWith("@middlebury.edu")) {
+                    passwdBox.clearFocus();
+                    passwdBox.requestFocus();
+                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    inputMethodManager.showSoftInput(passwdBox, InputMethodManager.SHOW_IMPLICIT);
+                }
             }
         });
 
@@ -220,6 +224,7 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         } catch (Exception e) {
+            e.printStackTrace();
             // so you have a keyboard, so what?
         }
     }

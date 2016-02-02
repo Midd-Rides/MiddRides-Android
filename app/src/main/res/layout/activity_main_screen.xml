@@ -37,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your van is almost at"
+            android:text="@string/van_is_almost_at"
             android:id="@+id/vanArrivingText"
             android:alpha="0"
             android:textSize="32sp"
@@ -47,14 +47,14 @@
             android:textColor="#ffffff" />
 
         <TextView
+            android:id="@+id/van_arriving_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/vanArrivingLocation"
             android:alpha="0"
             android:textSize="32sp"
-            android:text="Track Lot/KDR"
             android:layout_below="@+id/vanArrivingText"
             android:layout_centerHorizontal="true"
+            android:textAlignment="center"
             android:textColor="#ffffff" />
 
     </RelativeLayout>

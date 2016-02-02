@@ -38,8 +38,8 @@
             android:title="@string/pref_screen_announcements">
 
             <Preference
-                android:key="@string/pref_key_no_announcements"
-                android:title="@string/pref_screen_announcement_no_announcement"/>
+                android:key="@string/pref_key_no_announcement"
+                android:title="@string/pref_announcements_no_announcement"/>
 
         </PreferenceScreen>
 

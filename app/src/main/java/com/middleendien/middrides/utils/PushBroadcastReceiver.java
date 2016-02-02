@@ -7,7 +7,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,8 +27,8 @@ import com.parse.ParseUser;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Peter on 1/14/16.
@@ -48,8 +47,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     static OnPushNotificationListener callback;
 
-    private static Context notificationContext;
-
     Notification notification = null;
     Ringtone ringtone = null;
 
@@ -57,8 +54,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     @Override
     protected void onPushReceive(Context context, Intent intent) {
-        Log.d("PushReceiver", "Same context: " + (context.equals(notificationContext)));
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -99,8 +94,11 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         if (isLoggedIn && requestPending
                 && pickUpLocation.equals(arrivingLocation)) {
-            // so that reset view will be run
-            editor.putBoolean(context.getString(R.string.request_notified), true).apply();
+            long receivedTime = Calendar.getInstance().getTimeInMillis();
+            editor.putLong(context.getString(R.string.push_receive_time), receivedTime)
+                    // so that reset view will be run
+                    .putBoolean(context.getString(R.string.request_notified), true).apply();
+
             Log.d("PushReceiver", "Notified");
 
             if (screenIsOn) {
@@ -127,7 +125,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(context.getString(R.string.app_name))
-                .setContentText(context.getString(R.string.van_is_coming) + " " + "E Lot")
+                .setContentText(context.getString(R.string.van_is_coming) + " " + arrivingLocation)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
@@ -194,7 +192,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     public static void registerPushListener(Context context) {
         callback = (OnPushNotificationListener) context;
-        notificationContext = context;
     }
 
     public interface OnPushNotificationListener {

@@ -36,7 +36,9 @@
     <string name="dialog_msg_email_verified">You have successfully verified your email</string>
     <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
     <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
+    <string name="dialog_msg_did_you_catch_your_van">Did you catch your van?</string>
     <string name="dialog_btn_yes">Yes</string>
+    <string name="dialog_btn_no">No</string>
     <string name="dialog_btn_cancel">Cancel</string>
     <string name="dialog_btn_dismiss">Dismiss</string>
     <string name="dialog_btn_got_it">Got it!</string>
@@ -45,8 +47,9 @@
     <string name="dialog_title_request_confirm">Request Confirmation</string>
     <string name="dialog_title_request_success">Request Success</string>
     <string name="dialog_title_request_cancelled">Request Cancelled</string>
-    <string name="dialog_title_request_timeout">Request Timeout</string>
+    <string name="dialog_title_request_timeout">Request Processed</string>
     <string name="dialog_title_congrats">Congratulations!</string>
+    <string name="dialog_title_coming">Van Coming</string>
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Intent Bundle keys-->
@@ -86,6 +89,7 @@
     <string name="parse_class_location">Location</string>
     <string name="parse_class_locationstatus">LocationStatus</string>
     <string name="parse_class_user">User</string>
+    <string name="parse_class_requesthistory">RequestHistory</string>
 
     <!--Parse Objects-->
     <!--Format goes: parse + class name + variable name-->
@@ -114,6 +118,11 @@
     <string name="parse_locationstatus_name">name</string>
     <string name="parse_locationstatus_passengers_waiting">passengersWaiting</string>
 
+    <string name="parse_requesthistory_user">user</string>
+    <string name="parse_requesthistory_location">location</string>
+    <string name="parse_requesthistory_success">success</string>
+    <string name="parse_requesthistory_requestTime">requestTime</string>
+
     <string name="parse_installation_email">email</string>
 
     <string name="parse_no_results_found">no results found for query</string>
@@ -128,6 +137,7 @@
     <string name="waiting_to_log_out">waitingToLogOut</string>
     <string name="screen_on">screenOn</string>
     <string name="request_notified">notified</string>
+    <string name="push_receive_time">pushReceiveTime</string>
     <string name="cat_request">Request</string>
     <string name="cat_user">User</string>
     <string name="cat_others">Others</string>
@@ -138,8 +148,8 @@
     <string name="pref_verfied">Email Verified</string>
     <string name="pref_not_verifed">Resend Verification Email</string>
     <string name="pref_screen_announcements">Announcements</string>
-    <string name="pref_key_no_announcements">NoAnnouncements</string>
-    <string name="pref_screen_announcement_no_announcement">No Announcement</string>
+    <string name="pref_key_no_announcement">NoAnnouncement</string>
+    <string name="pref_announcements_no_announcement">No Announcement</string>
 
     <!--Spinners-->
     <string name="spinner_pick_up">Pick Up Location</string>
@@ -155,6 +165,7 @@
     <string name="text_hint_email">Email</string>
     <string name="text_hint_passwd">Password</string>
     <string name="text_hint_passwd_confirm">Confirm Password</string>
+    <string name="van_is_almost_at">Your van is almost at</string>
 
     <!--Toast-->
     <string name="already_verified">E-mail Already Verified</string>

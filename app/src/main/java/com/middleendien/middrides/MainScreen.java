@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +66,7 @@ import com.parse.SaveCallback;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -124,10 +126,12 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     // to periodically check email verification status
     private Handler checkEmailHandler;
     private Runnable checkEmailRunnable;
+    private static final long CHECK_EMAIL_INTERVAL = 30000;
 
     // to reset view a while after notification
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
+    private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
@@ -183,7 +187,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private void initView() {
         pickUpSpinner = (Spinner) findViewById(R.id.pick_up_spinner);
         vanArrivingText = (TextView) findViewById(R.id.vanArrivingText);
-        vanArrivingLocation = (TextView) findViewById(R.id.vanArrivingLocation);
+        vanArrivingLocation = (TextView) findViewById(R.id.van_arriving_location);
 
         // make request button
         callService = (FButton) findViewById(R.id.flat_button);
@@ -202,6 +206,10 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         toggleCallButton(BUTTON_MAKE_REQUEST);
         vanArrivingText.setAlpha(0);
         vanArrivingLocation.setAlpha(0);
+
+        // don't accidentally reset when later requests are made
+        if (resetViewHandler != null)
+            resetViewHandler.removeCallbacks(resetViewRunnable);
     }
 
     private void initEvent() {
@@ -340,7 +348,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     public void done(ParseObject requestToBeDeleted, ParseException e) {
                         if (e == null) {
                             //Delete pending requests and set pending requests to false
-                            requestToBeDeleted.deleteInBackground();
                             Synchronizer.getInstance(MainScreen.this).getObject(
                                     null,
                                     requestToBeDeleted.getString(getString(R.string.parse_request_locationID)),
@@ -355,36 +362,79 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                             Log.e("Cancellation Error", e.getMessage().toString());
                             Toast.makeText(MainScreen.this, getString(R.string.something_went_wrong), Toast.LENGTH_SHORT).show();
                         }
+
+                        String pickUpLocation;
+                        Date requestTime;
+                        if (requestToBeDeleted != null) {
+                            pickUpLocation = requestToBeDeleted.getString(getString(R.string.parse_request_pickup_location));
+                            requestTime = requestToBeDeleted.getDate(getString(R.string.parse_request_request_time));
+                            requestToBeDeleted.deleteInBackground();
+                        } else {
+                            pickUpLocation = null;
+                            requestTime = null;
+                        }
+
+                        // local currentUser pending status to false
                         ParseUser.getCurrentUser().put(getString(R.string.parse_user_pending_request), false);
                         ParseUser.getCurrentUser().saveInBackground();
+
+                        switch (flag) {
+                            case CANCEL_REQUEST_FLAG_MANUAL:
+                                showCancelDialog();
+                                break;
+
+                            case CANCEL_REQUEST_FLAG_TIMEOUT:
+                                if (pickUpLocation != null && requestTime != null)
+                                    showTimeoutDialog(pickUpLocation, requestTime);
+                                break;
+                        }
 
                         // I don't remember where else I use this preference
                         // but I'm too scared to take it out
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
-                        editor.putBoolean(getString(R.string.parse_user_pending_request), false).apply();
-
-                        switch (flag) {
-                            case CANCEL_REQUEST_FLAG_MANUAL:
-                                new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
-                                        .setTitleText(getString(R.string.dialog_title_request_cancelled))
-                                        .setConfirmText(getString(R.string.dialog_btn_dismiss))
-                                        .show();
-                                break;
-
-                            case CANCEL_REQUEST_FLAG_TIMEOUT:
-                                new SweetAlertDialog(MainScreen.this, SweetAlertDialog.ERROR_TYPE)
-                                        .setTitleText(getString(R.string.dialog_title_request_timeout))
-                                        .setConfirmText(getString(R.string.dialog_btn_dismiss))
-                                        .show();
-                                break;
-                        }
-
                         editor.putBoolean(getString(R.string.parse_user_pending_request), false)
                                 .putBoolean(getString(R.string.request_notified), false)
                                 .apply();
                         resetView();
                     }
                 });
+    }
+
+    private void showCancelDialog() {
+        new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_request_cancelled))
+                .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                .show();
+    }
+
+    private void showTimeoutDialog(String pickUpLocation, Date requestTime) {
+        final ParseObject requestHistory = new ParseObject(getString(R.string.parse_class_requesthistory));
+        requestHistory.put(getString(R.string.parse_requesthistory_location), pickUpLocation);
+        requestHistory.put(getString(R.string.parse_requesthistory_user), ParseUser.getCurrentUser().getEmail());
+        requestHistory.put(getString(R.string.parse_requesthistory_requestTime), requestTime);
+
+        new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_request_timeout))
+                .setContentText(getString(R.string.dialog_msg_did_you_catch_your_van))
+                .setConfirmText(getString(R.string.dialog_btn_yes))
+                .setCancelText(getString(R.string.dialog_btn_no))
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        requestHistory.put(getString(R.string.parse_requesthistory_success), true);
+                        requestHistory.saveInBackground();
+                        sweetAlertDialog.dismissWithAnimation();
+                    }
+                })
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        requestHistory.put(getString(R.string.parse_requesthistory_success), false);
+                        requestHistory.saveInBackground();
+                        sweetAlertDialog.dismissWithAnimation();
+                    }
+                })
+                .show();
     }
 
     private void showRequestDialog() {
@@ -430,7 +480,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     private void showVanComingDialog(String arrivingLocatoin) {
         final SweetAlertDialog dialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
-        dialog.setTitleText(getString(R.string.van_is_coming) + " " + arrivingLocatoin);
+        dialog.setTitleText(getString(R.string.dialog_title_coming));
+        dialog.setContentText(getString(R.string.van_is_coming) + " " + arrivingLocatoin);
         dialog.setConfirmText(getString(R.string.i_got_it));
         dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
@@ -445,6 +496,34 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         });
 
         dialog.show();
+
+
+        // reset the view after 5 minutes
+        // resetView needs to be run from the main thread because it modifies views created
+        // from the main thread. If we try to edit it using a different thread it will throw errors.
+        // in resetView(), check whether a request is pending and whether notified
+
+        resetViewHandler = new Handler();
+
+        resetViewRunnable = new Runnable() {
+            @Override
+            public void run(){
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                        if (ParseUser.getCurrentUser() != null &&
+                                ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
+                                sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+                            // logged in && has pending request && notified
+                            cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+                        }
+                    }
+                });
+            }
+        };
+        resetViewHandler.postDelayed(resetViewRunnable, RESET_TIMEOUT);     // 5 minutes
+        Log.d("MainScreen", "Reset countdown restarting... " + RESET_TIMEOUT / 1000 + " seconds left");
     }
 
     private void showEmailVerifiedDialog() {
@@ -502,6 +581,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone ringtone = RingtoneManager.getRingtone(this, alarm);
         ringtone.play();
+
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(800);
     }
 
     @Override
@@ -528,34 +610,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         vanArrivingText.setAlpha(1);
 
         Log.i("MainScreen", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
-
-        // reset the view after 5 minutes
-        // resetView needs to be run from the main thread because it modifies views created
-        // from the main thread. If we try to edit it using a different thread it will throw errors.
-        // TODO: this is not safe
-        // in resetView(), check whether a request is pending and whether notified
-
-        resetViewHandler = new Handler();
-
-        resetViewRunnable = new Runnable() {
-            @Override
-            public void run(){
-                runOnUiThread(new Runnable(){
-                    @Override
-                    public void run(){
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
-                        if (ParseUser.getCurrentUser() != null &&
-                                ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
-                                sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
-                            // logged in && has pending request && notified
-                            cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
-                        }
-                    }
-                });
-            }
-        };
-//        resetViewHandler.postDelayed(resetViewRunnable, 5 * 60000);     // 5 minutes
-        resetViewHandler.postDelayed(resetViewRunnable, 5000);     // 5 minutes
     }
 
     @SuppressWarnings("unused")
@@ -623,7 +677,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                 } else {
                     callService.setEnabled(true);
                 }
-
                 break;
 
             case STATUS_LOCATION_VERSION_REQUEST_CODE:
@@ -645,7 +698,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                         getString(R.string.parse_class_locationstatus),
                         pointer,
                         getString(R.string.parse_locationstatus_passengers_waiting),
-                        sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false) ? 1 : -1
+                        ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) ? 1 : -1
                 );
         }
     }
@@ -657,7 +710,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             case LOCATION_GET_LASTEST_VERSION_REQUEST_CODE:         // update from server
                 for (ParseObject obj : objectList) {
                     obj.pinInBackground();      // save locally
-//                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
+                    Log.d("Updated Locations", obj.getDouble(getString(R.string.parse_location_lat)) + "");
                 }
 
                 synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
@@ -683,8 +736,8 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     spinnerAdapter.notifyDataSetChanged();
 
                     // if has pending request, set spinner position accordingly
-                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
-                    if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false))
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    if (ParseUser.getCurrentUser() != null && ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)))
                         pickUpSpinner.setSelection(sharedPreferences.getInt(getString(R.string.request_spinner_position), 0), true);
                 } else {
                     synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
@@ -729,7 +782,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         Log.i("RequestMade", locationSelected.toString());
 
         final ParseObject parseUserRequest = new ParseObject(getString(R.string.parse_class_request));
-        parseUserRequest.put(getString(R.string.parse_request_request_time), new Date());                       // time
+        parseUserRequest.put(getString(R.string.parse_requesthistory_requestTime), new Date());
         parseUserRequest.put(getString(R.string.parse_request_user_id),
                 ParseUser.getCurrentUser().getObjectId());                                                      // userId
         parseUserRequest.put(getString(R.string.parse_request_user_email),
@@ -778,6 +831,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     // do nothing because we will deal with the log out in the callback
                 }
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
+                    setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
                 }
                 return;
@@ -840,7 +894,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
                         // email still not verified
                         synchronizer.refreshObject(ParseUser.getCurrentUser());
-                        checkEmailHandler.postDelayed(this, 1000);
+                        checkEmailHandler.postDelayed(this, CHECK_EMAIL_INTERVAL);
                         Log.i("MainScreen", "Email still not verified " + (new Date()).toString());
                     } else {
                         // email verified now
@@ -850,13 +904,15 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
                     }
                 }
             };
-            checkEmailHandler.postDelayed(checkEmailRunnable, 1000);           // check every minute
-            // for testing purpose, we can change the 30000's here to 1000's just to see
+            checkEmailHandler.postDelayed(checkEmailRunnable, CHECK_EMAIL_INTERVAL);           // check every half minute
         }
 
         // check if there is request pending
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPreferences.getBoolean(getString(R.string.parse_user_pending_request), false)) {      // yes
+        if (ParseUser.getCurrentUser() != null && ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {      // yes
+            if (sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+                displayVanArrivingMessages();
+            }
             showAnimation();
             toggleCallButton(BUTTON_CANCEL_REQUEST);
         } else {                                                          // no
@@ -870,6 +926,42 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
         // for push notification
         registerPushListener(this);
+
+        // checking for request timeout
+        if (sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+            // notified, now check when the user was notified
+            long currentTime = Calendar.getInstance().getTimeInMillis();
+            long receivedTime = sharedPreferences.getLong(getString(R.string.push_receive_time), currentTime);
+
+            if (currentTime - receivedTime >= RESET_TIMEOUT) {      // past timeout time
+                cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+            } else if (currentTime > receivedTime) {        // not past timeout yet
+                // restart countdown
+                resetViewHandler = new Handler();
+                resetViewRunnable = new Runnable() {
+                    @Override
+                    public void run(){
+                        runOnUiThread(new Runnable(){
+                            @Override
+                            public void run(){
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                                if (ParseUser.getCurrentUser() != null &&
+                                        ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
+                                        sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+                                    // logged in && has pending request && notified
+                                    cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+                                }
+                            }
+                        });
+                    }
+                };
+                // keep counting down
+                resetViewHandler.postDelayed(resetViewRunnable, RESET_TIMEOUT - (currentTime - receivedTime));
+                Log.d("MainScreen", "Reset countdown restarting... " + (RESET_TIMEOUT - (currentTime - receivedTime)) / 1000 + " seconds left");
+            } else {                            // something is wrong
+                // sod off
+            }
+        }
 
         // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
 
@@ -885,6 +977,9 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             Log.i("MainScreen", "Handler stopped");
         }
 
+        if (resetViewHandler != null)
+            resetViewHandler.removeCallbacks(resetViewRunnable);
+
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putBoolean(getString(R.string.screen_on), false).apply();
 
@@ -895,6 +990,18 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     // for debugging
 
