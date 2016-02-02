@@ -236,37 +236,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         spinnerAdapter.notifyDataSetChanged();
 
         toggleCallButton(BUTTON_MAKE_REQUEST);
-
-        // for notification debug, just leave it
-//        mainImage.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent toMainScreen = new Intent(getApplicationContext(), MainScreen.class);
-//                toMainScreen.putExtra(getString(R.string.parse_request_arriving_location), "Good God");
-//                toMainScreen.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, toMainScreen, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainScreen.this)
-//                        .setContentTitle(getString(R.string.app_name))
-//                        .setContentText(getString(R.string.van_is_coming) + " " + "E Lot")
-//                        .setSmallIcon(R.drawable.ic_notification)
-//                        .setContentIntent(pendingIntent)
-//                        .setAutoCancel(true);
-//
-//                Notification notification = builder.build();
-//                notification.defaults |= Notification.DEFAULT_VIBRATE;
-//                notification.defaults |= Notification.DEFAULT_LIGHTS;
-//                notification.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-//
-//                if (Build.VERSION.SDK_INT >= 21) {
-//                    notification.defaults |= Notification.VISIBILITY_PUBLIC;
-//                    notification.category = Notification.CATEGORY_ALARM;
-//                }
-//
-//                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//                notificationManager.notify(123, notification);
-//            }
-//        });
     }
 
     private void toggleCallButton(int changeTo) {
