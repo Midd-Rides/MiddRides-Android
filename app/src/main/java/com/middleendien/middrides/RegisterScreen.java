@@ -1,12 +1,14 @@
 package com.middleendien.middrides;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -167,6 +169,20 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
     public boolean onTouchEvent(MotionEvent event) {
         hideKeyboard();
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case android.R.id.home:
+                setResult(REGISTER_FAILURE_CODE);
+                finish();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

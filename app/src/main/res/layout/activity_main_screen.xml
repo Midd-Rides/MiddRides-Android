@@ -44,6 +44,7 @@
             android:layout_below="@+id/pick_up_spinner"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="50dp"
+            android:textAlignment="center"
             android:textColor="#ffffff" />
 
         <TextView
