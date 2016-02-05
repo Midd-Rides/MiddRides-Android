@@ -115,8 +115,10 @@ public class Synchronizer {
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (e == null) {
-                    object.increment(fieldName, increment);
-                    object.saveInBackground();
+                    if (increment > 0 || object.getInt(fieldName) > 0) {
+                        object.increment(fieldName, increment);
+                        object.saveInBackground();
+                    }
                     Log.i("Synchronizer", "Currently " + object.getInt(fieldName) + " waiting at " + object.getString(context.getString(R.string.parse_location_name)));
                     callback.onIncrementComplete();
                 }

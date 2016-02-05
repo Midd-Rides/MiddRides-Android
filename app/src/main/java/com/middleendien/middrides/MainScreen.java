@@ -132,6 +132,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
     private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
+//    private static final int RESET_TIMEOUT = 20000;
 
     private List<Location> locationList;
     ArrayAdapter spinnerAdapter;
