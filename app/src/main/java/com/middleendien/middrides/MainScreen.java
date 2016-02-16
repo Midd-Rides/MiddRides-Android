@@ -41,11 +41,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,7 +73,6 @@ import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
-import info.hoang8f.widget.FButton;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -83,7 +84,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
     private Synchronizer synchronizer;
 
-    private FButton callService;
+    private Button callService;
 
     /**
      * request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
@@ -190,7 +191,7 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         vanArrivingLocation = (TextView) findViewById(R.id.van_arriving_location);
 
         // make request button
-        callService = (FButton) findViewById(R.id.flat_button);
+        callService = (Button) findViewById(R.id.flat_button);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
     }
@@ -236,13 +237,17 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         spinnerAdapter.notifyDataSetChanged();
 
         toggleCallButton(BUTTON_MAKE_REQUEST);
+
+        RequestOnTouchListener onTouchListener = new RequestOnTouchListener();
+
+        callService.setOnTouchListener(onTouchListener);
+//        mainImage.setOnTouchListener(onTouchListener);
     }
 
     private void toggleCallButton(int changeTo) {
         switch (changeTo) {
             case BUTTON_MAKE_REQUEST:
                 callService.setText(getString(R.string.request_pick_up));
-                callService.setButtonColor(ContextCompat.getColor(this, R.color.colorButtons));
 
                 callService.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -278,7 +283,6 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
 
             case BUTTON_CANCEL_REQUEST:
                 callService.setText(getString(R.string.cancel_request));
-                callService.setButtonColor(ContextCompat.getColor(this, R.color.colorAccent));
 
                 callService.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -959,6 +963,24 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
+
+    class RequestOnTouchListener implements View.OnTouchListener {
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    callService.setTextColor(ContextCompat.getColor(MainScreen.this, R.color.colorAccent));
+                    break;
+                case MotionEvent.ACTION_UP:
+                    callService.setTextColor(ContextCompat.getColor(MainScreen.this, R.color.colorWhite));
+                    break;
+            }
+
+            return false;
+        }
+    }
+
 
 
 

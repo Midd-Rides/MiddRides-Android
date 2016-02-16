@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
-        <info.hoang8f.widget.FButton
+        <Button
             android:id="@+id/flat_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,11 +79,7 @@
             android:textColor="@android:color/white"
             android:textColorHighlight="@color/colorPrimaryDark"
             android:textAppearance="@style/TextAppearance.FontPath"
-            app:buttonColor="@color/colorButtons"
-            app:shadowColor="@color/colorPrimaryDark"
-            app:shadowEnabled="true"
-            app:shadowHeight="2dp"
-            app:cornerRadius="5dp"/>
+            style="?android:attr/borderlessButtonStyle"/>
 
     </LinearLayout>
 
