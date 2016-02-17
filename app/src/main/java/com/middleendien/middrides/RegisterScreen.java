@@ -3,6 +3,7 @@ package com.middleendien.middrides;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -178,7 +179,10 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
         switch (id) {
             case android.R.id.home:
                 setResult(REGISTER_FAILURE_CODE);
-                finish();
+                Intent toLoginScreen = new Intent(RegisterScreen.this, LoginScreen.class);
+                toLoginScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                toLoginScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                NavUtils.navigateUpTo(this, toLoginScreen);
                 return true;
         }
 
