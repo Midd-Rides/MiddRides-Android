@@ -44,6 +44,7 @@
             android:layout_below="@+id/pick_up_spinner"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="50dp"
+            android:textAlignment="center"
             android:textColor="#ffffff" />
 
         <TextView
@@ -65,25 +66,21 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
-        <info.hoang8f.widget.FButton
+        <Button
             android:id="@+id/flat_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_marginBottom="10dp"
-            android:paddingTop="5dp"
+            android:paddingTop="0dp"
             android:paddingBottom="5dp"
             android:text="@string/request_pick_up"
             android:textSize="32sp"
             android:textColor="@android:color/white"
             android:textColorHighlight="@color/colorPrimaryDark"
             android:textAppearance="@style/TextAppearance.FontPath"
-            app:buttonColor="@color/colorButtons"
-            app:shadowColor="@color/colorPrimaryDark"
-            app:shadowEnabled="true"
-            app:shadowHeight="2dp"
-            app:cornerRadius="5dp"/>
+            style="?android:attr/borderlessButtonStyle"/>
 
     </LinearLayout>
 
