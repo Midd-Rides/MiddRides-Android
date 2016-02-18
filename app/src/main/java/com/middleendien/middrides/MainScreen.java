@@ -37,9 +37,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -195,6 +199,11 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
         callService = (Button) findViewById(R.id.flat_button);
 
         mainImage = (GifImageView) findViewById(R.id.main_screen_image);
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setExitTransition(null);
+            getWindow().setReenterTransition(null);
+        }
     }
 
     /**
@@ -616,7 +625,12 @@ public class MainScreen extends AppCompatActivity implements OnSynchronizeListen
             case R.id.action_settings:
                 if (ParseUser.getCurrentUser() != null) {
                     Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
-                    startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE,
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(MainScreen.this).toBundle());
+                    } else {
+                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                    }
                 }
                 return true;
         }

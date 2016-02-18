@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,8 +18,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -106,6 +111,11 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
         usernameBox = (AutoCompleteTextView) findViewById(R.id.login_email);
         passwdBox = (EditText) findViewById(R.id.login_passwd);
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setExitTransition(null);
+            getWindow().setReenterTransition(null);
+        }
     }
 
     private void initEvent() {
@@ -179,7 +189,20 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 if (ContextCompat.checkSelfPermission(LoginScreen.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
                     Intent toRegisterScreen = new Intent(LoginScreen.this, RegisterScreen.class);
-                    startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//                        if (Build.VERSION.SDK_INT >= 21) {
+//                            getWindow().setExitTransition(new Slide(Gravity.END)
+//                                    .excludeTarget(android.R.id.statusBarBackground, true)
+//                                    .excludeTarget(android.R.id.navigationBarBackground, true));
+//                            getWindow().setReenterTransition(new Slide(Gravity.END)
+//                                    .excludeTarget(android.R.id.statusBarBackground, true)
+//                                    .excludeTarget(android.R.id.navigationBarBackground, true));
+//                        }
+                        startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE,
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(LoginScreen.this).toBundle());
+                    } else {
+                        startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE);
+                    }
                 } else {        // no internet permission
                     requestPermission(Manifest.permission.INTERNET, PERMISSION_INTERNET_REQUEST_CODE);
                 }
