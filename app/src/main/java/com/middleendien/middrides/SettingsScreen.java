@@ -2,9 +2,12 @@ package com.middleendien.middrides;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Slide;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,6 +27,16 @@ public class SettingsScreen extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Lollipop
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setEnterTransition(new Slide(Gravity.BOTTOM)
+                    .excludeTarget(android.R.id.statusBarBackground, true)
+                    .excludeTarget(android.R.id.navigationBarBackground, true));
+            getWindow().setReturnTransition(new Slide(Gravity.BOTTOM)
+                    .excludeTarget(android.R.id.statusBarBackground, true)
+                    .excludeTarget(android.R.id.navigationBarBackground, true));
+        }
 
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
@@ -46,10 +59,7 @@ public class SettingsScreen extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent toMainScreen = new Intent(SettingsScreen.this, MainScreen.class);
-                toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                NavUtils.navigateUpTo(this, toMainScreen);
+                onBackPressed();
                 return true;
         }
 

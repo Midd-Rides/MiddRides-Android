@@ -2,13 +2,16 @@ package com.middleendien.middrides;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,11 +54,25 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_screen);
 
+        initAnim();
+
         initData();
 
         initView();
 
         initEvent();
+    }
+
+    private void initAnim() {
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setEnterTransition(new Slide(Gravity.END)
+                    .excludeTarget(android.R.id.statusBarBackground, true)
+                    .excludeTarget(android.R.id.navigationBarBackground, true));
+
+            getWindow().setReturnTransition(new Slide(Gravity.END)
+                    .excludeTarget(android.R.id.statusBarBackground, true)
+                    .excludeTarget(android.R.id.navigationBarBackground, true));
+        }
     }
 
     private void initData() {
@@ -179,10 +196,7 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
         switch (id) {
             case android.R.id.home:
                 setResult(REGISTER_FAILURE_CODE);
-                Intent toLoginScreen = new Intent(RegisterScreen.this, LoginScreen.class);
-                toLoginScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                toLoginScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                NavUtils.navigateUpTo(this, toLoginScreen);
+                onBackPressed();
                 return true;
         }
 
