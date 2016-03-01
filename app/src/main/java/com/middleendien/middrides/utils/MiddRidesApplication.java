@@ -2,9 +2,11 @@ package com.middleendien.middrides.utils;
 
 import android.app.Application;
 
+import com.crashlytics.android.Crashlytics;
 import com.middleendien.middrides.R;
 import com.parse.Parse;
 
+import io.fabric.sdk.android.Fabric;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
 /**
@@ -16,6 +18,7 @@ public class MiddRidesApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         // Set up Parse Environment
         // Enable Local Datastore.
         Parse.enableLocalDatastore(this);
