@@ -38,6 +38,8 @@ public class SettingsScreen extends AppCompatActivity {
                     .excludeTarget(android.R.id.navigationBarBackground, true));
         }
 
+        getDelegate().onPostCreate(null);
+
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
