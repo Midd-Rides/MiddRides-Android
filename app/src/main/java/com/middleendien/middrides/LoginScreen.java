@@ -19,10 +19,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Fade;
-import android.transition.Slide;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -81,15 +79,6 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             NavUtils.navigateUpTo(this, toMainScreen);
         }
 
-        // adjust logo
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        ImageView splashLogo = (ImageView) findViewById(R.id.login_app_logo);
-
-        splashLogo.getLayoutParams().width = (int)(metrics.widthPixels * 0.5);
-        splashLogo.getLayoutParams().height = (int)(metrics.heightPixels * 0.4);
-
         initData();
 
         initView();
@@ -116,6 +105,15 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
             getWindow().setExitTransition(null);
             getWindow().setReenterTransition(null);
         }
+
+        // adjust logo
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        ImageView splashLogo = (ImageView) findViewById(R.id.login_app_logo);
+
+        splashLogo.getLayoutParams().width = (int)(metrics.widthPixels * 0.5);
+        splashLogo.getLayoutParams().height = (int)(metrics.heightPixels * 0.4);
     }
 
     private void initEvent() {
@@ -190,14 +188,6 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                         == PackageManager.PERMISSION_GRANTED) {
                     Intent toRegisterScreen = new Intent(LoginScreen.this, RegisterScreen.class);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                        if (Build.VERSION.SDK_INT >= 21) {
-//                            getWindow().setExitTransition(new Slide(Gravity.END)
-//                                    .excludeTarget(android.R.id.statusBarBackground, true)
-//                                    .excludeTarget(android.R.id.navigationBarBackground, true));
-//                            getWindow().setReenterTransition(new Slide(Gravity.END)
-//                                    .excludeTarget(android.R.id.statusBarBackground, true)
-//                                    .excludeTarget(android.R.id.navigationBarBackground, true));
-//                        }
                         startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE,
                                 ActivityOptionsCompat.makeSceneTransitionAnimation(LoginScreen.this).toBundle());
                     } else {

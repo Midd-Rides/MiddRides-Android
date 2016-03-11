@@ -130,6 +130,7 @@ public class SettingsFragment extends PreferenceFragment {
                             public void onClick(SweetAlertDialog sweetAlertDialog) {
                                 Synchronizer.getInstance(getActivity()).resetPassword(ParseUser.getCurrentUser().getEmail(),
                                         USER_RESET_PASSWORD_REQUEST_CODE);
+                                sweetAlertDialog.dismissWithAnimation();
                                 Log.i("SettingsFragment", "Reset Password");
                             }
                         }).show();
