@@ -2,7 +2,7 @@
     <string name="app_name">MiddRides</string>
     <string name="title_activity_login_page">Log In</string>
     <string name="title_activity_register_page">Register</string>
-    <string name="title_activity_main_page">MiddRides</string>
+    <string name="title_activity_main_page" translatable="false">MiddRides</string>
     <string name="title_activity_main_select_pickup_location">Select your pick up location</string>
     <string name="title_activity_main_van_on_way">Your van is on its way</string>
     <string name="title_activity_main_service_down">MiddRides is not running</string>
@@ -16,15 +16,15 @@
     <string name="no_internet_warning">Internet connection unavailable</string>
 
     <!--Broadcast-->
-    <string name="broadcast_kill_signal">KillActivity</string>
+    <string name="broadcast_kill_signal" translatable="false">KillActivity</string>
     
     <!--Buttons-->
     <string name="got_it">Got it!</string>
-    <string name="login_button">Log In</string>
+    <string name="login_button" translatable="false">Log In</string>
     <string name="register_button">Register</string>
-    <string name="log_in_later">Log in later</string>
-    <string name="logout_button">Log Out</string>
-    <string name="nearestLocation_button">Click this if Drunk</string>
+    <string name="log_in_later" translatable="false">Log in later</string>
+    <string name="logout_button" translatable="false">Log Out</string>
+    <string name="nearestLocation_button" translatable="false">Click this if Drunk</string>
     <string name="resend_email_button">Re-send verification e-mail</string>
     <string name="reset_passwd_button">Reset Password</string>
     <string name="request_pick_up">Request Pick Up</string>
@@ -53,12 +53,12 @@
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Intent Bundle keys-->
-    <string name="current_user">User</string>
-    <string name="is_logged_in">loggedIn</string>
-    <string name="is_dispatcher">Dispatcher</string>
+    <string name="current_user" translatable="false">User</string>
+    <string name="is_logged_in" translatable="false">loggedIn</string>
+    <string name="is_dispatcher" translatable="false">Dispatcher</string>
 
     <!--Log in/Sign up message-->
-    <string name="logged_in">Logged In</string>
+    <string name="logged_in" translatable="false">Logged In</string>
     <string name="wrong_email">Incorrect Email Format</string>
     <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
     <string name="pending_request_error">You can only make one request at a time</string>
@@ -73,8 +73,8 @@
     <string name="no_user">User Does Not Exist</string>
     <string name="user_exists">User Already Exists</string>
 
-    <string name="login_fail_msg">Login Fail Message</string>
-    <string name="reg_fail_msg">Register Fail Message</string>
+    <string name="login_fail_msg" translatable="false">Login Fail Message</string>
+    <!--<string name="reg_fail_msg">Register Fail Message</string>-->
 
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>
@@ -84,60 +84,60 @@
     <string name="app_logo">App Logo</string>
 
     <!--Parse Classes-->
-    <string name="parse_class_status">Status</string>
-    <string name="parse_class_request">UserRequest</string>
-    <string name="parse_class_location">Location</string>
-    <string name="parse_class_locationstatus">LocationStatus</string>
-    <string name="parse_class_user">User</string>
-    <string name="parse_class_requesthistory">RequestHistory</string>
+    <string name="parse_class_status" translatable="false">Status</string>
+    <string name="parse_class_request" translatable="false">UserRequest</string>
+    <string name="parse_class_location" translatable="false">Location</string>
+    <string name="parse_class_locationstatus" translatable="false">LocationStatus</string>
+    <string name="parse_class_user" translatable="false">User</string>
+    <string name="parse_class_requesthistory" translatable="false">RequestHistory</string>
 
     <!--Parse Objects-->
     <!--Format goes: parse + class name + variable name-->
-    <string name="parse_request_user_request">userRequest</string>
-    <string name="parse_request_request_time">requestTime</string>
-    <string name="parse_request_user_id">userId</string>
-    <string name="parse_request_user_email">email</string>
-    <string name="parse_request_pickup_location">pickUpLocation</string>
-    <string name="parse_request_arriving_location">arrivalLocation</string>
-    <string name="parse_request_dst_location">dstLocation</string>
-    <string name="parse_request_request_id">requestId</string>
+    <string name="parse_request_user_request" translatable="false">userRequest</string>
+    <string name="parse_request_request_time" translatable="false">requestTime</string>
+    <string name="parse_request_user_id" translatable="false">userId</string>
+    <string name="parse_request_user_email" translatable="false">email</string>
+    <string name="parse_request_pickup_location" translatable="false">pickUpLocation</string>
+    <string name="parse_request_arriving_location" translatable="false">arrivalLocation</string>
+    <string name="parse_request_dst_location" translatable="false">dstLocation</string>
+    <string name="parse_request_request_id" translatable="false">requestId</string>
 
-    <string name="parse_user_pending_request">pendingRequest</string>
-    <string name="parse_user_email">email</string>
-    <string name="parse_user_is_dispatcher">isDispatcher</string>
-    <string name="parse_user_email_verified">emailVerified</string>
+    <string name="parse_user_pending_request" translatable="false">pendingRequest</string>
+    <string name="parse_user_email" translatable="false">email</string>
+    <string name="parse_user_is_dispatcher" translatable="false">isDispatcher</string>
+    <string name="parse_user_email_verified" translatable="false">emailVerified</string>
 
-    <string name="parse_status_is_running">serviceIsRunning</string>
-    <string name="parse_status_location_version">latestLocVersion</string>
+    <string name="parse_status_is_running" translatable="false">serviceIsRunning</string>
+    <string name="parse_status_location_version" translatable="false">latestLocVersion</string>
 
-    <string name="parse_location_name">name</string>
-    <string name="parse_location_lat">lat</string>
-    <string name="parse_location_lng">lng</string>
-    <string name="parse_location_status">status</string>
+    <string name="parse_location_name" translatable="false">name</string>
+    <string name="parse_location_lat" translatable="false">lat</string>
+    <string name="parse_location_lng" translatable="false">lng</string>
+    <string name="parse_location_status" translatable="false">status</string>
 
-    <string name="parse_locationstatus_name">name</string>
-    <string name="parse_locationstatus_passengers_waiting">passengersWaiting</string>
+    <string name="parse_locationstatus_name" translatable="false">name</string>
+    <string name="parse_locationstatus_passengers_waiting" translatable="false">passengersWaiting</string>
 
-    <string name="parse_requesthistory_user">user</string>
-    <string name="parse_requesthistory_location">location</string>
-    <string name="parse_requesthistory_success">success</string>
-    <string name="parse_requesthistory_requestTime">requestTime</string>
+    <string name="parse_requesthistory_user" translatable="false">user</string>
+    <string name="parse_requesthistory_location" translatable="false">location</string>
+    <string name="parse_requesthistory_success" translatable="false">success</string>
+    <string name="parse_requesthistory_requestTime" translatable="false">requestTime</string>
 
-    <string name="parse_installation_email">email</string>
+    <string name="parse_installation_email" translatable="false">email</string>
 
-    <string name="parse_no_results_found">no results found for query</string>
+    <string name="parse_no_results_found" translatable="false">no results found for query</string>
 
     <!--Permission-->
     <string name="perm_contacts_rationale">We need to access your email account names</string>
 
     <!--SharedPreferences-->
-    <string name="login_status">LoginStatus</string>
-    <string name="location_version">LocationVersion</string>
-    <string name="request_spinner_position">spinnerPosition</string>
-    <string name="waiting_to_log_out">waitingToLogOut</string>
-    <string name="screen_on">screenOn</string>
-    <string name="request_notified">notified</string>
-    <string name="push_receive_time">pushReceiveTime</string>
+    <string name="login_status" translatable="false">LoginStatus</string>
+    <string name="location_version" translatable="false">LocationVersion</string>
+    <string name="request_spinner_position" translatable="false">spinnerPosition</string>
+    <string name="waiting_to_log_out" translatable="false">waitingToLogOut</string>
+    <string name="screen_on" translatable="false">screenOn</string>
+    <string name="request_notified" translatable="false">notified</string>
+    <string name="push_receive_time" translatable="false">pushReceiveTime</string>
     <string name="cat_request">Request</string>
     <string name="cat_user">User</string>
     <string name="cat_others">Others</string>
@@ -145,10 +145,10 @@
     <string name="pref_log_out">Log Out</string>
     <string name="pref_reset_passwd">Reset Password</string>
     <string name="pref_verification_status_unavailable">Verification Status Unavailable</string>
-    <string name="pref_verfied">Email Verified</string>
+    <string name="pref_verified">Email Verified</string>
     <string name="pref_not_verifed">Resend Verification Email</string>
     <string name="pref_screen_announcements">Announcements</string>
-    <string name="pref_key_no_announcement">NoAnnouncement</string>
+    <string name="pref_key_no_announcement" translatable="false">NoAnnouncement</string>
     <string name="pref_announcements_no_announcement">No Announcement</string>
 
     <!--Spinners-->
@@ -156,10 +156,10 @@
     <string name="spinner_dst">Destination</string>
 
     <!--Switches-->
-    <string name="dispatcher_login">Dispatcher</string>
+    <string name="dispatcher_login" translatable="false">Dispatcher</string>
 
     <!--Tags-->
-    <string name="announcement_fragment">ShowAnnouncement</string>
+    <string name="announcement_fragment" translatable="false">ShowAnnouncement</string>
 
     <!--TextViews-->
     <string name="text_hint_email">Email</string>
@@ -174,6 +174,6 @@
     <string name="something_went_wrong">Something went wrong</string>
     <string name="version_not_updated">Your local data might not be up to date</string>
     <string name="permission_internet_denied">MiddRides needs Internet access to log in and send requests</string>
-    <string name="parse_request_locationID">locationId</string>
+    <string name="parse_request_locationID" translatable="false">locationId</string>
 
 </resources>

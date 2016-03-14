@@ -57,7 +57,7 @@ public class SettingsFragment extends PreferenceFragment {
         if (ParseUser.getCurrentUser() != null) {
             // default true
             veriStatusPref.setTitle(ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)) ?
-                    getString(R.string.pref_verfied) : getString(R.string.pref_not_verifed));
+                    getString(R.string.pref_verified) : getString(R.string.pref_not_verifed));
         } else {
             veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
         }
