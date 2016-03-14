@@ -31,7 +31,7 @@
     <string name="dialog_title_request_confirm">确认请求</string>
     <string name="dialog_title_request_success">请求成功</string>
     <string name="dialog_title_request_timeout">请求已处理</string>
-    <string name="got_it" translatable="false">知道了!</string>
+    <string name="got_it">知道了!</string>
     <string name="i_got_it">知道了!</string>
     <string name="inter_server_err">服务器错误</string>
     <string name="no_internet_warning">无法连接网络</string>
