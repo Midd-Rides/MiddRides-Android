@@ -20,7 +20,7 @@
     
     <!--Buttons-->
     <string name="got_it">Got it!</string>
-    <string name="login_button" translatable="false">Log In</string>
+    <string name="login_button">Log In</string>
     <string name="register_button">Register</string>
     <string name="log_in_later" translatable="false">Log in later</string>
     <string name="logout_button" translatable="false">Log Out</string>
@@ -53,7 +53,7 @@
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Intent Bundle keys-->
-    <string name="current_user" translatable="false">User</string>
+    <string name="current_user">User</string>
     <string name="is_logged_in" translatable="false">loggedIn</string>
     <string name="is_dispatcher" translatable="false">Dispatcher</string>
 
@@ -153,7 +153,6 @@
 
     <!--Spinners-->
     <string name="spinner_pick_up">Pick Up Location</string>
-    <string name="spinner_dst">Destination</string>
 
     <!--Switches-->
     <string name="dispatcher_login" translatable="false">Dispatcher</string>

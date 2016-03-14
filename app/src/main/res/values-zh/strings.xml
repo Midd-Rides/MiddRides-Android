@@ -6,7 +6,6 @@
     <string name="action_settings">设置</string>
     <string name="already_verified">邮箱已验证</string>
     <string name="app_logo">图标</string>
-    <string name="broadcast_kill_signal"></string>
     <string name="cancel_request">取消请求</string>
     <string name="cat_others">其他</string>
     <string name="cat_request">请求</string>
@@ -17,19 +16,19 @@
     <string name="dialog_btn_got_it">知道了</string>
     <string name="dialog_btn_no">不</string>
     <string name="dialog_btn_yes">好</string>
-    <string name="dialog_logging_in">正在登录...</string>
+    <string name="dialog_logging_in">正在登录…</string>
     <string name="dialog_msg_are_you_sure">你确定吗?</string>
     <string name="dialog_msg_did_you_catch_your_van">上车了吗亲?</string>
     <string name="dialog_msg_email_verified">你已经成功验证了邮箱</string>
     <string name="dialog_msg_will_cancel_request">你的当前请求会被取消</string>
     <string name="dialog_msg_you_will_be_notified">请等待来车提示</string>
-    <string name="dialog_registering">正在注册...</string>
+    <string name="dialog_registering">正在注册…</string>
     <string name="dialog_request_message">上车地点</string>
     <string name="dialog_select_location">选择地点</string>
     <string name="dialog_title_coming">车来了</string>
     <string name="dialog_title_congrats">恭喜!</string>
     <string name="dialog_title_request_cancelled">请求已取消</string>
-    <string name="dialog_title_request_confirm">请求确认</string>
+    <string name="dialog_title_request_confirm">确认请求</string>
     <string name="dialog_title_request_success">请求成功</string>
     <string name="dialog_title_request_timeout">请求已处理</string>
     <string name="got_it" translatable="false">知道了!</string>
@@ -39,8 +38,7 @@
     <string name="no_user">用户不存在</string>
     <string name="not_email_verified">请先验证邮箱</string>
     <string name="not_logged_in">请先登录</string>
-    <string name="other_failure">发生了什么,囧...</string>
-    <string name="parse_class_location"></string>
+    <string name="other_failure">发生了什么,囧…</string>
     <string name="passwd_not_match">密码不匹配</string>
     <string name="pending_request_error">一次只能发送一个请求</string>
     <string name="perm_contacts_rationale">我们需要你的邮箱</string>
@@ -48,7 +46,6 @@
     <string name="please_turn_on_gps">请打开GPS</string>
     <string name="pref_announcements_no_announcement">没有通知</string>
     <string name="pref_cancel_request">取消请求</string>
-    <string name="pref_key_no_announcement"></string>
     <string name="pref_log_out">注销</string>
     <string name="pref_not_verifed">重新发送验证邮件</string>
     <string name="pref_reset_passwd">重设密码</string>
@@ -61,9 +58,7 @@
     <string name="resent_email">请检查你的邮箱</string>
     <string name="reset_email_sent">密码重设邮件已发送</string>
     <string name="reset_passwd_button">重设密码</string>
-    <string name="screen_on"></string>
-    <string name="something_went_wrong">发生了什么,囧...</string>
-    <string name="spinner_dst">目的地点</string>
+    <string name="something_went_wrong">发生了什么,囧…</string>
     <string name="spinner_pick_up">上车地点</string>
     <string name="text_hint_email">邮箱</string>
     <string name="text_hint_passwd">密码</string>
@@ -78,7 +73,9 @@
     <string name="van_is_almost_at">车马上就到</string>
     <string name="van_is_coming">车正在开往</string>
     <string name="version_not_updated">你的本地数据可能不是最新</string>
-    <string name="waiting_to_log_out"></string>
     <string name="wrong_email">邮箱格式不正确</string>
     <string name="wrong_info">邮箱或密码格式不正确</string>
+    <string name="login_button">登录</string>
+    <string name="pref_verification_status_unavailable">验证信息未知</string>
+    <string name="current_user">用户</string>
 </resources>
