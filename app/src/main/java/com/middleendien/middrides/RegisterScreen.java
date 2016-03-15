@@ -64,7 +64,7 @@ public class RegisterScreen extends AppCompatActivity implements OnRegisterListe
     }
 
     private void initAnim() {
-        if (Build.VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT > 21) {
             getWindow().setEnterTransition(new Slide(Gravity.END)
                     .excludeTarget(android.R.id.statusBarBackground, true)
                     .excludeTarget(android.R.id.navigationBarBackground, true));

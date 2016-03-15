@@ -27,7 +27,7 @@ public class SettingsScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Lollipop
-        if (Build.VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT > 21) {
             getWindow().setEnterTransition(new Slide(Gravity.BOTTOM)
                     .excludeTarget(android.R.id.statusBarBackground, true)
                     .excludeTarget(android.R.id.navigationBarBackground, true));
