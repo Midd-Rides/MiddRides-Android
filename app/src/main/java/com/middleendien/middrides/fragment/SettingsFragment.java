@@ -63,7 +63,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
-        userPrefCat.setTitle("User - " + ParseUser.getCurrentUser().getEmail());
+        userPrefCat.setTitle(ParseUser.getCurrentUser().getEmail());
     }
 
     private void initEvent() {

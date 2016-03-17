@@ -57,8 +57,14 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        String jsonData = intent.getExtras().getString("com.parse.Data");
-        Log.d("PushReceiver", jsonData);
+        String jsonData;
+        try {
+            jsonData = intent.getExtras().getString("com.parse.Data");
+            Log.d("PushReceiver", jsonData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         JSONObject jsonObject;
         try {
@@ -66,6 +72,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
             arrivingLocation = jsonObject.getString("location");
         } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
 
         screenIsOn = false;
@@ -159,7 +166,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
 
     @Override
     protected void onPushOpen(Context context, Intent intent) {
-        ringtone.stop();
+        if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
         Log.d("PushReceiver", "Push opened");
         super.onPushOpen(context, intent);
     }
