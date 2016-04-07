@@ -37,6 +37,7 @@
     <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
     <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
     <string name="dialog_msg_did_you_catch_your_van">Did you catch your van?</string>
+    <string name="dialog_msg_middrides_not_available">Middrides is not currently available</string>
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_no">No</string>
     <string name="dialog_btn_cancel">Cancel</string>
@@ -50,6 +51,7 @@
     <string name="dialog_title_request_timeout">Request Processed</string>
     <string name="dialog_title_congrats">Congratulations!</string>
     <string name="dialog_title_coming">Van Coming</string>
+    <string name="dialog_title_service_down">Service Down</string>
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Intent Bundle keys-->

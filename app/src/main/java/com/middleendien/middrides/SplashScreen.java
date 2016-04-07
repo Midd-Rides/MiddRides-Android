@@ -1,19 +1,27 @@
 package com.middleendien.middrides;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.ImageView;
+
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 /**
  * Created by Peter on 1/15/16.
  *
- *
- *
  */
+
 public class SplashScreen extends AppCompatActivity {
+
+    private static final int SPLASH_TIME_OUT = 2000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,21 +36,42 @@ public class SplashScreen extends AppCompatActivity {
         splashLogo.getLayoutParams().width = (int) (metrics.widthPixels * 0.5);
         splashLogo.getLayoutParams().height = (int) (metrics.heightPixels * 0.4);
 
-        int SPLASH_TIME_OUT = 2000;
-        new Handler().postDelayed(new Runnable() {
-            // Showing splash screen with a timer.
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog dialog = builder.setIcon(R.drawable.logo_with_background)
+                .setTitle(getString(R.string.dialog_title_service_down))
+                .setMessage(getString(R.string.dialog_msg_middrides_not_available))
+                .create();
+        dialog.setCanceledOnTouchOutside(false);
+
+        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_status));
+        parseQuery.getInBackground("C48Jb93mkT", new GetCallback<ParseObject>() {       // no harm hardcoding
             @Override
-            public void run() {
-                // This method will be executed once the timer is over
-                // Start your app main activity
-                Intent i = new Intent(SplashScreen.this, MainScreen.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    if (!object.getBoolean(getString(R.string.parse_status_is_running))) {
+                        dialog.show();
+                    } else {
+                        Log.d("Splash Screen", "Service is running ");
+                        new Handler().postDelayed(new Runnable() {
+                            // Showing splash screen with a timer.
+                            @Override
+                            public void run() {
+                                // This method will be executed once the timer is over
+                                // Start your app main activity
+                                Intent i = new Intent(SplashScreen.this, MainScreen.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
 
-                // close this activity
-                finish();
+                                // close this activity
+                                finish();
+                            }
+                        }, SPLASH_TIME_OUT);
+                    }
+                } else {
+                    dialog.show();
+                }
             }
-        }, SPLASH_TIME_OUT);
+        });
     }
-
 }

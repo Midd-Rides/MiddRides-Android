@@ -75,4 +75,6 @@
     <string name="login_button">登录</string>
     <string name="pref_verification_status_unavailable">验证信息未知</string>
     <string name="current_user">用户</string>
+    <string name="dialog_title_service_down">服务不可用</string>
+    <string name="dialog_msg_middrides_not_available">MiddRides暂时不可用</string>
 </resources>

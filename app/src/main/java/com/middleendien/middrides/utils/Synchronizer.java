@@ -1,5 +1,6 @@
 package com.middleendien.middrides.utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 
