@@ -1,11 +1,11 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.midd_rides.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Patterns;
 
-import com.middleendien.middrides.R;
+import com.middleendien.midd_rides.R;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;

@@ -1,4 +1,4 @@
-package com.middleendien.middrides.fragment;
+package com.middleendien.midd_rides.fragment;
 
 
 import android.content.SharedPreferences;
@@ -10,9 +10,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.middleendien.middrides.R;
-import com.middleendien.middrides.utils.LoginAgent;
-import com.middleendien.middrides.utils.Synchronizer;
+import com.middleendien.midd_rides.R;
+import com.middleendien.midd_rides.utils.LoginAgent;
+import com.middleendien.midd_rides.utils.Synchronizer;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;

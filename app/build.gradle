@@ -19,7 +19,7 @@ android {
     compileSdkVersion 23
     buildToolsVersion '23.0.3'
     defaultConfig {
-        applicationId "com.middleendien.middrides"
+        applicationId 'com.middleendien.midd_rides'
         minSdkVersion 14
         targetSdkVersion 23
         versionName '1.0.1'

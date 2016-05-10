@@ -1,10 +1,8 @@
-package com.middleendien.middrides;
+package com.middleendien.midd_rides;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -22,9 +20,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.middleendien.middrides.utils.LoginAgent;
-import com.middleendien.middrides.utils.LoginAgent.OnRegisterListener;
-import com.middleendien.middrides.utils.MiddRidesUtils;
+import com.middleendien.midd_rides.utils.LoginAgent;
+import com.middleendien.midd_rides.utils.LoginAgent.OnRegisterListener;
+import com.middleendien.midd_rides.utils.MiddRidesUtils;
 import com.parse.ParseException;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;

@@ -1,4 +1,4 @@
-package com.middleendien.middrides.models;
+package com.middleendien.midd_rides.models;
 
 import java.io.Serializable;
 

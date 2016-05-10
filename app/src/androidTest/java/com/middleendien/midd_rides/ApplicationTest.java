@@ -1,4 +1,4 @@
-package com.middleendien.middrides;
+package com.middleendien.midd_rides;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

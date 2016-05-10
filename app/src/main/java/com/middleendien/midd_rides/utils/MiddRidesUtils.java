@@ -1,4 +1,4 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.midd_rides.utils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -13,8 +13,8 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.middleendien.middrides.MainScreen;
-import com.middleendien.middrides.R;
+import com.middleendien.midd_rides.MainScreen;
+import com.middleendien.midd_rides.R;
 
 /**
  * Created by Sherif on 1/24/2016.

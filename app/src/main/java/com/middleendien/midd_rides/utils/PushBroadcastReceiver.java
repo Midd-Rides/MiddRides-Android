@@ -1,4 +1,4 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.midd_rides.utils;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -19,8 +19,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.middleendien.middrides.MainScreen;
-import com.middleendien.middrides.R;
+import com.middleendien.midd_rides.MainScreen;
+import com.middleendien.midd_rides.R;
 import com.parse.ParsePushBroadcastReceiver;
 import com.parse.ParseUser;
 

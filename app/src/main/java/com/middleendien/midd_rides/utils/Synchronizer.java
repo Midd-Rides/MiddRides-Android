@@ -1,10 +1,9 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.midd_rides.utils;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 
-import com.middleendien.middrides.R;
+import com.middleendien.midd_rides.R;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;

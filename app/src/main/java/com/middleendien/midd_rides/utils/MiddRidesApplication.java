@@ -1,9 +1,9 @@
-package com.middleendien.middrides.utils;
+package com.middleendien.midd_rides.utils;
 
 import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
-import com.middleendien.middrides.R;
+import com.middleendien.midd_rides.R;
 import com.parse.Parse;
 
 import io.fabric.sdk.android.Fabric;

@@ -1,4 +1,4 @@
-package com.middleendien.middrides;
+package com.middleendien.midd_rides;
 
 import android.Manifest;
 import android.content.Context;
@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.transition.Fade;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,9 +31,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.middleendien.middrides.utils.LoginAgent;
-import com.middleendien.middrides.utils.LoginAgent.OnLoginListener;
-import com.middleendien.middrides.utils.MiddRidesUtils;
+import com.middleendien.midd_rides.utils.LoginAgent;
+import com.middleendien.midd_rides.utils.LoginAgent.OnLoginListener;
+import com.middleendien.midd_rides.utils.MiddRidesUtils;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 

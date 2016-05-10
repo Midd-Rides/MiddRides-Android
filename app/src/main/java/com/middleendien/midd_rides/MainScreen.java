@@ -1,4 +1,4 @@
-package com.middleendien.middrides;
+package com.middleendien.midd_rides;
 
 ////////////////////////////////////////////////////////////////////
 //                            _ooOoo_                             //
@@ -53,12 +53,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.middleendien.middrides.models.Location;
-import com.middleendien.middrides.utils.LoginAgent;
-import com.middleendien.middrides.utils.LoginAgent.OnLogoutListener;
-import com.middleendien.middrides.utils.MiddRidesUtils;
-import com.middleendien.middrides.utils.Synchronizer;
-import com.middleendien.middrides.utils.Synchronizer.OnSynchronizeListener;
+import com.middleendien.midd_rides.models.Location;
+import com.middleendien.midd_rides.utils.LoginAgent;
+import com.middleendien.midd_rides.utils.LoginAgent.OnLogoutListener;
+import com.middleendien.midd_rides.utils.MiddRidesUtils;
+import com.middleendien.midd_rides.utils.Synchronizer;
+import com.middleendien.midd_rides.utils.Synchronizer.OnSynchronizeListener;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -78,7 +78,7 @@ import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.middleendien.middrides.utils.PushBroadcastReceiver.*;
+import static com.middleendien.midd_rides.utils.PushBroadcastReceiver.*;
 
 public class MainScreen extends AppCompatActivity implements OnSynchronizeListener,
         OnLogoutListener, OnPushNotificationListener {

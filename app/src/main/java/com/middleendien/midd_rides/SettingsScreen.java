@@ -1,4 +1,4 @@
-package com.middleendien.middrides;
+package com.middleendien.midd_rides;
 
 import android.content.Context;
 import android.os.Build;
@@ -10,7 +10,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.middleendien.middrides.fragment.SettingsFragment;
+import com.middleendien.midd_rides.fragment.SettingsFragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 

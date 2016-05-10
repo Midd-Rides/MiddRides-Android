@@ -1,4 +1,4 @@
-package com.middleendien.middrides;
+package com.middleendien.midd_rides;
 
 import android.app.AlertDialog;
 import android.content.Intent;
