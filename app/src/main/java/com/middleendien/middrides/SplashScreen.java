@@ -45,7 +45,7 @@ public class SplashScreen extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
 
         ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_status));
-        parseQuery.getInBackground("C48Jb93mkT", new GetCallback<ParseObject>() {       // no harm hardcoding
+        parseQuery.getInBackground("oWxwbDQuhL", new GetCallback<ParseObject>() {       // no harm hardcoding
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (e == null) {
