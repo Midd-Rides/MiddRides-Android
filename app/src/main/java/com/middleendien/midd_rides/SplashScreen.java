@@ -36,7 +36,6 @@ public class SplashScreen extends AppCompatActivity {
         splashLogo.getLayoutParams().width = (int) (metrics.widthPixels * 0.5);
         splashLogo.getLayoutParams().height = (int) (metrics.heightPixels * 0.4);
 
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final AlertDialog dialog = builder.setIcon(R.drawable.logo_with_background)
                 .setTitle(getString(R.string.dialog_title_service_down))
