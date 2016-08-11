@@ -8,10 +8,8 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
-import com.middleendien.midd_rides.utils.Synchronizer;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -158,11 +156,11 @@ public class SettingsFragment extends PreferenceFragment {
     /***
      * Okay so what happens here is:
      * incrementing needs the user alive, for some reason
-     * we cancel the request, knowing that it's bound to take longer than returning to MainScreen
-     * and return to MainScreen, what a surprise
+     * we cancel the request, knowing that it's bound to take longer than returning to MainActivity
+     * and return to MainActivity, what a surprise
      * the increment will check upon finish whether we are waiting to log out
      * and will perform log out accordingly
-     * and if it logs out, MainScreen will hear it, and return to LoginScreen
+     * and if it logs out, MainActivity will hear it, and return to LoginActivity
      * and they live happily ever since
      * @param andLogOut whether to log out after cancelling current request
      */

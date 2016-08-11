@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides;
+package com.middleendien.midd_rides.activity;
 
 ////////////////////////////////////////////////////////////////////
 //                            _ooOoo_                             //
@@ -52,9 +52,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.Location;
 import com.middleendien.midd_rides.utils.HardwareUtil;
-import com.middleendien.midd_rides.utils.Synchronizer;
+import com.middleendien.midd_rides.network.Synchronizer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,9 +68,9 @@ import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.middleendien.midd_rides.utils.PushBroadcastReceiver.*;
+import static com.middleendien.midd_rides.network.PushBroadcastReceiver.*;
 
-public class MainScreen extends AppCompatActivity implements OnPushNotificationListener {
+public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
 
     private Synchronizer synchronizer;
 
@@ -131,11 +132,11 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
-        Log.d("MainScreen", "Create");
+        Log.d("MainActivity", "Create");
 
         // TODO:
 //        if (ParseUser.getCurrentUser() == null) {
-//            Intent toLoginScreen = new Intent(MainScreen.this, LoginScreen.class);
+//            Intent toLoginScreen = new Intent(MainActivity.this, LoginActivity.class);
 //            startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
 //        }
 
@@ -143,12 +144,12 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
             try {
                 String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
                 showVanComingDialog(arrivingAt);
-                Log.d("MainScreen", "Coming to " + arrivingAt);
+                Log.d("MainActivity", "Coming to " + arrivingAt);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
-            Log.d("MainScreen", "Not from push");
+            Log.d("MainActivity", "Not from push");
         }
 
         initView();
@@ -196,7 +197,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
      * Resets everything in the current view to its initial state
      */
     private void resetView(){
-        Log.i("MainScreen", "Reset view");
+        Log.i("MainActivity", "Reset view");
 
         cancelAnimation();
 
@@ -256,7 +257,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 //                                    getString(R.string.dialog_btn_dismiss));
 //                            return;                     // do nothing
 //                        } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
-//                            Log.d("MainScreen", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
+//                            Log.d("MainActivity", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
 //                            showWarningDialog(
 //                                    getString(R.string.not_logged_in),
 //                                    null,
@@ -314,7 +315,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
     }
 
     private void showCancelDialog() {
-        new SweetAlertDialog(MainScreen.this, SweetAlertDialog.NORMAL_TYPE)
+        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.NORMAL_TYPE)
                 .setTitleText(getString(R.string.dialog_title_request_cancelled))
                 .setConfirmText(getString(R.string.dialog_btn_dismiss))
                 .show();
@@ -346,7 +347,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
                         toggleCallButton(BUTTON_CANCEL_REQUEST);
 
                         // for spinner position when re-entering
-                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainScreen.this).edit();
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
                         editor.putInt(getString(R.string.request_spinner_position), pickUpSpinner.getSelectedItemPosition())
                                 .apply();
 
@@ -401,7 +402,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
                 runOnUiThread(new Runnable(){
                     @Override
                     public void run(){
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         // TODO:
 //                        if (ParseUser.getCurrentUser() != null &&
 //                                ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
@@ -414,7 +415,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
             }
         };
         resetViewHandler.postDelayed(resetViewRunnable, RESET_TIMEOUT);     // 5 minutes
-        Log.d("MainScreen", "Reset countdown restarting... " + RESET_TIMEOUT / 1000 + " seconds left");
+        Log.d("MainActivity", "Reset countdown restarting... " + RESET_TIMEOUT / 1000 + " seconds left");
     }
 
     private void showEmailVerifiedDialog() {
@@ -466,7 +467,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 
     @Override
     public void onReceivePushWhileScreenOn(String arrivingLocation) {
-        Log.d("MainScreen", "Received Push while active");
+        Log.d("MainActivity", "Received Push while active");
         showVanComingDialog(arrivingLocation);
 
         Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -479,12 +480,12 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 
     @Override
     public void onReceivePushWhileDormant() {
-        Log.d("MainScreen", "Received Push while dormant");
+        Log.d("MainActivity", "Received Push while dormant");
         killSelf();
     }
 
     private void killSelf() {
-        Log.i("MainScreen", "I'm dead");
+        Log.i("MainActivity", "I'm dead");
         finish();
         int pid = android.os.Process.myPid();
         android.os.Process.killProcess(pid);
@@ -495,12 +496,12 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
      * Resets the view after 5 minutes.
      */
     private void displayVanArrivingMessages(){
-        Log.d("MainScreen", "DisplayVanArrivingMessages");
+        Log.d("MainActivity", "DisplayVanArrivingMessages");
         // Display messages informing the user that the van is coming
         vanArrivingLocation.setAlpha(1);
         vanArrivingText.setAlpha(1);
 
-        Log.i("MainScreen", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
+        Log.i("MainActivity", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
     }
 
     @SuppressWarnings("unused")
@@ -533,10 +534,10 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
             case R.id.action_settings:
                 // TODO:
 //                if (ParseUser.getCurrentUser() != null) {
-//                    Intent toSettingsScreen = new Intent(MainScreen.this, SettingsScreen.class);
+//                    Intent toSettingsScreen = new Intent(MainActivity.this, SettingsActivity.class);
 //                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 //                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE,
-//                                ActivityOptionsCompat.makeSceneTransitionAnimation(MainScreen.this).toBundle());
+//                                ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this).toBundle());
 //                    } else {
 //                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
 //                    }
@@ -558,7 +559,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
-                Log.d("MainScreen", "Entering from SettingsScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
+                Log.d("MainActivity", "Entering from SettingsActivity, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
                     cancelAnimation();
                     // do nothing because we will deal with the log out in the callback
@@ -569,7 +570,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
                 }
                 return;
             case LOGIN_REQUEST_CODE:
-                Log.d("MainScreen", "Entering from LoginScreen, 0x" + Integer.toHexString(resultCode).toUpperCase());
+                Log.d("MainActivity", "Entering from LoginActivity, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
                     finish();
                     int pid = android.os.Process.myPid();
@@ -583,7 +584,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Log.d("MainScreen", "onNewIntent");
+        Log.d("MainActivity", "onNewIntent");
 //        Synchronizer.getInstance(this).getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
         setIntent(intent);
         super.onNewIntent(intent);
@@ -595,7 +596,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
             case KeyEvent.KEYCODE_BACK:
                 long backSecondPressed = System.currentTimeMillis();
                 if(backSecondPressed - backFirstPressed >= 2000){
-                    Toast.makeText(MainScreen.this, getString(R.string.press_again_exit), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, getString(R.string.press_again_exit), Toast.LENGTH_SHORT).show();
                     backFirstPressed = backSecondPressed;
                     return true;
                 }
@@ -611,7 +612,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 
     @Override
     protected void onResume() {
-        Log.d("MainScreen", "Resume");
+        Log.d("MainActivity", "Resume");
 
         // TODO:
 //        LoginAgent.getInstance(this).registerListener(LoginAgent.LOGOUT, this);
@@ -619,7 +620,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
         // if email not verified, periodically check for email verification status
         // TODO:
 //        if (ParseUser.getCurrentUser() != null && !ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
-//            Log.i("MainScreen", "Handler started, checking email verification status...");
+//            Log.i("MainActivity", "Handler started, checking email verification status...");
 //
 //            checkEmailHandler = new Handler();
 //
@@ -630,12 +631,12 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 //                        // email still not verified
 //                        // TODO: re-check with server
 //                        checkEmailHandler.postDelayed(this, CHECK_EMAIL_INTERVAL);
-//                        Log.i("MainScreen", "Email still not verified " + (new Date()).toString());
+//                        Log.i("MainActivity", "Email still not verified " + (new Date()).toString());
 //                    } else {
 //                        // email verified now
 //                        checkEmailHandler.removeCallbacks(this);
 //                        showEmailVerifiedDialog();
-//                        Log.i("MainScreen", "Finally verified email");
+//                        Log.i("MainActivity", "Finally verified email");
 //                    }
 //                }
 //            };
@@ -680,7 +681,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainScreen.this);
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                                 // TODO:
 //                                if (ParseUser.getCurrentUser() != null &&
 //                                        ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
@@ -694,7 +695,7 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
                 };
                 // keep counting down
                 resetViewHandler.postDelayed(resetViewRunnable, RESET_TIMEOUT - (currentTime - receivedTime));
-                Log.d("MainScreen", "Reset countdown restarting... " + (RESET_TIMEOUT - (currentTime - receivedTime)) / 1000 + " seconds left");
+                Log.d("MainActivity", "Reset countdown restarting... " + (RESET_TIMEOUT - (currentTime - receivedTime)) / 1000 + " seconds left");
             } else {                            // something is wrong
                 // sod off
             }
@@ -707,11 +708,11 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 
     @Override
     protected void onPause() {
-        Log.d("MainScreen", "Pause");
+        Log.d("MainActivity", "Pause");
 
         if (checkEmailHandler != null) {
             checkEmailHandler.removeCallbacks(checkEmailRunnable);
-            Log.i("MainScreen", "Handler stopped");
+            Log.i("MainActivity", "Handler stopped");
         }
 
         if (resetViewHandler != null)
@@ -734,10 +735,10 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    callService.setTextColor(ContextCompat.getColor(MainScreen.this, R.color.colorAccent));
+                    callService.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.colorAccent));
                     break;
                 case MotionEvent.ACTION_UP:
-                    callService.setTextColor(ContextCompat.getColor(MainScreen.this, R.color.colorWhite));
+                    callService.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.colorWhite));
                     break;
             }
 
@@ -762,25 +763,25 @@ public class MainScreen extends AppCompatActivity implements OnPushNotificationL
 
     @Override
     protected void onStart() {
-        Log.d("MainScreen", "Start");
+        Log.d("MainActivity", "Start");
         super.onStart();
     }
 
     @Override
     protected void onRestart() {
-        Log.d("MainScreen", "Restart");
+        Log.d("MainActivity", "Restart");
         super.onRestart();
     }
 
     @Override
     protected void onStop() {
-        Log.d("MainScreen", "Stop");
+        Log.d("MainActivity", "Stop");
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        Log.d("MainScreen", "Destroy");
+        Log.d("MainActivity", "Destroy");
         super.onDestroy();
     }
 }

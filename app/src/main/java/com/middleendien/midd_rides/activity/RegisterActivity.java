@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides;
+package com.middleendien.midd_rides.activity;
 
 import android.content.Context;
 import android.os.Build;
@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Slide;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -20,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -29,7 +29,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Created by Peter on 10/5/15.
  *
  */
-public class RegisterScreen extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
     private AutoCompleteTextView usernameBox;
     private EditText passwdBox;
     private EditText passwdConfirmBox;
@@ -90,18 +90,18 @@ public class RegisterScreen extends AppCompatActivity {
                 // check e-mail validity
                 // TODO:
 //                if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
-//                    Toast.makeText(RegisterScreen.this, getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(RegisterActivity.this, getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
 //                    return;
 //                }
 
                 // check password match
                 if (!passwdBox.getText().toString().equals(passwdConfirmBox.getText().toString())) {
-                    Toast.makeText(RegisterScreen.this, getString(R.string.passwd_not_match), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, getString(R.string.passwd_not_match), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if (!HardwareUtil.isNetworkAvailable(getApplicationContext())){
-                    Toast.makeText(RegisterScreen.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -123,12 +123,12 @@ public class RegisterScreen extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().length() > 0 && s.charAt(s.length() - 1) == '@') {             // ends with "@"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
-                            RegisterScreen.this,
+                            RegisterActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[]{s + "middlebury.edu"});
                     usernameBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 2 && !s.toString().contains("@")) {         // "sth"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
-                            RegisterScreen.this,
+                            RegisterActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[]{s + "@middlebury.edu"});
                     usernameBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 15 && s.toString().substring(s.length() - 15).equals("@middlebury.edu")) {

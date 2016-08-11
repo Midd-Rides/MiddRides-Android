@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides;
+package com.middleendien.midd_rides.activity;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -9,12 +9,14 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.middleendien.midd_rides.R;
+
 /**
  * Created by Peter on 1/15/16.
  *
  */
 
-public class SplashScreen extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity {
 
     private static final int SPLASH_TIME_OUT = 2000;
 
@@ -54,7 +56,7 @@ public class SplashScreen extends AppCompatActivity {
 //                            public void run() {
 //                                // This method will be executed once the timer is over
 //                                // Start your app main activity
-//                                Intent i = new Intent(SplashScreen.this, MainScreen.class);
+//                                Intent i = new Intent(SplashActivity.this, MainActivity.class);
 //                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //                                startActivity(i);
 //

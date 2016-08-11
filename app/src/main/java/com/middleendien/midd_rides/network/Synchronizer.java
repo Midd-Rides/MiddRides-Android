@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides.utils;
+package com.middleendien.midd_rides.network;
 
 import android.content.Context;
 

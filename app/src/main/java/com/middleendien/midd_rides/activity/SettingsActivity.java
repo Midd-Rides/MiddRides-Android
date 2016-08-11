@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides;
+package com.middleendien.midd_rides.activity;
 
 import android.content.Context;
 import android.os.Build;
@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.fragment.SettingsFragment;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -17,10 +18,10 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Created by Peter on 10/1/15.
  *
- * This is simply a holder, and decides how the MainScreen will behave when re-entered
+ * This is simply a holder, and decides how the MainActivity will behave when re-entered
  *
  */
-public class SettingsScreen extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

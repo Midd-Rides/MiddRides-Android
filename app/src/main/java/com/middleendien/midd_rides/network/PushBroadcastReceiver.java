@@ -1,7 +1,6 @@
-package com.middleendien.midd_rides.utils;
+package com.middleendien.midd_rides.network;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Notification;
@@ -11,8 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.os.Build;
@@ -20,7 +17,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.middleendien.midd_rides.MainScreen;
+import com.middleendien.midd_rides.activity.MainActivity;
 import com.middleendien.midd_rides.R;
 
 import org.json.JSONException;
@@ -113,7 +110,7 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
                 return;
             }
 
-            showNotificationWithIntent(context);            // MainScreen kills self
+            showNotificationWithIntent(context);            // MainActivity kills self
 
             if (killActivity)
                 callback.onReceivePushWhileDormant();
@@ -125,7 +122,7 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
 
     @TargetApi(16)
     private void showNotificationWithIntent(Context context) {
-        Intent toMainScreen = new Intent(context, MainScreen.class);
+        Intent toMainScreen = new Intent(context, MainActivity.class);
         toMainScreen.putExtra(context.getString(R.string.parse_request_arriving_location), arrivingLocation);
         toMainScreen.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, toMainScreen, PendingIntent.FLAG_UPDATE_CURRENT);

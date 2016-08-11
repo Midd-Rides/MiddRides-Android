@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides;
+package com.middleendien.midd_rides.activity;
 
 import android.Manifest;
 import android.content.Context;
@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -41,7 +42,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Note: This class is the entry point of the app
  *
  */
-public class LoginScreen extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     // UI
     private Button btnLogIn;
@@ -66,8 +67,8 @@ public class LoginScreen extends AppCompatActivity {
 
         // TODO:
 //        if(ParseUser.getCurrentUser() != null){
-//            Log.d("LoginScreen", "Already has user");
-//            Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
+//            Log.d("LoginActivity", "Already has user");
+//            Intent toMainScreen = new Intent(LoginActivity.this, MainActivity.class);
 //            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 //            NavUtils.navigateUpTo(this, toMainScreen);
@@ -122,12 +123,12 @@ public class LoginScreen extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().length() > 0 && s.charAt(s.length() - 1) == '@') {             // ends with "@"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
-                            LoginScreen.this,
+                            LoginActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[] { s + "middlebury.edu" });
                     usernameBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 2 && !s.toString().contains("@")) {         // "sth"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
-                            LoginScreen.this,
+                            LoginActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[] { s + "@middlebury.edu" });
                     usernameBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 15 && s.toString().substring(s.length() - 15).equals("@middlebury.edu")) {
@@ -154,16 +155,16 @@ public class LoginScreen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
             // login logic is implemented with the LoginAgent class
-                if (ContextCompat.checkSelfPermission(LoginScreen.this, Manifest.permission.INTERNET)
+                if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
                     // check e-mail validity
                     // TODO:
 //                    if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
-//                        Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(LoginActivity.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
 //                        return;
 //                    }
                     if (!HardwareUtil.isNetworkAvailable(getApplicationContext())){
-                        Toast.makeText(LoginScreen.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -181,12 +182,12 @@ public class LoginScreen extends AppCompatActivity {
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {                        // switch to register page
-                if (ContextCompat.checkSelfPermission(LoginScreen.this, Manifest.permission.INTERNET)
+                if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
-                    Intent toRegisterScreen = new Intent(LoginScreen.this, RegisterScreen.class);
+                    Intent toRegisterScreen = new Intent(LoginActivity.this, RegisterActivity.class);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE,
-                                ActivityOptionsCompat.makeSceneTransitionAnimation(LoginScreen.this).toBundle());
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(LoginActivity.this).toBundle());
                     } else {
                         startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE);
                     }
@@ -216,7 +217,7 @@ public class LoginScreen extends AppCompatActivity {
         switch (requestCode){
             case REGISTER_REQUEST_CODE:
                 if(resultCode == REGISTER_SUCCESS_RESULT_CODE){
-                    Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
+                    Intent toMainScreen = new Intent(LoginActivity.this, MainActivity.class);
                     toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     NavUtils.navigateUpTo(this, toMainScreen);
@@ -251,7 +252,7 @@ public class LoginScreen extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSION_INTERNET_REQUEST_CODE:
                 if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)   // not granted
-                    Toast.makeText(LoginScreen.this, getString(R.string.permission_internet_denied), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.permission_internet_denied), Toast.LENGTH_SHORT).show();
                 break;
         }
     }
