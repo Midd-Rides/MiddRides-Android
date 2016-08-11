@@ -13,6 +13,8 @@ import android.util.Log;
 
 public class HardwareUtil {
 
+    private static final String TAG = "HardwareUtil";
+
     /***
      * Check if location service is available
      * @param context Activity or Application context
@@ -27,14 +29,14 @@ public class HardwareUtil {
             GPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("MiddRidesUtils", "Location GPS Provider unavailable");
+            Log.d(TAG, "Location GPS Provider unavailable");
         }
 
         try {
             networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("MiddRidesUtils", "Location Network Provider unavailable");
+            Log.d(TAG, "Location Network Provider unavailable");
         }
 
         return GPSEnabled && networkEnabled;
