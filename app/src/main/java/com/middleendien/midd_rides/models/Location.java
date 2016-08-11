@@ -1,7 +1,5 @@
 package com.middleendien.midd_rides.models;
 
-import java.io.Serializable;
-
 /**
  * Created by Nosagie on 10/23/15.
  *
@@ -9,13 +7,9 @@ import java.io.Serializable;
  * Latitude and Longitude methods are used to find closest stop to the user
  */
 
-
-
-public class Location implements Serializable{
+public class Location {
 
     private String name;
-    private double latitude;
-    private double longitude;
     private String locationID;
     private int passengersWaiting;
 
@@ -32,29 +26,15 @@ public class Location implements Serializable{
         this.locationID = locationID;
     }
 
-    public Location(String name, double latitude, double longitude){
+    public Location(String name){
         this.name = name;
-        this.latitude =  latitude;
-        this.longitude = longitude;
         passengersWaiting = 0;
     }
 
-    public Location(String name, double latitude, double longitude, String locationID){
+    public Location(String name, String locationID){
         this.name = name;
-        this.latitude =  latitude;
-        this.longitude = longitude;
-
         this.locationID = locationID;
-
         passengersWaiting = 0;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
     }
 
     public String getName() {
@@ -63,14 +43,6 @@ public class Location implements Serializable{
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
     }
 
     public void setPassengersWaiting(int value) {
