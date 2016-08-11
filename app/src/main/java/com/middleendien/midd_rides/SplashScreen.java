@@ -9,11 +9,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.parse.GetCallback;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-
 /**
  * Created by Peter on 1/15/16.
  *
@@ -43,34 +38,35 @@ public class SplashScreen extends AppCompatActivity {
                 .create();
         dialog.setCanceledOnTouchOutside(false);
 
-        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_status));
-        parseQuery.getInBackground("oWxwbDQuhL", new GetCallback<ParseObject>() {       // no harm hardcoding
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                if (e == null) {
-                    if (!object.getBoolean(getString(R.string.parse_status_is_running))) {
-                        dialog.show();
-                    } else {
-                        Log.d("Splash Screen", "Service is running ");
-                        new Handler().postDelayed(new Runnable() {
-                            // Showing splash screen with a timer.
-                            @Override
-                            public void run() {
-                                // This method will be executed once the timer is over
-                                // Start your app main activity
-                                Intent i = new Intent(SplashScreen.this, MainScreen.class);
-                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(i);
-
-                                // close this activity
-                                finish();
-                            }
-                        }, SPLASH_TIME_OUT);
-                    }
-                } else {
-                    dialog.show();
-                }
-            }
-        });
+        // TODO: check server running
+//        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(getString(R.string.parse_class_status));
+//        parseQuery.getInBackground("oWxwbDQuhL", new GetCallback<ParseObject>() {       // no harm hardcoding
+//            @Override
+//            public void done(ParseObject object, ParseException e) {
+//                if (e == null) {
+//                    if (!object.getBoolean(getString(R.string.parse_status_is_running))) {
+//                        dialog.show();
+//                    } else {
+//                        Log.d("Splash Screen", "Service is running ");
+//                        new Handler().postDelayed(new Runnable() {
+//                            // Showing splash screen with a timer.
+//                            @Override
+//                            public void run() {
+//                                // This method will be executed once the timer is over
+//                                // Start your app main activity
+//                                Intent i = new Intent(SplashScreen.this, MainScreen.class);
+//                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                startActivity(i);
+//
+//                                // close this activity
+//                                finish();
+//                            }
+//                        }, SPLASH_TIME_OUT);
+//                    }
+//                } else {
+//                    dialog.show();
+//                }
+//            }
+//        });
     }
 }

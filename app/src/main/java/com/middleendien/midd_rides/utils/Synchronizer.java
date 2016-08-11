@@ -1,18 +1,6 @@
 package com.middleendien.midd_rides.utils;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.middleendien.midd_rides.R;
-import com.parse.FindCallback;
-import com.parse.GetCallback;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
-import com.parse.RequestPasswordResetCallback;
-
-import java.util.List;
 
 /**
  * Created by Peter on 11/17/15.
@@ -46,88 +34,23 @@ public class Synchronizer {
 
     @SuppressWarnings("all")
     public void getObject (String varName, String objectId, String className, final int requestCode) {
-        Log.d("Synchronizer", "Getting " + className + "." + objectId + "." + requestCode);
-        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
-        if (varName != null) {      // search by name
-            // haven't thought of a scenario where this would be useful
-            // normally we could just use find() || findInBackground, so maybe this is not necessary
-            // for now, just keep the first parameter as null
-        } else {                    // search by Id
-            parseQuery.getInBackground(objectId, new GetCallback<ParseObject>() {
-                @Override
-                public void done(ParseObject object, ParseException e) {
-                    if (e == null) {
-                        callback.onGetObjectComplete(object, requestCode);
-                    } else {        // error syncing
-                        // do nothing
-                    }
-                }
-            });
-        }
+
     }
 
     public void getListObjects (String className, final int requestCode) {
-        Log.d("Synchronizer", "Getting List " + className + "." + requestCode);
-        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
-        parseQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e == null) {
-                    callback.onGetListObjectsComplete(objects, requestCode);
-                    Log.d("getListObjects", "Success");
-                } else {            // error syncing
-                    e.printStackTrace();
-                }
-            }
-        });
+
     }
 
     public void getListObjectsLocal (String className, final int requestCode) {
-        Log.d("Synchronizer", "Getting List Local: " + className + ".0x" + Integer.toHexString(requestCode));
-        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
-        parseQuery.fromLocalDatastore();
-        parseQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e == null) {
-                    // success, verified        - Peter
-                    callback.onGetListObjectsComplete(objects, requestCode);
-                } else {            // error syncing
-                    // do nothing
-                }
-            }
-        });
+
     }
 
     public void resetPassword (String email, final int requestCode) {
-        ParseUser.requestPasswordResetInBackground(email, new RequestPasswordResetCallback() {
-            @Override
-            public void done(ParseException e) {
-                callback.onResetPasswordComplete(e == null, requestCode);
-            }
-        });
+
     }
 
     public void incrementFieldBy(String className, final String objectId, final String fieldName, final int increment) {
-        Log.d("Synchronizer", "Incrementing " + className + "." + objectId + "." + fieldName + " by " + increment);
-        ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery(className);
-        parseQuery.getInBackground(objectId, new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                if (e == null) {
-                    if (increment > 0 || object.getInt(fieldName) > 0) {
-                        object.increment(fieldName, increment);
-                        object.saveInBackground();
-                    }
-                    Log.i("Synchronizer", "Currently " + object.getInt(fieldName) + " waiting at " + object.getString(context.getString(R.string.parse_location_name)));
-                    callback.onIncrementComplete();
-                }
-            }
-        });
-    }
 
-    public void refreshObject (ParseObject object) {
-        object.fetchInBackground();
     }
 
     /***
@@ -138,39 +61,8 @@ public class Synchronizer {
 
     }
 
-
-
-    public interface OnSynchronizeListener {
-
-        void onGetObjectComplete(ParseObject object, int requestCode);
-
-        void onGetListObjectsComplete(List<ParseObject> objects, int requestCode);
-
-        void onResetPasswordComplete(boolean resetSuccess, int requestCode);
-
-        void onIncrementComplete();
+    interface OnSynchronizeListener {
 
     }
-
-
-
-
-
-
-//    // Async Task to get Double type value
-//    class GetDoubleTaskAsync extends AsyncTask<String, Void, Double> {
-//        private OnSynchronizeListener callback;
-//
-//        @Override
-//        protected Double doInBackground(String... params) {         // please make sure that you query one at a time
-//
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Double aDouble) {
-//            super.onPostExecute(aDouble);
-//        }
-//    }
 
 }

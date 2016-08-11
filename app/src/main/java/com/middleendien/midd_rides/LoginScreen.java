@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,11 +30,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.middleendien.midd_rides.utils.LoginAgent;
-import com.middleendien.midd_rides.utils.LoginAgent.OnLoginListener;
-import com.middleendien.midd_rides.utils.MiddRidesUtils;
-import com.parse.ParseException;
-import com.parse.ParseUser;
+import com.middleendien.midd_rides.utils.HardwareUtil;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -46,7 +41,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  * Note: This class is the entry point of the app
  *
  */
-public class LoginScreen extends AppCompatActivity implements OnLoginListener {
+public class LoginScreen extends AppCompatActivity {
 
     // UI
     private Button btnLogIn;
@@ -64,19 +59,19 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
 
     private SweetAlertDialog progressDialog;
 
-    private LoginAgent loginAgent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
 
-        if(ParseUser.getCurrentUser() != null){
-            Log.d("LoginScreen", "Already has user");
-            Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            NavUtils.navigateUpTo(this, toMainScreen);
-        }
+        // TODO:
+//        if(ParseUser.getCurrentUser() != null){
+//            Log.d("LoginScreen", "Already has user");
+//            Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
+//            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//            NavUtils.navigateUpTo(this, toMainScreen);
+//        }
 
         initData();
 
@@ -86,8 +81,9 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
     }
 
     private void initData() {
-        loginAgent = LoginAgent.getInstance(this);
-        loginAgent.registerListener(LoginAgent.LOGIN, this);
+        // TODO:
+//        loginAgent = LoginAgent.getInstance(this);
+//        loginAgent.registerListener(LoginAgent.LOGIN, this);
 
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
@@ -161,17 +157,19 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 if (ContextCompat.checkSelfPermission(LoginScreen.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
                     // check e-mail validity
-                    if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
-                        Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (!MiddRidesUtils.isNetworkAvailable(getApplicationContext())){
+                    // TODO:
+//                    if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
+//                        Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
+                    if (!HardwareUtil.isNetworkAvailable(getApplicationContext())){
                         Toast.makeText(LoginScreen.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     setDialogShowing(true);
-                    loginAgent.loginInBackground(usernameBox.getText().toString(), passwdBox.getText().toString());
+                    // TODO:
+//                    loginAgent.loginInBackground(usernameBox.getText().toString(), passwdBox.getText().toString());
                 } else {        // no internet permission
                     requestPermission(Manifest.permission.INTERNET, PERMISSION_INTERNET_REQUEST_CODE);
                 }
@@ -277,43 +275,6 @@ public class LoginScreen extends AppCompatActivity implements OnLoginListener {
                 finish();
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public void onLoginComplete(boolean loginSuccess, ParseException e) {
-        setDialogShowing(false);
-
-        if (loginSuccess) {
-            Log.i("Login Success", "Login Success");
-            Toast.makeText(LoginScreen.this, "Login Success", Toast.LENGTH_SHORT).show();
-            Intent toMainScreen = new Intent(LoginScreen.this, MainScreen.class);
-            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            NavUtils.navigateUpTo(this, toMainScreen);
-        } else {            // login failure
-            if (e.getCode() == ParseException.CONNECTION_FAILED) {
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.connection_fail), Toast.LENGTH_SHORT).show();
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-            } else if (e.getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.account_linked), Toast.LENGTH_SHORT).show();
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-            } else if (e.getCode() == ParseException.INTERNAL_SERVER_ERROR) {
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.inter_server_err), Toast.LENGTH_SHORT).show();
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-            } else if (e.getCode() == ParseException.TIMEOUT) {
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.time_out), Toast.LENGTH_SHORT).show();
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-            } else if (e.getCode() == ParseException.VALIDATION_ERROR) {
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-            } else if (e.getCode() == 101) {
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.wrong_info), Toast.LENGTH_SHORT).show();
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-            } else {
-                Log.i("Login Error", e.getCode() + " " + e.getMessage());
-                Toast.makeText(LoginScreen.this, getResources().getString(R.string.other_failure), Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,8 +22,6 @@ import android.util.Log;
 
 import com.middleendien.midd_rides.MainScreen;
 import com.middleendien.midd_rides.R;
-import com.parse.ParsePushBroadcastReceiver;
-import com.parse.ParseUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,7 +34,7 @@ import java.util.List;
  *
  * To receive push and decides whether to pop up notifications
  */
-public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
+public class PushBroadcastReceiver extends BroadcastReceiver {
 
     boolean isLoggedIn;
     boolean requestPending;
@@ -53,7 +52,7 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
     public static final int NOTIFICATION_ID = 123;
 
     @Override
-    protected void onPushReceive(Context context, Intent intent) {
+    public void onReceive(Context context, Intent intent) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -95,7 +94,8 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
             Log.i("PushReceiver", "App not running");
         }
 
-        isLoggedIn = ParseUser.getCurrentUser() != null;
+        // TODO:
+//        isLoggedIn = ParseUser.getCurrentUser() != null;
         requestPending = sharedPreferences.getBoolean(context.getString(R.string.parse_user_pending_request), false);
         pickUpLocation = sharedPreferences.getString(context.getString(R.string.parse_request_pickup_location), "Nowhere");
 
@@ -162,39 +162,6 @@ public class PushBroadcastReceiver extends ParsePushBroadcastReceiver {
         }
 
         return false;
-    }
-
-    @Override
-    protected void onPushOpen(Context context, Intent intent) {
-        if (ringtone != null && ringtone.isPlaying()) ringtone.stop();
-        Log.d("PushReceiver", "Push opened");
-        super.onPushOpen(context, intent);
-    }
-
-    @Override
-    protected void onPushDismiss(Context context, Intent intent) {
-        Log.d("PushReceiver", "Push dismissed");
-        super.onPushDismiss(context, intent);
-    }
-
-    @Override
-    protected Notification getNotification(Context context, Intent intent) {
-        return notification;
-    }
-
-    @Override
-    protected int getSmallIconId(Context context, Intent intent) {
-        return R.mipmap.ic_launcher;
-    }
-
-    @Override
-    protected Bitmap getLargeIcon(Context context, Intent intent) {
-        return BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
-    }
-
-    @Override
-    protected Class<? extends Activity> getActivity(Context context, Intent intent) {
-        return MainScreen.class;
     }
 
     public static void registerPushListener(Context context) {
