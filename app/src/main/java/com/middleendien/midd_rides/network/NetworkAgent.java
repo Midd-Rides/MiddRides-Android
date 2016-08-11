@@ -21,10 +21,11 @@ import retrofit2.http.QueryMap;
 
 /**
  * Created by Peter on 8/11/16.
+ *
  * Agent for handling connections between app and server
  */
 
-class NetworkAgent {
+public class NetworkAgent {
 
     interface MiddRidesService {
 

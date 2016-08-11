@@ -53,7 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
-import com.middleendien.midd_rides.models.Location;
+import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.network.Synchronizer;
 
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     // location spinners
     private Spinner pickUpSpinner;
-    private Location selectedLocation;
+    private Stop selectedStop;
     private TextView vanArrivingText;
     private TextView vanArrivingLocation;
 
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
 //    private static final int RESET_TIMEOUT = 20000;
 
-    private List<Location> locationList;
+    private List<Stop> stopList;
     ArrayAdapter spinnerAdapter;
 
     @Override
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void initData() {
-        locationList = new ArrayList<>();
+        stopList = new ArrayList<>();
 
         synchronizer = Synchronizer.getInstance(this);
         synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
@@ -213,15 +213,15 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     private void initEvent() {
         backFirstPressed = System.currentTimeMillis() - 2000;
 
-        spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, locationList);
+        spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, stopList);
 
         pickUpSpinner.setAdapter(spinnerAdapter);
 
         pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedLocation = (Location) spinnerAdapter.getItem(position);
-                vanArrivingLocation.setText(selectedLocation.getName());
+                selectedStop = (Stop) spinnerAdapter.getItem(position);
+                vanArrivingLocation.setText(selectedStop.getName());
                 Log.d("PickupSpinner", "Selected: " + position + "");
             }
 
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 //                                    getString(R.string.pending_request_error),
 //                                    null,
 //                                    getString(R.string.dialog_btn_dismiss));
-//                        } else {                        //initialize Location Dialog
+//                        } else {                        //initialize Stop Dialog
 //                            showRequestDialog();
 //                        }
                     }
@@ -328,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     private void showRequestDialog() {
         new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
                 .setTitleText(getString(R.string.dialog_title_request_confirm))
-                .setContentText(getString(R.string.dialog_request_message) + " " + selectedLocation.getName() + "?")
+                .setContentText(getString(R.string.dialog_request_message) + " " + selectedStop.getName() + "?")
                 .setConfirmText(getString(R.string.dialog_btn_yes))
                 .setCancelText(getString(R.string.dialog_btn_cancel))
                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -336,10 +336,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                     public void onClick(SweetAlertDialog sweetAlertDialog) {
                         // make request
                         // TODO:
-//                        makeRequest(selectedLocation);
+//                        makeRequest(selectedStop);
 
                         // Replace whitespaces and forward slashes in location name with hyphens
-                        String channelName = selectedLocation.getName().replace('/', '-').replace(' ', '-');
+                        String channelName = selectedStop.getName().replace('/', '-').replace(' ', '-');
                         // TODO: subscribe to fcm channel
 //                        ParsePush.subscribeInBackground(channelName);
 
@@ -378,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
             public void onClick(SweetAlertDialog sweetAlertDialog) {
                 dialog.dismissWithAnimation();
                 // Replace whitespaces and forward slashes in location name with hyphens
-                String channelName = selectedLocation.getName().replace('/', '-').replace(' ', '-');
+                String channelName = selectedStop.getName().replace('/', '-').replace(' ', '-');
                 // TODO: unsubscribe to fcm channel
 //                ParsePush.unsubscribeInBackground(channelName);
 
