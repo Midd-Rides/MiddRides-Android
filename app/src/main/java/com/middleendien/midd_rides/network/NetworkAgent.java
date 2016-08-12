@@ -22,11 +22,16 @@ import retrofit2.http.QueryMap;
 /**
  * Created by Peter on 8/11/16.
  *
- * Agent for handling connections between app and server
+ * Agent for handling connections between app and server (to replace the old "Synchronizer")
+ *
+ * Note: all network request shall be asynchronous
  */
 
 public class NetworkAgent {
 
+    /***
+     * Retrofit interface for communicating with server
+     */
     interface MiddRidesService {
 
         @GET(Constants.INDEX_URL)
@@ -39,6 +44,10 @@ public class NetworkAgent {
         @POST(Constants.REGISTER_URL)
         @FormUrlEncoded
         Call<ResponseBody> register(@FieldMap Map<String, String> bodyParams);
+
+        @POST(Constants.CHANGE_PASSWORD_URL)
+        @FormUrlEncoded
+        Call<ResponseBody> changePassword(@FieldMap Map<String, String> bodyParams);
 
         @GET(Constants.UPDATE_LOCATION_URL)
         Call<ResponseBody> updateLocations(@QueryMap Map<String, String> queryParams);
@@ -61,10 +70,21 @@ public class NetworkAgent {
      */
     public NetworkAgent getInstance() {
         if (agent == null)
-            agent = new NetworkAgent();
+            initAgent();
         return agent;
     }
 
+    /***
+     * Who says we won't go multi-thread in the future?
+     */
+    private static synchronized void initAgent() {
+        if (agent == null)
+            agent = new NetworkAgent();
+    }
+
+    /***
+     * Constructor
+     */
     private NetworkAgent() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.SERVER_BASE_URL)
@@ -106,6 +126,22 @@ public class NetworkAgent {
         bodyParams.put(context.getString(R.string.map_param_email), email);
         bodyParams.put(context.getString(R.string.map_param_password), password);
         service.register(bodyParams).enqueue(callback);
+    }
+
+    /***
+     * Change user password
+     * @param email         email
+     * @param oldPassword   old password (encoded)
+     * @param newPassword   new password (encoded)
+     * @param context       context
+     * @param callback      callback
+     */
+    public void changePassword(String email, String oldPassword, String newPassword, Context context, Callback<ResponseBody> callback) {
+        Map<String, String> bodyParams = new HashMap<>();
+        bodyParams.put(context.getString(R.string.map_param_email), email);
+        bodyParams.put(context.getString(R.string.map_param_old_password), oldPassword);
+        bodyParams.put(context.getString(R.string.map_param_new_password), newPassword);
+        service.changePassword(bodyParams).enqueue(callback);
     }
 
     /***

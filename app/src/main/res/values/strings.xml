@@ -81,6 +81,8 @@
     <!--Network Parameter Keys-->
     <string name="map_param_email" translatable="false">email</string>
     <string name="map_param_password" translatable="false">password</string>
+    <string name="map_param_old_password" translatable="false">oldPassword</string>
+    <string name="map_param_new_password" translatable="false">newPassword</string>
     <string name="map_param_last_updated_time" translatable="false">lastUpdated</string>
     <string name="map_param_stop_id" translatable="false">stopId</string>
 

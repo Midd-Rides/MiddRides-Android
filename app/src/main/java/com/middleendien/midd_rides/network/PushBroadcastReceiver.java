@@ -36,8 +36,8 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
     boolean isLoggedIn;
     boolean requestPending;
     boolean screenIsOn;
-    String pickUpLocation;
-    String arrivingLocation;
+    String pickUpStop;
+    String arrivingStop;
 
     boolean killActivity;
 
@@ -65,7 +65,7 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
         JSONObject jsonObject;
         try {
             jsonObject = new JSONObject(jsonData);
-            arrivingLocation = jsonObject.getString("location");
+            arrivingStop = jsonObject.getString("location");
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -93,11 +93,11 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
 
         // TODO:
 //        isLoggedIn = ParseUser.getCurrentUser() != null;
-        requestPending = sharedPreferences.getBoolean(context.getString(R.string.parse_user_pending_request), false);
-        pickUpLocation = sharedPreferences.getString(context.getString(R.string.parse_request_pickup_location), "Nowhere");
+//        requestPending = sharedPreferences.getBoolean(context.getString(R.string.parse_user_pending_request), false);
+//        pickUpStop = sharedPreferences.getString(context.getString(R.string.parse_request_pickup_location), "Nowhere");
 
         if (isLoggedIn && requestPending
-                && pickUpLocation.equals(arrivingLocation)) {
+                && pickUpStop.equals(arrivingStop)) {
             long receivedTime = Calendar.getInstance().getTimeInMillis();
             editor.putLong(context.getString(R.string.push_receive_time), receivedTime)
                     // so that reset view will be run
@@ -106,7 +106,7 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
             Log.d("PushReceiver", "Notified");
 
             if (screenIsOn) {
-                callback.onReceivePushWhileScreenOn(arrivingLocation);
+                callback.onReceivePushWhileScreenOn(arrivingStop);
                 return;
             }
 
@@ -123,13 +123,14 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
     @TargetApi(16)
     private void showNotificationWithIntent(Context context) {
         Intent toMainScreen = new Intent(context, MainActivity.class);
-        toMainScreen.putExtra(context.getString(R.string.parse_request_arriving_location), arrivingLocation);
+        // TODO:
+//        toMainScreen.putExtra(context.getString(R.string.parse_request_arriving_location), arrivingStop);
         toMainScreen.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, toMainScreen, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(context.getString(R.string.app_name))
-                .setContentText(context.getString(R.string.van_is_coming) + " " + arrivingLocation)
+                .setContentText(context.getString(R.string.van_is_coming) + " " + arrivingStop)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
