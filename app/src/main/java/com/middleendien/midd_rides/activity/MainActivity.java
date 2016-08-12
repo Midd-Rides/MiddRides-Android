@@ -55,7 +55,6 @@ import android.widget.Toast;
 import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.utils.HardwareUtil;
-import com.middleendien.midd_rides.network.Synchronizer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ import static com.middleendien.midd_rides.network.PushBroadcastReceiver.*;
 
 public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
 
-    private Synchronizer synchronizer;
+//    private Synchronizer synchronizer;
 
     private Button callService;
 
@@ -163,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     private void initData() {
         stopList = new ArrayList<>();
 
-        synchronizer = Synchronizer.getInstance(this);
+//        synchronizer = Synchronizer.getInstance(this);
 //        synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
         /**

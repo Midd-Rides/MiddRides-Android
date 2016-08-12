@@ -26,6 +26,5 @@ public class MiddRidesApplication extends Application {
                 .setDefaultFontPath("TikalSans-Medium.otf")
                 .setFontAttrId(R.attr.fontPath)
                 .build());
-
     }
 }
