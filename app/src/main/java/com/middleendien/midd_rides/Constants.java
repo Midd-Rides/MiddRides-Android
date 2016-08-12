@@ -7,7 +7,7 @@ package com.middleendien.midd_rides;
 
 public class Constants {
 
-    public static final String SERVER_BASE_URL = "10.0.2.2";
+    public static final String SERVER_BASE_URL = "http://10.0.2.2:3000";
 
     /* GET */
     public static final String INDEX_URL = "/";

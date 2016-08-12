@@ -142,9 +142,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
         if (getIntent().getExtras() != null) {
             try {
-                String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
-                showVanComingDialog(arrivingAt);
-                Log.d("MainActivity", "Coming to " + arrivingAt);
+                // TODO:
+//                String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
+//                showVanComingDialog(arrivingAt);
+//                Log.d("MainActivity", "Coming to " + arrivingAt);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -163,18 +164,18 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         stopList = new ArrayList<>();
 
         synchronizer = Synchronizer.getInstance(this);
-        synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+//        synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
 
         /**
          * Deal with everything in callback
          */
-
+        // TODO:
         // check service running status
         // Status should be the only hardcoded query
-        synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_SERVICE_RUNNING_REQUEST_CODE);
+//        synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_SERVICE_RUNNING_REQUEST_CODE);
 
         // check location list version
-        synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_LOCATION_VERSION_REQUEST_CODE);
+//        synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_LOCATION_VERSION_REQUEST_CODE);
     }
 
     private void initView() {
@@ -549,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void updateLocations() {
-        synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
+//        synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
         if (spinnerAdapter != null)
             spinnerAdapter.notifyDataSetChanged();
         Log.d("updateLocations()", "Called");

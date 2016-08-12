@@ -86,6 +86,9 @@
     <string name="map_param_last_updated_time" translatable="false">lastUpdated</string>
     <string name="map_param_stop_id" translatable="false">stopId</string>
 
+    <!--Network Response Keys-->
+    <string name="res_param_status" translatable="false">status</string>
+
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>
     <string name="i_got_it">Got it!</string>

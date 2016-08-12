@@ -68,7 +68,7 @@ public class NetworkAgent {
      * Singleton pattern for getting NetworkAgent
      * @return      current agent
      */
-    public NetworkAgent getInstance() {
+    public static NetworkAgent getInstance() {
         if (agent == null)
             initAgent();
         return agent;
@@ -78,8 +78,7 @@ public class NetworkAgent {
      * Who says we won't go multi-thread in the future?
      */
     private static synchronized void initAgent() {
-        if (agent == null)
-            agent = new NetworkAgent();
+        if (agent == null) agent = new NetworkAgent();
     }
 
     /***
