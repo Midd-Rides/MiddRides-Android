@@ -19,6 +19,9 @@ public class MiddRidesApplication extends Application {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
 
+        // Subscribe to Firebase global channel
+        // TODO:
+
         // The fonts
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath("TikalSans-Medium.otf")
