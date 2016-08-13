@@ -37,7 +37,7 @@
     <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
     <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
     <string name="dialog_msg_did_you_catch_your_van">Did you catch your van?</string>
-    <string name="dialog_msg_middrides_not_available">Middrides is not currently available</string>
+    <string name="dialog_msg_middrides_not_available">MiddRides is not currently available</string>
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_no">No</string>
     <string name="dialog_btn_cancel">Cancel</string>
@@ -55,7 +55,7 @@
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Intent Bundle keys-->
-    <string name="current_user">User</string>
+    <string name="current_user" translatable="false">User</string>
     <string name="is_logged_in" translatable="false">loggedIn</string>
     <string name="is_dispatcher" translatable="false">Dispatcher</string>
 
@@ -76,7 +76,6 @@
     <string name="user_exists">User Already Exists</string>
 
     <string name="login_fail_msg" translatable="false">Login Fail Message</string>
-    <!--<string name="reg_fail_msg">Register Fail Message</string>-->
 
     <!--Network Parameter Keys-->
     <string name="map_param_email" translatable="false">email</string>
