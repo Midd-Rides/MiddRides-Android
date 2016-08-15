@@ -13,10 +13,6 @@ public class Stop {
     private String mName;
     private String mStopId;
 
-    public Stop(String name) {
-        this(name, null);
-    }
-
     public Stop(String name, String stopId){
         mName = name;
         mStopId = stopId;

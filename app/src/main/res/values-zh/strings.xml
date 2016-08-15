@@ -34,10 +34,10 @@
     <string name="no_internet_warning">无法连接网络</string>
     <string name="no_user">用户不存在</string>
     <string name="not_email_verified">请先验证邮箱</string>
-    <string name="not_logged_in">请先登录</string>
+    <string name="dialog_msg_not_logged_in">请先登录</string>
     <string name="other_failure">发生了什么,囧…</string>
     <string name="password_dont_match">密码不匹配</string>
-    <string name="pending_request_error">一次只能发送一个请求</string>
+    <string name="dialog_msg_can_only_make_one_request">一次只能发送一个请求</string>
     <string name="perm_contacts_rationale">我们需要你的邮箱</string>
     <string name="permission_internet_denied">MiddRides需要网络连接</string>
     <string name="please_turn_on_gps">请打开GPS</string>

@@ -23,6 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
+
+        <!--[Activity START]-->
         <activity
             android:name="com.middleendien.midd_rides.activity.SplashActivity"
             android:screenOrientation="portrait"
@@ -69,6 +71,21 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.middleendien.midd_rides.activity.LoginActivity" />
         </activity>
+        <!--[Activity END]-->
+
+        <!--[Service START]-->
+        <service android:name=".firebase.MiddRidesMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name=".firebase.MiddRidesInstanceIdService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <!--[Service END]-->
 
         <meta-data
             android:name="io.fabric.ApiKey"

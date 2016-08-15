@@ -10,23 +10,13 @@
     <!--Action Bars & SnackBar-->
     <string name="action_settings">Settings</string>
     <string name="action_login">Log In</string>
-    <string name="not_logged_in">You have to log in first</string>
     <string name="not_email_verified">You have to verify your email first</string>
     <string name="press_again_exit">Press again to exit</string>
     <string name="no_internet_warning">Internet connection unavailable</string>
 
-    <!--Broadcast-->
-    <string name="broadcast_kill_signal" translatable="false">KillActivity</string>
-    
     <!--Buttons-->
-    <string name="got_it">Got it!</string>
     <string name="login_button">Log In</string>
     <string name="register_button">Register</string>
-    <string name="log_in_later">Log in later</string>
-    <string name="logout_button">Log Out</string>
-    <string name="nearestLocation_button">Click this if Drunk</string>
-    <string name="resend_email_button">Re-send verification e-mail</string>
-    <string name="reset_passwd_button">Reset Password</string>
     <string name="request_pick_up">Request Pick Up</string>
     <string name="cancel_request">Cancel Request</string>
     <string name="change_password">Change Password</string>
@@ -39,11 +29,15 @@
     <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
     <string name="dialog_msg_did_you_catch_your_van">Did you catch your van?</string>
     <string name="dialog_msg_middrides_not_available">MiddRides is not currently available</string>
+    <string name="dialog_msg_can_only_make_one_request">You can only make one request at a time</string>
+    <string name="dialog_msg_not_logged_in">You have to log in first</string>
+
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_no">No</string>
     <string name="dialog_btn_cancel">Cancel</string>
     <string name="dialog_btn_dismiss">Dismiss</string>
     <string name="dialog_btn_got_it">Got it!</string>
+
     <string name="dialog_logging_in">Signing In…</string>
     <string name="dialog_registering">Registering…</string>
     <string name="dialog_changing_password">Changing Password</string>
@@ -56,14 +50,8 @@
     <string name="dialog_title_service_down">Service Down</string>
     <string name="dialog_request_message">Pick up at</string>
 
-    <!--Intent Bundle keys-->
-    <string name="intent_current_user" translatable="false">User</string>
-    <string name="intent_is_logged_in" translatable="false">loggedIn</string>
-
     <!--Log in/Sign up message-->
-    <string name="logged_in" translatable="false">Logged In</string>
     <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
-    <string name="pending_request_error">You can only make one request at a time</string>
 
     <string name="connection_fail">Connection Failed</string>
     <string name="account_linked">Account Already Linked</string>
@@ -119,6 +107,7 @@
     <string name="current_user" translatable="false">currentUser</string>
     <string name="last_updated" translatable="false">lastUpdated</string>
     <string name="all_stops" translatable="false">allStops</string>
+    <string name="pending_request" translatable="false">pendingRequest</string>
 
     <string name="login_status" translatable="false">LoginStatus</string>
     <string name="request_spinner_position" translatable="false">spinnerPosition</string>

@@ -24,8 +24,6 @@ package com.middleendien.midd_rides.activity;
 ////////////////////////////////////////////////////////////////////
 
 import android.annotation.TargetApi;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,7 +35,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -54,10 +52,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.Stop;
+import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.utils.NetworkUtil;
 import com.middleendien.midd_rides.utils.UserUtil;
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedStop = (Stop) spinnerAdapter.getItem(position);
                 vanArrivingLocation.setText(selectedStop.getName());
-                Log.d("PickupSpinner", "Selected: " + position + "");
+                Log.d("PickupSpinner", "Selected: " + position);
             }
 
             @Override
@@ -249,30 +249,31 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                     @Override
                     public void onClick(View view) {
                         // TODO:
-//                        if (ParseUser.getCurrentUser() == null) {                   // not logged in
-//                            showWarningDialog(
-//                                    getString(R.string.not_logged_in),
-//                                    null,
-//                                    getString(R.string.dialog_btn_dismiss));
-//                            return;                     // do nothing
-//                        } else if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
-//                            Log.d("MainActivity", "Email verified: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)));
-//                            showWarningDialog(
-//                                    getString(R.string.not_logged_in),
-//                                    null,
-//                                    getString(R.string.dialog_btn_dismiss));
-//                            return;
-//                        } else if (warnIfDisconnected())
-//                            return;
-//
-//                        if (ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {
-//                            showWarningDialog(
-//                                    getString(R.string.pending_request_error),
-//                                    null,
-//                                    getString(R.string.dialog_btn_dismiss));
-//                        } else {                        //initialize Stop Dialog
-//                            showRequestDialog();
-//                        }
+                        User currentUser = UserUtil.getCurrentUser(MainActivity.this);
+                        if (currentUser == null) {                   // not logged in
+                            showWarningDialog(
+                                    getString(R.string.dialog_msg_not_logged_in),
+                                    null,
+                                    getString(R.string.dialog_btn_dismiss));
+                            return;                     // do nothing
+                        } else if (!currentUser.isVerified()) {
+                            Log.d("MainActivity", "Email verified: " + currentUser.isVerified());
+                            showWarningDialog(
+                                    getString(R.string.dialog_msg_not_logged_in),
+                                    null,
+                                    getString(R.string.dialog_btn_dismiss));
+                            return;
+                        } else if (warnIfDisconnected())
+                            return;
+
+                        if (getPendingRequest() != null) {
+                            showWarningDialog(
+                                    getString(R.string.dialog_msg_can_only_make_one_request),
+                                    null,
+                                    getString(R.string.dialog_btn_dismiss));
+                        } else {
+                            showRequestDialog();
+                        }
                     }
                 });
                 break;
@@ -283,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 callService.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        // TODO: check out if this still works
                         if(warnIfDisconnected())
                             return;
 
@@ -310,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void cancelCurrentRequest(final int flag) {
-
+        // TODO: remember to unsubscribe
     }
 
     private void showCancelDialog() {
@@ -334,13 +336,32 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                     @Override
                     public void onClick(SweetAlertDialog sweetAlertDialog) {
                         // make request
-                        // TODO:
-//                        makeRequest(selectedStop);
+                        User currentUser = UserUtil.getCurrentUser(MainActivity.this);
+                        if (currentUser == null) {
+                            Toast.makeText(MainActivity.this, getString(R.string.dialog_msg_not_logged_in), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        NetworkUtil.getInstance().makeRequest(
+                                currentUser.getEmail(),
+                                currentUser.getPassword(),
+                                selectedStop.getStopId(),
+                                MainActivity.this,
+                                new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        // TODO:
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        // TODO:
+                                    }
+                                }
+                        );
 
                         // Replace whitespaces and forward slashes in location name with hyphens
-                        String channelName = selectedStop.getName().replace('/', '-').replace(' ', '-');
-                        // TODO: subscribe to fcm channel
-//                        ParsePush.subscribeInBackground(channelName);
+                        String channelName = selectedStop.getStopId();
+                        FirebaseMessaging.getInstance().subscribeToTopic(channelName);
 
                         setTitle(getString(R.string.title_activity_main_van_on_way));
                         toggleCallButton(BUTTON_CANCEL_REQUEST);
@@ -377,9 +398,8 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
             public void onClick(SweetAlertDialog sweetAlertDialog) {
                 dialog.dismissWithAnimation();
                 // Replace whitespaces and forward slashes in location name with hyphens
-                String channelName = selectedStop.getName().replace('/', '-').replace(' ', '-');
-                // TODO: unsubscribe to fcm channel
-//                ParsePush.unsubscribeInBackground(channelName);
+                String channelName = selectedStop.getStopId();
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(channelName);
 
                 displayVanArrivingMessages();
             }
@@ -541,7 +561,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                 stopList.add(new Stop(stopName, stopId));
                             }
                             // save all updated stops to local storage
-                            saveLocalStops(stopList);
+                            putLocalStops(stopList);
                             if (spinnerAdapter != null)
                                 spinnerAdapter.notifyDataSetChanged();
                         }
@@ -562,7 +582,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
      * Save all stops to {@link} SharedPreference
      * @param stopList      list of stops
      */
-    private void saveLocalStops(List<Stop> stopList) {
+    private void putLocalStops(List<Stop> stopList) {
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .putString(getString(R.string.all_stops), new Gson().toJson(
                         stopList,
@@ -581,6 +601,25 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
             return new ArrayList<>();
         else
             return new Gson().fromJson(allStopsString, new TypeToken<ArrayList<Stop>>() {}.getType());
+    }
+
+    /***
+     * Save a pending request to local storage
+     * @param stop          stop that the request is for
+     */
+    private void putPendingRequest(Stop stop) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putString(getString(R.string.pending_request), new Gson().toJson(stop, Stop.class))
+                .apply();
+    }
+
+    /***
+     * Get the pending request from local storage
+     * @return
+     */
+    private @Nullable Stop getPendingRequest() {
+        return new Gson().fromJson(PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(getString(R.string.pending_request), null), Stop.class);
     }
 
     private void killSelf() {
