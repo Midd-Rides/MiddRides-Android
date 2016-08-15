@@ -86,6 +86,8 @@
     <!--Network Response Keys-->
     <string name="res_param_status" translatable="false">status</string>
     <string name="res_param_error" translatable="false">error</string>
+    <string name="res_param_verified" translatable="false">verified</string>
+    <string name="res_param_user" translatable="false">user</string>
 
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>

@@ -9,10 +9,12 @@ public class User {
 
     private String mEmail;
     private String mPassword;
+    private boolean mVerified;
 
-    public User(String email, String encryptedPassword) {
+    public User(String email, String encryptedPassword, boolean verified) {
         mEmail = email;
         mPassword = encryptedPassword;
+        mVerified = verified;
     }
 
     public String getEmail() {
@@ -30,6 +32,15 @@ public class User {
 
     public User setPassword(String encryptedPassword) {
         mPassword = encryptedPassword;
+        return this;
+    }
+
+    public boolean isVerified() {
+        return mVerified;
+    }
+
+    public User setVerified(boolean verified) {
+        mVerified = verified;
         return this;
     }
 

@@ -63,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private AutoCompleteTextView emailBox;
     private EditText passwordBox;
 
+    private static final int REGISTER_REQUEST_CODE = 0x100;
     private static final int PERMISSION_INTERNET_REQUEST_CODE = 0x201;
 
     private SweetAlertDialog progressDialog;
@@ -172,13 +173,18 @@ public class LoginActivity extends AppCompatActivity {
                             // TODO: change Toast to SweetAlertDialog
                             setDialogShowing(false);
                             try {
-                                JSONObject body = new JSONObject(response.body().string());
+                                JSONObject body;
                                 if (!response.isSuccessful()) {     // not successful
+                                    body = new JSONObject(response.errorBody().string());
                                     Toast.makeText(LoginActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
                                     Log.d(TAG, body.toString());
                                 } else {                            // login success
+                                    body = new JSONObject(response.body().string());
                                     // save to local storage
-                                    UserUtil.setCurrentUser(LoginActivity.this, new User(email, Privacy.encodePassword(password)));
+                                    UserUtil.setCurrentUser(LoginActivity.this, new User(
+                                            email,
+                                            Privacy.encodePassword(password),
+                                            body.getJSONObject(getString(R.string.res_param_user)).getBoolean(getString(R.string.res_param_verified))));
                                     Intent toMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(toMainActivity);
                                     finish();
@@ -209,10 +215,12 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {                        // go to register page
                 Intent toRegisterActivity = new Intent(LoginActivity.this, RegisterActivity.class);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    startActivity(toRegisterActivity,
+                    startActivityForResult(
+                            toRegisterActivity,
+                            REGISTER_REQUEST_CODE,
                             ActivityOptionsCompat.makeSceneTransitionAnimation(LoginActivity.this).toBundle());
                 else
-                    startActivity(toRegisterActivity);
+                    startActivityForResult(toRegisterActivity, REGISTER_REQUEST_CODE);
             }
         });
     }
@@ -256,6 +264,21 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, getString(R.string.permission_internet_denied), Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REGISTER_REQUEST_CODE:
+                if (resultCode == RegisterActivity.REGISTER_SUCCESS_CODE) {
+                    Intent toMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(toMainActivity);
+                    finish();
+                }
+                return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**

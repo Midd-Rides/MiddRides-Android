@@ -55,7 +55,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private Button registerButton;
 
-    private static final int REGISTER_FAILURE_CODE = 0x102;
+    public static final int REGISTER_SUCCESS_CODE = 0x101;
+    public static final int REGISTER_FAILURE_CODE = 0x102;
 
     private SweetAlertDialog progressDialog;
 
@@ -123,14 +124,19 @@ public class RegisterActivity extends AppCompatActivity {
                         // TODO: change Toast to SweetAlertDialog
                         setDialogShowing(false);
                         try {
-                            JSONObject body = new JSONObject(response.body().string());
+                            JSONObject body;
                             if (!response.isSuccessful()) {     // not successful
-                                Toast.makeText(RegisterActivity.this, getString(R.string.res_param_error), Toast.LENGTH_SHORT).show();
+                                body = new JSONObject(response.errorBody().string());
+                                Toast.makeText(RegisterActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, body.toString());
                             } else {                            // register success
-                                UserUtil.setCurrentUser(RegisterActivity.this, new User(email, Privacy.encodePassword(password)));
-                                Intent toMainActivity = new Intent(RegisterActivity.this, MainActivity.class);
-                                startActivity(toMainActivity);
+                                body = new JSONObject(response.body().string());
+                                // save to local storage
+                                UserUtil.setCurrentUser(RegisterActivity.this, new User(
+                                        email,
+                                        Privacy.encodePassword(password),
+                                        body.getJSONObject(getString(R.string.res_param_user)).getBoolean(getString(R.string.res_param_verified))));
+                                setResult(REGISTER_SUCCESS_CODE);
                                 finish();
                             }
                         } catch (JSONException | IOException e) {
@@ -228,12 +234,17 @@ public class RegisterActivity extends AppCompatActivity {
 
         switch (id) {
             case android.R.id.home:
-                setResult(REGISTER_FAILURE_CODE);
                 onBackPressed();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(REGISTER_FAILURE_CODE);
+        super.onBackPressed();
     }
 
     @Override
