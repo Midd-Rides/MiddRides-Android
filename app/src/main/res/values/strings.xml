@@ -55,13 +55,11 @@
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Intent Bundle keys-->
-    <string name="current_user" translatable="false">User</string>
-    <string name="is_logged_in" translatable="false">loggedIn</string>
-    <string name="is_dispatcher" translatable="false">Dispatcher</string>
+    <string name="intent_current_user" translatable="false">User</string>
+    <string name="intent_is_logged_in" translatable="false">loggedIn</string>
 
     <!--Log in/Sign up message-->
     <string name="logged_in" translatable="false">Logged In</string>
-    <string name="wrong_email">Incorrect Email Format</string>
     <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
     <string name="pending_request_error">You can only make one request at a time</string>
     <string name="passwd_not_match">Your passwords don\'t match</string>
@@ -110,8 +108,9 @@
     <string name="pref_announcements_no_announcement">No Announcement</string>
 
     <!--SharedPreferences-->
+    <string name="current_user" translatable="false">currentUser</string>
+
     <string name="login_status" translatable="false">LoginStatus</string>
-    <string name="location_version" translatable="false">LocationVersion</string>
     <string name="request_spinner_position" translatable="false">spinnerPosition</string>
     <string name="waiting_to_log_out" translatable="false">waitingToLogOut</string>
     <string name="screen_on" translatable="false">screenOn</string>
@@ -132,6 +131,8 @@
 
     <!--Toast-->
     <string name="cannot_connect_to_server">Cannot connect to server</string>
+    <string name="failed_to_talk_to_server">Failed to talk to server</string>
+    <string name="incorrect_email_format">Incorrect Email Format</string>
 
     <string name="already_verified">E-mail Already Verified</string>
     <string name="resent_email">Please check your mailbox</string>

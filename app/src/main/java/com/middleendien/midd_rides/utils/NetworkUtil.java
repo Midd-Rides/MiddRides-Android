@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides.network;
+package com.middleendien.midd_rides.utils;
 
 import android.content.Context;
 
@@ -27,7 +27,7 @@ import retrofit2.http.QueryMap;
  * Note: all network request shall be asynchronous
  */
 
-public class NetworkAgent {
+public class NetworkUtil {
 
     /***
      * Retrofit interface for communicating with server
@@ -61,14 +61,14 @@ public class NetworkAgent {
 
     }
 
-    private static NetworkAgent agent;
+    private static NetworkUtil agent;
     private MiddRidesService service;
 
     /***
-     * Singleton pattern for getting NetworkAgent
+     * Singleton pattern for getting NetworkUtil
      * @return      current agent
      */
-    public static NetworkAgent getInstance() {
+    public static NetworkUtil getInstance() {
         if (agent == null)
             initAgent();
         return agent;
@@ -78,13 +78,13 @@ public class NetworkAgent {
      * Who says we won't go multi-thread in the future?
      */
     private static synchronized void initAgent() {
-        if (agent == null) agent = new NetworkAgent();
+        if (agent == null) agent = new NetworkUtil();
     }
 
     /***
      * Constructor
      */
-    private NetworkAgent() {
+    private NetworkUtil() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.SERVER_BASE_URL)
                 .build();

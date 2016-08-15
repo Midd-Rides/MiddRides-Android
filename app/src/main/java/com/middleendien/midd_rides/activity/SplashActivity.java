@@ -7,12 +7,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
-import com.middleendien.midd_rides.network.NetworkAgent;
+import com.middleendien.midd_rides.utils.NetworkUtil;
+import com.middleendien.midd_rides.utils.UserUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +31,8 @@ import retrofit2.Response;
  */
 
 public class SplashActivity extends AppCompatActivity {
+
+    private static final String TAG = "SplashActivity";
 
     private static final int SPLASH_TIME_OUT = 2000;
     private AlertDialog dialog;
@@ -66,7 +69,7 @@ public class SplashActivity extends AppCompatActivity {
         });
 
         // check if server is running
-        NetworkAgent.getInstance().isServerRunning(new Callback<ResponseBody>() {
+        NetworkUtil.getInstance().isServerRunning(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
                 new Handler().postDelayed(new Runnable() {
@@ -74,10 +77,17 @@ public class SplashActivity extends AppCompatActivity {
                     public void run() {
                         try {
                             JSONObject body = new JSONObject(response.body().string());
-                            if (body.getBoolean(getString(R.string.res_param_status))) {
-                                // TODO: check if logged in
-                                Toast.makeText(SplashActivity.this, "Server Running", Toast.LENGTH_SHORT).show();
-                            } else {
+                            if (body.getBoolean(getString(R.string.res_param_status))) {        // server is running
+                                Log.i(TAG, "Server Running");
+
+                                Intent intent;
+                                if (UserUtil.getCurrentUser(SplashActivity.this) == null)
+                                    intent = new Intent(SplashActivity.this, LoginActivity.class);
+                                else
+                                    intent = new Intent(SplashActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {                                // server down
                                 dialog.show();
                             }
                         } catch (JSONException | IOException e) {

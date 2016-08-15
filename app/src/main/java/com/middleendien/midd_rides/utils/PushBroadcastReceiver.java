@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides.network;
+package com.middleendien.midd_rides.utils;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;

@@ -67,7 +67,7 @@ import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.middleendien.midd_rides.network.PushBroadcastReceiver.*;
+import static com.middleendien.midd_rides.utils.PushBroadcastReceiver.*;
 
 public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
 

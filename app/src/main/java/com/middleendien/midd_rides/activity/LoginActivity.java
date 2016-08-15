@@ -10,7 +10,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
@@ -32,8 +31,14 @@ import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.utils.HardwareUtil;
+import com.middleendien.midd_rides.utils.NetworkUtil;
+import com.middleendien.midd_rides.utils.UserUtil;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
@@ -46,13 +51,11 @@ public class LoginActivity extends AppCompatActivity {
 
     // UI
     private Button btnLogIn;
-    private Button btnRegister;
-    private AutoCompleteTextView usernameBox;
-    private EditText passwdBox;
+    private Button btnToRegister;
+    private AutoCompleteTextView emailBox;
+    private EditText passwordBox;
 
     private static final int REGISTER_REQUEST_CODE = 0x001;
-
-    private static final int REGISTER_SUCCESS_RESULT_CODE = 0x101;
 
     private static final int LOGIN_CANCEL_RESULT_CODE = 0x301;
 
@@ -65,15 +68,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
 
-        // TODO:
-//        if(ParseUser.getCurrentUser() != null){
-//            Log.d("LoginActivity", "Already has user");
-//            Intent toMainScreen = new Intent(LoginActivity.this, MainActivity.class);
-//            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//            NavUtils.navigateUpTo(this, toMainScreen);
-//        }
-
         initData();
 
         initView();
@@ -82,20 +76,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        // TODO:
-//        loginAgent = LoginAgent.getInstance(this);
-//        loginAgent.registerListener(LoginAgent.LOGIN, this);
-
+        // TODO: what is this?
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
     }
 
     private void initView() {
         btnLogIn = (Button) findViewById(R.id.login_login);
-        btnRegister = (Button) findViewById(R.id.login_register);
+        btnToRegister = (Button) findViewById(R.id.login_register);
 
-        usernameBox = (AutoCompleteTextView) findViewById(R.id.login_email);
-        passwdBox = (EditText) findViewById(R.id.login_passwd);
+        emailBox = (AutoCompleteTextView) findViewById(R.id.login_email);
+        passwordBox = (EditText) findViewById(R.id.login_passwd);
 
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().setExitTransition(null);
@@ -113,7 +104,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initEvent() {
-        usernameBox.addTextChangedListener(new TextWatcher() {
+        emailBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -122,31 +113,31 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().length() > 0 && s.charAt(s.length() - 1) == '@') {             // ends with "@"
-                    ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
+                    ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<>(
                             LoginActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[] { s + "middlebury.edu" });
-                    usernameBox.setAdapter(autoCompleteAdapter);
+                    emailBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 2 && !s.toString().contains("@")) {         // "sth"
-                    ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
+                    ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<>(
                             LoginActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[] { s + "@middlebury.edu" });
-                    usernameBox.setAdapter(autoCompleteAdapter);
+                    emailBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 15 && s.toString().substring(s.length() - 15).equals("@middlebury.edu")) {
                     // completed format
-                    usernameBox.dismissDropDown();
+                    emailBox.dismissDropDown();
                 } else if (s.toString().length() == 0) {
                     // cleared everything or initial state, without @
-                    usernameBox.setAdapter(null);
+                    emailBox.setAdapter(null);
                 }               // else do nothing
             }
 
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.toString().endsWith("@middlebury.edu")) {
-                    passwdBox.clearFocus();
-                    passwdBox.requestFocus();
+                    passwordBox.clearFocus();
+                    passwordBox.requestFocus();
                     InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                    inputMethodManager.showSoftInput(passwdBox, InputMethodManager.SHOW_IMPLICIT);
+                    inputMethodManager.showSoftInput(passwordBox, InputMethodManager.SHOW_IMPLICIT);
                 }
             }
         });
@@ -157,20 +148,32 @@ public class LoginActivity extends AppCompatActivity {
             // login logic is implemented with the LoginAgent class
                 if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
+                    String email = emailBox.getText().toString();
+                    String password = passwordBox.getText().toString();
+
                     // check e-mail validity
-                    // TODO:
-//                    if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
-//                        Toast.makeText(LoginActivity.this, getResources().getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
-//                        return;
-//                    }
+                    if (UserUtil.isEmailValid(email)) {
+                        Toast.makeText(LoginActivity.this, getResources().getString(R.string.incorrect_email_format), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     if (!HardwareUtil.isNetworkAvailable(getApplicationContext())){
                         Toast.makeText(LoginActivity.this, getResources().getString(R.string.no_internet_warning), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     setDialogShowing(true);
-                    // TODO:
-//                    loginAgent.loginInBackground(usernameBox.getText().toString(), passwdBox.getText().toString());
+                    NetworkUtil.getInstance().login(email, password, LoginActivity.this, new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            // TODO:
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            t.printStackTrace();
+                            Toast.makeText(LoginActivity.this, getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 } else {        // no internet permission
                     requestPermission(Manifest.permission.INTERNET, PERMISSION_INTERNET_REQUEST_CODE);
                 }
@@ -179,21 +182,15 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
+        btnToRegister.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {                        // switch to register page
-                if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.INTERNET)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    Intent toRegisterScreen = new Intent(LoginActivity.this, RegisterActivity.class);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE,
-                                ActivityOptionsCompat.makeSceneTransitionAnimation(LoginActivity.this).toBundle());
-                    } else {
-                        startActivityForResult(toRegisterScreen, REGISTER_REQUEST_CODE);
-                    }
-                } else {        // no internet permission
-                    requestPermission(Manifest.permission.INTERNET, PERMISSION_INTERNET_REQUEST_CODE);
-                }
+            public void onClick(View v) {                        // go to register page
+                Intent toRegisterActivity = new Intent(LoginActivity.this, RegisterActivity.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    startActivity(toRegisterActivity,
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(LoginActivity.this).toBundle());
+                else
+                    startActivity(toRegisterActivity);
             }
         });
     }
@@ -210,24 +207,6 @@ public class LoginActivity extends AppCompatActivity {
             if (progressDialog.isShowing())
                 progressDialog.dismissWithAnimation();
         }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
-            case REGISTER_REQUEST_CODE:
-                if(resultCode == REGISTER_SUCCESS_RESULT_CODE){
-                    Intent toMainScreen = new Intent(LoginActivity.this, MainActivity.class);
-                    toMainScreen.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    toMainScreen.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    NavUtils.navigateUpTo(this, toMainScreen);
-                } else {
-                    // Register not successful, do nothing
-                }
-                break;
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void hideKeyboard() {

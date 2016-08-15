@@ -70,11 +70,11 @@
     <string name="van_is_almost_at">车马上就到</string>
     <string name="van_is_coming">车正在开往</string>
     <string name="version_not_updated">你的本地数据可能不是最新</string>
-    <string name="wrong_email">邮箱格式不正确</string>
+    <string name="incorrect_email_format">邮箱格式不正确</string>
     <string name="wrong_info">邮箱或密码格式不正确</string>
     <string name="login_button">登录</string>
     <string name="pref_verification_status_unavailable">验证信息未知</string>
-    <string name="current_user">用户</string>
+    <string name="intent_current_user">用户</string>
     <string name="dialog_title_service_down">服务不可用</string>
     <string name="dialog_msg_middrides_not_available">MiddRides暂时不可用</string>
 </resources>
