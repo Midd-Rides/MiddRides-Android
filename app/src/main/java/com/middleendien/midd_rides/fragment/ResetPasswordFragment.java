@@ -3,7 +3,6 @@ package com.middleendien.midd_rides.fragment;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +15,7 @@ import android.widget.Toast;
 import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.NetworkUtil;
-import com.middleendien.midd_rides.utils.Privacy;
+import com.middleendien.midd_rides.Privacy;
 import com.middleendien.midd_rides.utils.UserUtil;
 
 import org.json.JSONException;

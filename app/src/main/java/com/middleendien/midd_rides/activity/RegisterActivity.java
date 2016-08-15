@@ -24,7 +24,7 @@ import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.utils.NetworkUtil;
-import com.middleendien.midd_rides.utils.Privacy;
+import com.middleendien.midd_rides.Privacy;
 import com.middleendien.midd_rides.utils.UserUtil;
 
 import org.json.JSONException;

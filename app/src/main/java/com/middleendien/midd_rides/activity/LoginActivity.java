@@ -19,7 +19,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -34,7 +33,7 @@ import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.utils.NetworkUtil;
-import com.middleendien.midd_rides.utils.Privacy;
+import com.middleendien.midd_rides.Privacy;
 import com.middleendien.midd_rides.utils.UserUtil;
 
 import org.json.JSONException;
