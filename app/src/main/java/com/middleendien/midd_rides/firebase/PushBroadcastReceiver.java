@@ -1,4 +1,4 @@
-package com.middleendien.midd_rides.utils;
+package com.middleendien.midd_rides.firebase;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;

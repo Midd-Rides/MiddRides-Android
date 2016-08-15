@@ -31,6 +31,7 @@
     <string name="dialog_msg_middrides_not_available">MiddRides is not currently available</string>
     <string name="dialog_msg_can_only_make_one_request">You can only make one request at a time</string>
     <string name="dialog_msg_not_logged_in">You have to log in first</string>
+    <string name="dialog_msg_not_verified">You have to verify your email first</string>
 
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_no">No</string>
@@ -48,6 +49,7 @@
     <string name="dialog_title_congrats">Congratulations!</string>
     <string name="dialog_title_coming">Van Coming</string>
     <string name="dialog_title_service_down">Service Down</string>
+    <string name="dialog_title_email_verification">Email Verification</string>
     <string name="dialog_request_message">Pick up at</string>
 
     <!--Log in/Sign up message-->

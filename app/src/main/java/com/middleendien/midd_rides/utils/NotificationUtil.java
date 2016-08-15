@@ -6,7 +6,7 @@ package com.middleendien.midd_rides.utils;
  * Middleware for displaying notifications
  */
 
-public class NotificationHelper {
+public class NotificationUtil {
 
 
 

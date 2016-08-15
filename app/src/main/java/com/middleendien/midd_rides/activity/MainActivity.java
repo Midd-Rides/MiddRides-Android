@@ -81,7 +81,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.middleendien.midd_rides.utils.PushBroadcastReceiver.*;
+import static com.middleendien.midd_rides.firebase.PushBroadcastReceiver.*;
 
 public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
 
@@ -89,21 +89,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     private Button callService;
 
-    /**
-     * request code for query: CLASSNAME_VAR_NAME_REQUEST_CODE;
-     */
-    private static final int STATUS_SERVICE_RUNNING_REQUEST_CODE            = 0x001;
-    private static final int STATUS_LOCATION_VERSION_REQUEST_CODE           = 0x002;
-    private static final int LOCATION_GET_LASTEST_VERSION_REQUEST_CODE      = 0x003;
-
-    private static final int LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE        = 0x011;
-    private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
-    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
-
     private static final int SETTINGS_SCREEN_REQUEST_CODE                   = 0x201;
-    private static final int LOGIN_REQUEST_CODE                             = 0x202;
-
-    private static final int LOGIN_CANCEL_RESULT_CODE                       = 0x301;
 
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
     private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
@@ -146,12 +132,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
         Log.d("MainActivity", "Create");
-
-        // TODO:
-//        if (ParseUser.getCurrentUser() == null) {
-//            Intent toLoginScreen = new Intent(MainActivity.this, LoginActivity.class);
-//            startActivityForResult(toLoginScreen, LOGIN_REQUEST_CODE);
-//        }
 
         if (getIntent().getExtras() != null) {
             try {
@@ -248,7 +228,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 callService.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // TODO:
                         User currentUser = UserUtil.getCurrentUser(MainActivity.this);
                         if (currentUser == null) {                   // not logged in
                             showWarningDialog(
@@ -256,13 +235,14 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                     null,
                                     getString(R.string.dialog_btn_dismiss));
                             return;                     // do nothing
-                        } else if (!currentUser.isVerified()) {
-                            Log.d("MainActivity", "Email verified: " + currentUser.isVerified());
-                            showWarningDialog(
-                                    getString(R.string.dialog_msg_not_logged_in),
-                                    null,
-                                    getString(R.string.dialog_btn_dismiss));
-                            return;
+                            // TODO: turn this back on after email verification is implemented
+//                        } else if (!currentUser.isVerified()) {
+//                            Log.d("MainActivity", "Email verified: " + currentUser.isVerified());
+//                            showWarningDialog(
+//                                    getString(R.string.dialog_title_email_verification),
+//                                    getString(R.string.dialog_msg_not_verified),
+//                                    getString(R.string.dialog_btn_dismiss));
+//                            return;
                         } else if (warnIfDisconnected())
                             return;
 
@@ -643,14 +623,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
-                }
-                return;
-            case LOGIN_REQUEST_CODE:
-                Log.d("MainActivity", "Entering from LoginActivity, 0x" + Integer.toHexString(resultCode).toUpperCase());
-                if (resultCode == LOGIN_CANCEL_RESULT_CODE) {
-                    finish();
-                    int pid = android.os.Process.myPid();
-                    android.os.Process.killProcess(pid);
                 }
                 return;
         }

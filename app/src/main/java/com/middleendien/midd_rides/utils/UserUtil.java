@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Patterns;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.middleendien.midd_rides.R;
