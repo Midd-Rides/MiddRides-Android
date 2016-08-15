@@ -50,10 +50,9 @@ import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
- * A login screen that offers login via email/password.
+ * Created by Peter on some earlier time
  *
- * Note: This class is the entry point of the app
- *
+ * Activity where user logs himself in
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -157,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
                     final String password = passwordBox.getText().toString();
 
                     // check e-mail validity
-                    if (UserUtil.isEmailValid(email)) {
+                    if (!UserUtil.isEmailValid(email)) {
                         Toast.makeText(LoginActivity.this, getResources().getString(R.string.incorrect_email_format), Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -167,22 +166,25 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                     setDialogShowing(true);
-                    NetworkUtil.getInstance().login(email, password, LoginActivity.this, new Callback<ResponseBody>() {
+                    NetworkUtil.getInstance().login(email, Privacy.encodePassword(password), LoginActivity.this, new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            // TODO: change Toast to SweetAlertDialog
+                            setDialogShowing(false);
                             try {
                                 JSONObject body = new JSONObject(response.body().string());
                                 if (!response.isSuccessful()) {     // not successful
                                     Toast.makeText(LoginActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
                                     Log.d(TAG, body.toString());
-                                } else {                // login successful
+                                } else {                            // login success
                                     // save to local storage
                                     UserUtil.setCurrentUser(LoginActivity.this, new User(email, Privacy.encodePassword(password)));
                                     Intent toMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(toMainActivity);
-
+                                    finish();
                                 }
                             } catch (JSONException | IOException e) {
+                                setDialogShowing(false);
                                 e.printStackTrace();
                                 Toast.makeText(LoginActivity.this, getString(R.string.unexpected_server_response), Toast.LENGTH_SHORT).show();
                             }

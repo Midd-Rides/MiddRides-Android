@@ -1,6 +1,7 @@
 package com.middleendien.midd_rides.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Slide;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -20,24 +22,39 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
+import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
+import com.middleendien.midd_rides.utils.NetworkUtil;
+import com.middleendien.midd_rides.utils.Privacy;
+import com.middleendien.midd_rides.utils.UserUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Peter on 10/5/15.
  *
+ * Activity where user registers
  */
 public class RegisterActivity extends AppCompatActivity {
-    private AutoCompleteTextView usernameBox;
-    private EditText passwdBox;
-    private EditText passwdConfirmBox;
 
+    private static final String TAG = "RegisterActivity";
+
+    private AutoCompleteTextView emailBox;
+    private EditText passwordBox;
+    private EditText passwordConfirmBox;
 
     private Button registerButton;
 
-    private static final int REGISTER_SUCCESS_CODE = 0x101;
     private static final int REGISTER_FAILURE_CODE = 0x102;
 
     private SweetAlertDialog progressDialog;
@@ -48,8 +65,6 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register_screen);
 
         initAnim();
-
-        initData();
 
         initView();
 
@@ -68,17 +83,10 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void initData() {
-        // possibly nothing
-        // TODO:
-//        loginAgent = LoginAgent.getInstance(this);
-//        loginAgent.registerListener(LoginAgent.REGISTER, this);
-    }
-
     private void initView() {
-        usernameBox = (AutoCompleteTextView) findViewById(R.id.register_email);
-        passwdBox = (EditText) findViewById(R.id.register_passwd);
-        passwdConfirmBox = (EditText) findViewById(R.id.register_passwd_confirm);
+        emailBox = (AutoCompleteTextView) findViewById(R.id.register_email);
+        passwordBox = (EditText) findViewById(R.id.register_passwd);
+        passwordConfirmBox = (EditText) findViewById(R.id.register_passwd_confirm);
 
         registerButton = (Button) findViewById(R.id.register_register);
     }
@@ -87,15 +95,18 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final String email = emailBox.getText().toString();
+                final String password = passwordBox.getText().toString();
+                String confirm = passwordConfirmBox.getText().toString();
+
                 // check e-mail validity
-                // TODO:
-//                if (!LoginAgent.isEmailValid(usernameBox.getText().toString())) {
-//                    Toast.makeText(RegisterActivity.this, getString(R.string.wrong_email), Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
+                if (!UserUtil.isEmailValid(email)) {
+                    Toast.makeText(RegisterActivity.this, getString(R.string.incorrect_email_format), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 // check password match
-                if (!passwdBox.getText().toString().equals(passwdConfirmBox.getText().toString())) {
+                if (!password.equals(confirm)) {
                     Toast.makeText(RegisterActivity.this, getString(R.string.passwd_not_match), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -106,14 +117,40 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 setDialogShowing(true);
-                // TODO:
-//                loginAgent.registerInBackground(usernameBox.getText().toString(), passwdBox.getText().toString());
+                NetworkUtil.getInstance().register(email, Privacy.encodePassword(password), RegisterActivity.this, new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        // TODO: change Toast to SweetAlertDialog
+                        setDialogShowing(false);
+                        try {
+                            JSONObject body = new JSONObject(response.body().string());
+                            if (!response.isSuccessful()) {     // not successful
+                                Toast.makeText(RegisterActivity.this, getString(R.string.res_param_error), Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, body.toString());
+                            } else {                            // register success
+                                UserUtil.setCurrentUser(RegisterActivity.this, new User(email, Privacy.encodePassword(password)));
+                                Intent toMainActivity = new Intent(RegisterActivity.this, MainActivity.class);
+                                startActivity(toMainActivity);
+                                finish();
+                            }
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        setDialogShowing(false);
+                        t.printStackTrace();
+                        Toast.makeText(RegisterActivity.this, getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                    }
+                });
 
                 hideKeyboard();
             }
         });
 
-        usernameBox.addTextChangedListener(new TextWatcher() {
+        emailBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -125,18 +162,18 @@ public class RegisterActivity extends AppCompatActivity {
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
                             RegisterActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[]{s + "middlebury.edu"});
-                    usernameBox.setAdapter(autoCompleteAdapter);
+                    emailBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 2 && !s.toString().contains("@")) {         // "sth"
                     ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(
                             RegisterActivity.this,
                             android.R.layout.simple_dropdown_item_1line, new String[]{s + "@middlebury.edu"});
-                    usernameBox.setAdapter(autoCompleteAdapter);
+                    emailBox.setAdapter(autoCompleteAdapter);
                 } else if (s.toString().length() > 15 && s.toString().substring(s.length() - 15).equals("@middlebury.edu")) {
                     // completed format
-                    usernameBox.dismissDropDown();
+                    emailBox.dismissDropDown();
                 } else if (s.toString().length() == 0) {
                     // cleared everything or initial state, without @
-                    usernameBox.setAdapter(null);
+                    emailBox.setAdapter(null);
                 }   // else do nothing
             }
 
