@@ -6,5 +6,6 @@
 /build
 /captures
 google-services.json
+Privacy.java
 
 *.apk

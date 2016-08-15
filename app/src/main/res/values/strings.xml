@@ -85,6 +85,7 @@
 
     <!--Network Response Keys-->
     <string name="res_param_status" translatable="false">status</string>
+    <string name="res_param_error" translatable="false">error</string>
 
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>
@@ -132,6 +133,7 @@
     <!--Toast-->
     <string name="cannot_connect_to_server">Cannot connect to server</string>
     <string name="failed_to_talk_to_server">Failed to talk to server</string>
+    <string name="unexpected_server_response">Unexpected server response</string>
     <string name="incorrect_email_format">Incorrect Email Format</string>
 
     <string name="already_verified">E-mail Already Verified</string>

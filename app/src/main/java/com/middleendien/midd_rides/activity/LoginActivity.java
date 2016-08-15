@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,9 +31,16 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
+import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.utils.NetworkUtil;
+import com.middleendien.midd_rides.utils.Privacy;
 import com.middleendien.midd_rides.utils.UserUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
@@ -49,15 +57,12 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    // UI
+    private static final String TAG = "LoginActivity";
+
     private Button btnLogIn;
     private Button btnToRegister;
     private AutoCompleteTextView emailBox;
     private EditText passwordBox;
-
-    private static final int REGISTER_REQUEST_CODE = 0x001;
-
-    private static final int LOGIN_CANCEL_RESULT_CODE = 0x301;
 
     private static final int PERMISSION_INTERNET_REQUEST_CODE = 0x201;
 
@@ -145,11 +150,11 @@ public class LoginActivity extends AppCompatActivity {
         btnLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            // login logic is implemented with the LoginAgent class
+                // login logic is implemented in NetworkUtil
                 if (ContextCompat.checkSelfPermission(LoginActivity.this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED) {
-                    String email = emailBox.getText().toString();
-                    String password = passwordBox.getText().toString();
+                    final String email = emailBox.getText().toString();
+                    final String password = passwordBox.getText().toString();
 
                     // check e-mail validity
                     if (UserUtil.isEmailValid(email)) {
@@ -165,7 +170,22 @@ public class LoginActivity extends AppCompatActivity {
                     NetworkUtil.getInstance().login(email, password, LoginActivity.this, new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            // TODO:
+                            try {
+                                JSONObject body = new JSONObject(response.body().string());
+                                if (!response.isSuccessful()) {     // not successful
+                                    Toast.makeText(LoginActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, body.toString());
+                                } else {                // login successful
+                                    // save to local storage
+                                    UserUtil.setCurrentUser(LoginActivity.this, new User(email, Privacy.encodePassword(password)));
+                                    Intent toMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(toMainActivity);
+
+                                }
+                            } catch (JSONException | IOException e) {
+                                e.printStackTrace();
+                                Toast.makeText(LoginActivity.this, getString(R.string.unexpected_server_response), Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                         @Override
@@ -245,16 +265,6 @@ public class LoginActivity extends AppCompatActivity {
     public boolean onTouchEvent(MotionEvent event) {
         hideKeyboard();
         return super.onTouchEvent(event);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                setResult(LOGIN_CANCEL_RESULT_CODE);
-                finish();
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override

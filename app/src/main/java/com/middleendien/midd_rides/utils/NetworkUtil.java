@@ -174,7 +174,7 @@ public class NetworkUtil {
     /***
      * Cancel MiddRides request
      * @param email         email
-     * @param password      password
+     * @param password      password (encoded)
      * @param stopId        unique ID of the stop
      * @param context       context
      * @param callback      callback
