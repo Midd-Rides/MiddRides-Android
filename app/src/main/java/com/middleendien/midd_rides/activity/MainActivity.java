@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -53,10 +54,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.utils.HardwareUtil;
+import com.middleendien.midd_rides.utils.NetworkUtil;
 import com.middleendien.midd_rides.utils.UserUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,15 +73,19 @@ import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import okhttp3.ResponseBody;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static com.middleendien.midd_rides.utils.PushBroadcastReceiver.*;
 
 public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
 
-//    private Synchronizer synchronizer;
+    private static final String TAG = "MainActivity";
 
     private Button callService;
 
@@ -162,21 +174,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void initData() {
-        stopList = new ArrayList<>();
-
-//        synchronizer = Synchronizer.getInstance(this);
-//        synchronizer.getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
-
-        /**
-         * Deal with everything in callback
-         */
-        // TODO:
-        // check service running status
-        // Status should be the only hardcoded query
-//        synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_SERVICE_RUNNING_REQUEST_CODE);
-
-        // check location list version
-//        synchronizer.getObject(null, "Xn18IdIQJj", getString(R.string.parse_class_status), STATUS_LOCATION_VERSION_REQUEST_CODE);
+        stopList = getLocalStops();
+        Log.i(TAG, "StopList: " + stopList.toString());
+        syncStops();
     }
 
     private void initView() {
@@ -216,9 +216,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         backFirstPressed = System.currentTimeMillis() - 2000;
 
         spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, stopList);
-
         pickUpSpinner.setAdapter(spinnerAdapter);
-
         pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -240,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         RequestOnTouchListener onTouchListener = new RequestOnTouchListener();
 
         callService.setOnTouchListener(onTouchListener);
-//        mainImage.setOnTouchListener(onTouchListener);
     }
 
     private void toggleCallButton(int changeTo) {
@@ -420,14 +417,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         Log.d("MainActivity", "Reset countdown restarting... " + RESET_TIMEOUT / 1000 + " seconds left");
     }
 
-    private void showEmailVerifiedDialog() {
-        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
-                .setTitleText(getString(R.string.dialog_title_congrats))
-                .setContentText(getString(R.string.dialog_msg_email_verified))
-                .setConfirmText(getString(R.string.dialog_btn_dismiss))
-                .show();
-    }
-
     private void showWarningDialog(String title, String contentText, String confirmText) {
         new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                 .setTitleText(title)
@@ -486,13 +475,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         killSelf();
     }
 
-    private void killSelf() {
-        Log.i("MainActivity", "I'm dead");
-        finish();
-        int pid = android.os.Process.myPid();
-        android.os.Process.killProcess(pid);
-    }
-
     /**
      * Displays info messages that say the van is heading to the requested stop.
      * Resets the view after 5 minutes.
@@ -504,20 +486,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         vanArrivingText.setAlpha(1);
 
         Log.i("MainActivity", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
-    }
-
-    @SuppressWarnings("unused")
-    private void bringSelfToFront() {
-        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        List<RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
-
-        for (RunningTaskInfo task : tasks) {
-            if (task.baseActivity.getPackageName().equalsIgnoreCase(getPackageName())) {
-                activityManager.moveTaskToFront(task.id, 0);
-                break;
-            }
-        }
-
     }
 
     @Override
@@ -549,12 +517,77 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         return super.onOptionsItemSelected(item);
     }
 
-    private void updateLocations() {
-        // TODO:
-//        synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
-        if (spinnerAdapter != null)
-            spinnerAdapter.notifyDataSetChanged();
-        Log.d("updateLocations()", "Called");
+    /***
+     * Pull stops from server if out of date
+     */
+    private void syncStops() {
+        long lastUpdated = PreferenceManager.getDefaultSharedPreferences(this)
+                .getLong(getString(R.string.last_updated), 0);
+        NetworkUtil.getInstance().syncStops(lastUpdated, this, new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    if (response.isSuccessful()) {
+                        JSONObject body = new JSONObject(response.body().string());
+                        if (body.getBoolean(getString(R.string.res_param_has_updates))) {
+                            JSONArray stops = body.getJSONArray(getString(R.string.res_param_stops));
+
+                            Log.d(TAG, stops.toString());
+
+                            stopList.clear();
+                            for (int i = 0; i < stops.length(); i++) {
+                                String stopName = stops.getJSONObject(i).getString(getString(R.string.res_param_name));
+                                String stopId = stops.getJSONObject(i).getString(getString(R.string.res_param_stop_id));
+                                stopList.add(new Stop(stopName, stopId));
+                            }
+                            // save all updated stops to local storage
+                            saveLocalStops(stopList);
+                            if (spinnerAdapter != null)
+                                spinnerAdapter.notifyDataSetChanged();
+                        }
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    /***
+     * Save all stops to {@link} SharedPreference
+     * @param stopList      list of stops
+     */
+    private void saveLocalStops(List<Stop> stopList) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putString(getString(R.string.all_stops), new Gson().toJson(
+                        stopList,
+                        new TypeToken<ArrayList<Stop>>() {}.getType()))
+                .putLong(getString(R.string.last_updated), System.currentTimeMillis())
+                .apply();
+    }
+
+    /***
+     * Get all stops from {@link} SharedPreference
+     * @return              list of stops
+     */
+    private List<Stop> getLocalStops() {
+        String allStopsString = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.all_stops), null);
+        if (allStopsString == null)
+            return new ArrayList<>();
+        else
+            return new Gson().fromJson(allStopsString, new TypeToken<ArrayList<Stop>>() {}.getType());
+    }
+
+    private void killSelf() {
+        Log.i("MainActivity", "I'm dead");
+        finish();
+        int pid = android.os.Process.myPid();
+        android.os.Process.killProcess(pid);
     }
 
     @Override

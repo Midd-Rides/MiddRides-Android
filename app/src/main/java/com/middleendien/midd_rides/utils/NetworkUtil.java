@@ -49,8 +49,8 @@ public class NetworkUtil {
         @FormUrlEncoded
         Call<ResponseBody> changePassword(@FieldMap Map<String, String> bodyParams);
 
-        @GET(Constants.UPDATE_LOCATION_URL)
-        Call<ResponseBody> updateLocations(@QueryMap Map<String, String> queryParams);
+        @GET(Constants.SYNC_STOPS_URL)
+        Call<ResponseBody> syncStops(@QueryMap Map<String, String> queryParams);
 
         @POST(Constants.MAKE_REQUEST_URL)
         @FormUrlEncoded
@@ -149,10 +149,10 @@ public class NetworkUtil {
      * @param context       context
      * @param callback      callback
      */
-    public void updateStops(long lastUpdatedTimeInMillis, Context context, Callback<ResponseBody> callback) {
+    public void syncStops(long lastUpdatedTimeInMillis, Context context, Callback<ResponseBody> callback) {
         Map<String, String> queryParams = new HashMap<>();
         queryParams.put(context.getString(R.string.map_param_last_updated_time), String.valueOf(lastUpdatedTimeInMillis));
-        service.updateLocations(queryParams).enqueue(callback);
+        service.syncStops(queryParams).enqueue(callback);
     }
 
     /***

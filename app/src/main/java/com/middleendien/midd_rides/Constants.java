@@ -11,7 +11,7 @@ public class Constants {
 
     /* GET */
     public static final String INDEX_URL = "/";
-    public static final String UPDATE_LOCATION_URL = "/location";
+    public static final String SYNC_STOPS_URL = "/location";
 
     /* POST */
     public static final String LOGIN_URL = "/login";

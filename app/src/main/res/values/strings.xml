@@ -89,6 +89,10 @@
     <string name="res_param_error" translatable="false">error</string>
     <string name="res_param_verified" translatable="false">verified</string>
     <string name="res_param_user" translatable="false">user</string>
+    <string name="res_param_has_updates" translatable="false">hasUpdates</string>
+    <string name="res_param_stops" translatable="false">stops</string>
+    <string name="res_param_name" translatable="false">name</string>
+    <string name="res_param_stop_id" translatable="false">stopId</string>
 
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>
@@ -113,6 +117,8 @@
 
     <!--SharedPreferences-->
     <string name="current_user" translatable="false">currentUser</string>
+    <string name="last_updated" translatable="false">lastUpdated</string>
+    <string name="all_stops" translatable="false">allStops</string>
 
     <string name="login_status" translatable="false">LoginStatus</string>
     <string name="request_spinner_position" translatable="false">spinnerPosition</string>

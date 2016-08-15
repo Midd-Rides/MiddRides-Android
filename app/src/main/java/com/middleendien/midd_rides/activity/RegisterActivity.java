@@ -120,7 +120,6 @@ public class RegisterActivity extends AppCompatActivity {
                 NetworkUtil.getInstance().register(email, Privacy.encodePassword(password), RegisterActivity.this, new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        // TODO: change Toast to SweetAlertDialog
                         setDialogShowing(false);
                         try {
                             JSONObject body;

@@ -169,7 +169,6 @@ public class LoginActivity extends AppCompatActivity {
                     NetworkUtil.getInstance().login(email, Privacy.encodePassword(password), LoginActivity.this, new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            // TODO: change Toast to SweetAlertDialog
                             setDialogShowing(false);
                             try {
                                 JSONObject body;

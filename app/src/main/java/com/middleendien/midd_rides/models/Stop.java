@@ -13,6 +13,10 @@ public class Stop {
     private String mName;
     private String mStopId;
 
+    public Stop(String name) {
+        this(name, null);
+    }
+
     public Stop(String name, String stopId){
         mName = name;
         mStopId = stopId;
@@ -36,6 +40,6 @@ public class Stop {
     }
 
     public String toString(){
-        return mStopId + " - " + mName;
+        return mName;
     }
 }
