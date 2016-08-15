@@ -55,7 +55,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:inputType="textPassword"
-                android:hint="@string/text_hint_passwd"/>
+                android:hint="@string/text_hint_password"/>
 
         </android.support.design.widget.TextInputLayout>
 

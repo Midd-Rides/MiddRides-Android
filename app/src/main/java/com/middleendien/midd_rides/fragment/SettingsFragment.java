@@ -1,15 +1,17 @@
 package com.middleendien.midd_rides.fragment;
 
 
+import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.middleendien.midd_rides.R;
+import com.middleendien.midd_rides.models.User;
+import com.middleendien.midd_rides.utils.UserUtil;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -45,31 +47,31 @@ public class SettingsFragment extends PreferenceFragment {
         resetPasswdPref         = findPreference(getString(R.string.pref_reset_passwd));
         veriStatusPref          = findPreference(getString(R.string.pref_verification_status_unavailable));
 
-        // email verification
-        // TODO:
-//        if (ParseUser.getCurrentUser() != null) {
-//            // default true
-//            veriStatusPref.setTitle(ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified)) ?
-//                    getString(R.string.pref_verified) : getString(R.string.pref_not_verifed));
-//        } else {
-//            veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
-//        }
-
         PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
-        // TODO:
-//        userPrefCat.setTitle(ParseUser.getCurrentUser().getEmail());
+
+        // email verification
+        User currentUser = UserUtil.getCurrentUser(getActivity());
+        if (currentUser != null) {
+            // default true
+            veriStatusPref.setTitle(currentUser.isVerified() ?
+                    getString(R.string.pref_verified) : getString(R.string.pref_not_verifed));
+            userPrefCat.setTitle(currentUser.getEmail());
+        } else {
+            veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
+        }
     }
 
+    @SuppressWarnings("all")
     private void initEvent() {
         // availability of the preference
-        // TODO:
-//        if (ParseUser.getCurrentUser() == null) {                   // not logged in
-//            cancelRequestPref.setEnabled(false);
-//        } else {
+        if (UserUtil.getCurrentUser(getActivity()) == null) {                   // not logged in
+            cancelRequestPref.setEnabled(false);
+        } else {
+            // TODO: save pending request in SharedPreference
 //            Log.d("SettingsFragment", "Current user pending request: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) + "");
-//            cancelRequestPref.setEnabled(ParseUser.getCurrentUser()
+//            cancelRequestPref.setEnabled(UserUtil.getCurrentUser(getActivity())
 //                    .getBoolean(getString(R.string.parse_user_pending_request)));
-//        }
+        }
 
         // initialise click events
         // cancel
@@ -87,28 +89,33 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                // TODO:
-//                final Boolean hasPendingRequest = ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request));
-//
-//                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
-//                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
-//                        .setContentText(hasPendingRequest ? getString(R.string.dialog_msg_will_cancel_request) : null)
-//                        .showContentText(hasPendingRequest)
-//                        .setConfirmText(getString(R.string.dialog_btn_yes))
-//                        .setCancelText(getString(R.string.dialog_btn_cancel))
-//                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-//                            @Override
-//                            public void onClick(SweetAlertDialog sweetAlertDialog) {
-//                                if (hasPendingRequest) {
-//                                    // cancel the request first
-//                                    cancelCurrentRequest(true);
-//                                } else {
-//                                    SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                    editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
-//                                    logUserOut();
-//                                }
-//                            }
-//                        }).show();
+                // TODO: pending request thing
+//                final Boolean hasPendingRequest = UserUtil.getCurrentUser(getActivity()).getBoolean(getString(R.string.parse_user_pending_request));
+                final Boolean hasPendingRequest = false;
+
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+                        .setContentText(hasPendingRequest ? getString(R.string.dialog_msg_will_cancel_request) : null)
+                        .showContentText(hasPendingRequest)
+                        .setConfirmText(getString(R.string.dialog_btn_yes))
+                        .setCancelText(getString(R.string.dialog_btn_cancel))
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                if (hasPendingRequest) {
+                                    // cancel the request first
+                                    cancelCurrentRequest(true);
+                                } else {
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
+                                    // TODO: what's this for
+
+                                    UserUtil.reset(getActivity());
+                                    getActivity().setResult(USER_LOGOUT_RESULT_CODE);
+                                    getActivity().finish();
+                                }
+                            }
+                        }).show();
 
                 return false;
             }
@@ -120,17 +127,27 @@ public class SettingsFragment extends PreferenceFragment {
                 new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                         .setTitleText(getString(R.string.dialog_msg_are_you_sure))
                         .setConfirmText(getString(R.string.dialog_btn_yes))
-                        .setCancelText(getString(R.string.dialog_btn_cancel))
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
                             public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                // TODO:
-//                                Synchronizer.getInstance(getActivity()).resetPassword(ParseUser.getCurrentUser().getEmail(),
-//                                        USER_RESET_PASSWORD_REQUEST_CODE);
+                                // TODO: to reset screen
+                                FragmentManager fragmentManager = getFragmentManager();
+                                fragmentManager.beginTransaction()
+                                        .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                                        .replace(android.R.id.content, new ResetPasswordFragment())
+                                        .addToBackStack("settings")
+                                        .commit();
                                 sweetAlertDialog.dismissWithAnimation();
-                                Log.i("SettingsFragment", "Reset Password");
                             }
-                        }).show();
+                        })
+                        .setCancelText(getString(R.string.dialog_btn_cancel))
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismissWithAnimation();
+                            }
+                        })
+                        .show();
 
                 return false;
             }
@@ -166,13 +183,6 @@ public class SettingsFragment extends PreferenceFragment {
      */
     private void cancelCurrentRequest(final Boolean andLogOut) {
         // TODO:
-    }
-
-    private void logUserOut() {
-        // TODO:
-//        LoginAgent.getInstance(getActivity()).logOutInBackground();
-        getActivity().setResult(USER_LOGOUT_RESULT_CODE);
-        getActivity().finish();
     }
 
     @Override

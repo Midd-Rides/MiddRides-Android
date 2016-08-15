@@ -16,7 +16,7 @@ public class Constants {
     /* POST */
     public static final String LOGIN_URL = "/login";
     public static final String REGISTER_URL = "/register";
-    public static final String CHANGE_PASSWORD_URL = "changepwd";
+    public static final String CHANGE_PASSWORD_URL = "/changepwd";
     public static final String MAKE_REQUEST_URL = "/request";
 
     /* DELETE */

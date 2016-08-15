@@ -1,7 +1,6 @@
 package com.middleendien.midd_rides.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -108,7 +107,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 // check password match
                 if (!password.equals(confirm)) {
-                    Toast.makeText(RegisterActivity.this, getString(R.string.passwd_not_match), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, getString(R.string.password_dont_match), Toast.LENGTH_SHORT).show();
                     return;
                 }
 

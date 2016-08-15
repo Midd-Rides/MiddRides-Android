@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -55,6 +56,7 @@ import android.widget.Toast;
 import com.middleendien.midd_rides.R;
 import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.utils.HardwareUtil;
+import com.middleendien.midd_rides.utils.UserUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -532,16 +534,15 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
         switch (id) {
             case R.id.action_settings:
-                // TODO:
-//                if (ParseUser.getCurrentUser() != null) {
-//                    Intent toSettingsScreen = new Intent(MainActivity.this, SettingsActivity.class);
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE,
-//                                ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this).toBundle());
-//                    } else {
-//                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
-//                    }
-//                }
+                if (UserUtil.getCurrentUser(this) != null) {
+                    Intent toSettingsScreen = new Intent(MainActivity.this, SettingsActivity.class);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE,
+                                ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+                    } else {
+                        startActivityForResult(toSettingsScreen, SETTINGS_SCREEN_REQUEST_CODE);
+                    }
+                }
                 return true;
         }
 
@@ -549,6 +550,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void updateLocations() {
+        // TODO:
 //        synchronizer.getListObjects(getString(R.string.parse_class_location), LOCATION_GET_LASTEST_VERSION_REQUEST_CODE);
         if (spinnerAdapter != null)
             spinnerAdapter.notifyDataSetChanged();
@@ -562,7 +564,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 Log.d("MainActivity", "Entering from SettingsActivity, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
                     cancelAnimation();
-                    // do nothing because we will deal with the log out in the callback
+                    Intent toLoginActivity = new Intent(this, LoginActivity.class);
+                    startActivity(toLoginActivity);
+                    finish();
                 }
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));

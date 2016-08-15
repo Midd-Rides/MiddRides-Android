@@ -36,7 +36,7 @@
     <string name="not_email_verified">请先验证邮箱</string>
     <string name="not_logged_in">请先登录</string>
     <string name="other_failure">发生了什么,囧…</string>
-    <string name="passwd_not_match">密码不匹配</string>
+    <string name="password_dont_match">密码不匹配</string>
     <string name="pending_request_error">一次只能发送一个请求</string>
     <string name="perm_contacts_rationale">我们需要你的邮箱</string>
     <string name="permission_internet_denied">MiddRides需要网络连接</string>
@@ -58,8 +58,8 @@
     <string name="something_went_wrong">发生了什么,囧…</string>
     <string name="spinner_pick_up">上车地点</string>
     <string name="text_hint_email">邮箱</string>
-    <string name="text_hint_passwd">密码</string>
-    <string name="text_hint_passwd_confirm">确认密码</string>
+    <string name="text_hint_password">密码</string>
+    <string name="text_hint_password_confirm">确认密码</string>
     <string name="time_out">登录超时</string>
     <string name="title_activity_login_page">登录</string>
     <string name="title_activity_main_select_pickup_location">选择出发地点</string>
