@@ -159,26 +159,42 @@ public class SettingsFragment extends PreferenceFragment {
         verifyStatusPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                User currentUser = UserUtil.getCurrentUser(getActivity());
+                final User currentUser = UserUtil.getCurrentUser(getActivity());
                 if (!currentUser.isVerified()) {    // email not verified
-                    NetworkUtil.getInstance().sendVerificationEmail(
-                            currentUser.getEmail(),
-                            currentUser.getPassword(),
-                            getActivity(),
-                            new Callback<ResponseBody>() {
+                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                            .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+                            .setConfirmText(getString(R.string.dialog_btn_yes))
+                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                                 @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if (response.isSuccessful())
-                                        Log.i(TAG, "Re-sent Email Verification");
-                                }
+                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                    NetworkUtil.getInstance().sendVerificationEmail(
+                                            currentUser.getEmail(),
+                                            currentUser.getPassword(),
+                                            getActivity(),
+                                            new Callback<ResponseBody>() {
+                                                @Override
+                                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                    if (response.isSuccessful())
+                                                        Log.i(TAG, "Re-sent Email Verification");
+                                                }
 
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    t.printStackTrace();
-                                    Toast.makeText(getActivity(), getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                                                @Override
+                                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                    t.printStackTrace();
+                                                    Toast.makeText(getActivity(), getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                    );
                                 }
-                            }
-                    );
+                            })
+                            .setCancelText(getString(R.string.dialog_btn_cancel))
+                            .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                    sweetAlertDialog.dismissWithAnimation();
+                                }
+                            })
+                            .show();
                 }
 
                 new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
