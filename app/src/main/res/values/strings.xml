@@ -33,6 +33,7 @@
     <string name="dialog_msg_not_logged_in">You have to log in first</string>
     <string name="dialog_msg_not_verified">You have to verify your email first</string>
     <string name="dialog_msg_reset_email_sent">Reset Password Email Sent</string>
+    <string name="dialog_msg_have_you_caught_the_can">Have you caught the van?</string>
 
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_no">No</string>
@@ -46,26 +47,18 @@
     <string name="dialog_title_request_confirm">Request Confirmation</string>
     <string name="dialog_title_request_success">Request Success</string>
     <string name="dialog_title_request_cancelled">Request Cancelled</string>
-    <string name="dialog_title_request_timeout">Request Processed</string>
+    <string name="dialog_title_request_timeout">Request Timed Out</string>
     <string name="dialog_title_congrats">Congratulations!</string>
     <string name="dialog_title_coming">Van Coming</string>
     <string name="dialog_title_service_down">Service Down</string>
     <string name="dialog_title_email_verification">Email Verification</string>
     <string name="dialog_request_message">Pick up at</string>
 
+    <!--Keys-->
+    <string name="key_arriving_stop" translatable="false">arrivingStop</string>
+
     <!--Log in/Sign up message-->
     <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
-
-    <string name="connection_fail">Connection Failed</string>
-    <string name="account_linked">Account Already Linked</string>
-    <string name="inter_server_err">Server Error</string>
-    <string name="time_out">Login Timed Out</string>
-    <string name="wrong_info">Incorrect E-mail or Password</string>
-    <string name="other_failure">Something Happened</string>
-    <string name="no_user">User Does Not Exist</string>
-    <string name="user_exists">User Already Exists</string>
-
-    <string name="login_fail_msg" translatable="false">Login Fail Message</string>
 
     <!--Network Parameter Keys-->
     <string name="map_param_email" translatable="false">email</string>
@@ -87,7 +80,7 @@
 
     <!--Notifications-->
     <string name="van_is_coming">Your van is coming to</string>
-    <string name="i_got_it">Got it!</string>
+    <string name="your_place">your place</string>
 
     <!--Others-->
     <string name="app_logo">App Logo</string>
@@ -95,7 +88,7 @@
     <!--Permission-->
     <string name="perm_contacts_rationale">We need to access your email account names</string>
 
-    <!--Preference Screen-->
+    <!--Preference Activity-->
     <string name="pref_cancel_request">Cancel Request</string>
     <string name="pref_log_out">Log Out</string>
     <string name="pref_reset_password">Reset Password</string>
@@ -114,11 +107,10 @@
     <string name="pending_request" translatable="false">pendingRequest</string>
     <string name="have_been_notified" translatable="false">notified</string>
     <string name="saved_spinner_position" translatable="false">spinnerPosition</string>
-
-    <string name="login_status" translatable="false">LoginStatus</string>
-    <string name="waiting_to_log_out" translatable="false">waitingToLogOut</string>
-    <string name="screen_on" translatable="false">screenOn</string>
+    <string name="saved_stop_name" translatable="false">stopName</string>
     <string name="push_receive_time" translatable="false">pushReceiveTime</string>
+    <string name="screen_on" translatable="false">screenOn</string>
+
     <string name="cat_request" translatable="false">Request</string>
     <string name="cat_user" translatable="false">User</string>
     <string name="cat_others" translatable="false">Others</string>

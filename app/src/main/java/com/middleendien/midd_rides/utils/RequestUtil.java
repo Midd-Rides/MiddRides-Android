@@ -34,4 +34,15 @@ public class RequestUtil {
                 .apply();
     }
 
+    /***
+     * Set current user as notified or not
+     * @param hasBeenNotified   whether notified
+     * @param context           context
+     */
+    public static void setNotified(boolean hasBeenNotified, Context context) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean(context.getString(R.string.have_been_notified), hasBeenNotified)
+                .apply();
+    }
+
 }

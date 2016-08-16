@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -55,10 +56,13 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.middleendien.midd_rides.R;
+import com.middleendien.midd_rides.firebase.MiddRidesMessagingService;
+import com.middleendien.midd_rides.firebase.MiddRidesMessagingService.OnNotificationReceiveListener;
 import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.utils.NetworkUtil;
+import com.middleendien.midd_rides.utils.SpinnerAdapter;
 import com.middleendien.midd_rides.utils.UserUtil;
 
 import org.json.JSONArray;
@@ -68,7 +72,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -80,10 +83,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-import static com.middleendien.midd_rides.firebase.PushBroadcastReceiver.*;
 import static com.middleendien.midd_rides.utils.RequestUtil.*;
 
-public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
+public class MainActivity extends AppCompatActivity implements OnNotificationReceiveListener {
 
     private static final String TAG = "MainActivity";
 
@@ -114,11 +116,11 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     // to logout view a while after notification
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
-    private static final int RESET_TIMEOUT = 5 * 60000;         // 5 minutes
-//    private static final int RESET_TIMEOUT = 5000;              // for testing
+//    private static final int RESET_TIMEOUT = 5 * 60000;         // 5 minutes
+    private static final int RESET_TIMEOUT = 5000;              // for testing
 
     private List<Stop> stopList;
-    ArrayAdapter spinnerAdapter;
+    private SpinnerAdapter spinnerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,10 +131,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
         if (getIntent().getExtras() != null) {
             try {
-                // TODO:
-//                String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
-//                showVanComingDialog(arrivingAt);
-//                Log.d(TAG, "Coming to " + arrivingAt);
+                String arrivingAt = getIntent().getExtras().getString(getString(R.string.key_arriving_stop));
+                showVanComingDialog(arrivingAt);
+                Log.d(TAG, "Coming to " + arrivingAt);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -189,12 +190,12 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     private void initEvent() {
         backFirstPressed = System.currentTimeMillis() - 2000;
 
-        spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, stopList);
+        spinnerAdapter = new SpinnerAdapter(this, android.R.layout.simple_list_item_activated_1, stopList);
         pickUpSpinner.setAdapter(spinnerAdapter);
         pickUpSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedStop = (Stop) spinnerAdapter.getItem(position);
+                selectedStop = spinnerAdapter.getItem(position);
                 vanArrivingLocation.setText(selectedStop.getName());
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
                         .putInt(getString(R.string.saved_spinner_position), position)
@@ -311,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                             } else {
                                 resetView();
                                 putPendingRequest(null, MainActivity.this);
+                                setNotified(false, MainActivity.this);
                                 switch (flag) {
                                     case CANCEL_REQUEST_FLAG_MANUAL:
                                         showCancelDialog();
@@ -341,7 +343,23 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void showTimeoutDialog() {
-        // TODO:
+        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.NORMAL_TYPE)
+                .setTitleText(getString(R.string.dialog_title_request_timeout))
+                .setContentText(getString(R.string.dialog_msg_have_you_caught_the_can))
+                .setConfirmText(getString(R.string.dialog_btn_yes))
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        // TODO:
+                    }
+                })
+                .setCancelText(getString(R.string.dialog_btn_no))
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        // TODO:
+                    }
+                }).show();
     }
 
     private void showRequestDialog() {
@@ -386,6 +404,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                                 // for spinner position when re-entering
                                                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
                                                         .putInt(getString(R.string.saved_spinner_position), pickUpSpinner.getSelectedItemPosition())
+                                                        .putString(getString(R.string.saved_stop_name), selectedStop.getName())
                                                         .apply();
 
                                                 // change alert type
@@ -419,25 +438,22 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 }).show();
     }
 
-    private void showVanComingDialog(String arrivingStop) {
-        final SweetAlertDialog dialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
-        dialog.setTitleText(getString(R.string.dialog_title_coming));
-        dialog.setContentText(getString(R.string.van_is_coming) + " " + arrivingStop);
-        dialog.setConfirmText(getString(R.string.i_got_it));
-        dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-            @Override
-            public void onClick(SweetAlertDialog sweetAlertDialog) {
-                dialog.dismissWithAnimation();
-                // Replace whitespaces and forward slashes in location name with hyphens
-                String channelName = selectedStop.getStopId();
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(channelName);
+    private void showVanComingDialog(final String arrivingStop) {
+        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText(getString(R.string.dialog_title_coming))
+                .setContentText(getString(R.string.van_is_coming) + " " + arrivingStop)
+                .setConfirmText(getString(R.string.dialog_btn_got_it))
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismissWithAnimation();
+                        // Replace whitespaces and forward slashes in location name with hyphens
+                        String channelName = selectedStop.getStopId();
+                        FirebaseMessaging.getInstance().unsubscribeFromTopic(channelName);
 
-                displayVanArrivingMessages();
-            }
-        });
-
-        dialog.show();
-
+                        displayVanArrivingMessages();
+                    }
+                }).show();
 
         // logout the view after 5 minutes
         // resetView needs to be run from the main thread because it modifies views created
@@ -503,25 +519,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
         // disable spinner
         pickUpSpinner.setEnabled(false);
-    }
-
-    @Override
-    public void onReceivePushWhileScreenOn(String arrivingLocation) {
-        Log.d(TAG, "Received Push while active");
-        showVanComingDialog(arrivingLocation);
-
-        Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Ringtone ringtone = RingtoneManager.getRingtone(this, alarm);
-        ringtone.play();
-
-        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        vibrator.vibrate(800);
-    }
-
-    @Override
-    public void onReceivePushWhileDormant() {
-        Log.d(TAG, "Received Push while dormant");
-        killSelf();
     }
 
     /**
@@ -717,10 +714,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         editor.putBoolean(getString(R.string.screen_on), true).apply();
 
         // for push notification
-        registerPushListener(this);
+        MiddRidesMessagingService.registerListener(this);
 
         // checking for request timeout
-        if (sharedPreferences.getBoolean(getString(R.string.have_been_notified), false)) {
+        if (hasBeenNotified() && getPendingRequest(this) != null) {
             // notified, now check when the user was notified
             long currentTime = Calendar.getInstance().getTimeInMillis();
             long receivedTime = sharedPreferences.getLong(getString(R.string.push_receive_time), currentTime);
@@ -739,6 +736,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                 if (currentUser != null && getPendingRequest(MainActivity.this) != null && hasBeenNotified()) {
                                     // logged in && has pending request && notified
                                     cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+                                    showTimeoutDialog();
                                 }
                             }
                         });
@@ -771,6 +769,31 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
+    public void onReceiveWithMainActivityActive(final String stopId) {
+        Log.d(TAG, "Received Push while active");
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                showVanComingDialog(spinnerAdapter.getStopById(stopId).getName());
+            }
+        });
+
+        Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone ringtone = RingtoneManager.getRingtone(this, alarm);
+        ringtone.play();
+
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(800);
+    }
+
+    @Override
+    public void onReceiveWithMainActivityDormant() {
+        Log.d(TAG, "Received Push while dormant");
+        killSelf();
     }
 
     /***

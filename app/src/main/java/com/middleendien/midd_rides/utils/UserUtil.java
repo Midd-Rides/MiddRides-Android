@@ -48,6 +48,7 @@ public class UserUtil {
                 .putString(context.getString(R.string.current_user), null)
                 .putInt(context.getString(R.string.saved_spinner_position), 0)
                 .putString(context.getString(R.string.pending_request), null)
+                .putString(context.getString(R.string.saved_stop_name), null)
                 .apply();
     }
 
