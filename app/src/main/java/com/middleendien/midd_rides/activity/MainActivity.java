@@ -46,7 +46,6 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -62,7 +61,7 @@ import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.HardwareUtil;
 import com.middleendien.midd_rides.utils.NetworkUtil;
-import com.middleendien.midd_rides.utils.SpinnerAdapter;
+import com.middleendien.midd_rides.models.SpinnerAdapter;
 import com.middleendien.midd_rides.utils.UserUtil;
 
 import org.json.JSONArray;
