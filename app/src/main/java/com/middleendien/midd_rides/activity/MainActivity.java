@@ -803,6 +803,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
+    /***
+     * Change button text colour on touch
+     */
     class RequestOnTouchListener implements View.OnTouchListener {
 
         @Override
