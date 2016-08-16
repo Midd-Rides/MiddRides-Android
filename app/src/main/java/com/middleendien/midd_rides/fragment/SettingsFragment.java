@@ -185,6 +185,13 @@ public class SettingsFragment extends PreferenceFragment {
                                                 }
                                             }
                                     );
+
+                                    sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                                    sweetAlertDialog.setTitleText(getString(R.string.resent_email))
+                                            .setConfirmText(getString(R.string.dialog_btn_got_it))
+                                            .setConfirmClickListener(null)
+                                            .showCancelButton(false)
+                                            .show();
                                 }
                             })
                             .setCancelText(getString(R.string.dialog_btn_cancel))
@@ -197,25 +204,13 @@ public class SettingsFragment extends PreferenceFragment {
                             .show();
                 }
 
-                new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
-                        .setTitleText(getString(R.string.resent_email))
-                        .setConfirmText(getString(R.string.dialog_btn_got_it))
-                        .show();
-
                 return false;
             }
         });
     }
 
     /***
-     * Okay so what happens here is:
-     * incrementing needs the user alive, for some reason
-     * we cancel the request, knowing that it's bound to take longer than returning to MainActivity
-     * and return to MainActivity, what a surprise
-     * the increment will check upon finish whether we are waiting to log out
-     * and will perform log out accordingly
-     * and if it logs out, MainActivity will hear it, and return to LoginActivity
-     * and they live happily ever since
+     * Cancel request, might also log user out
      * @param andLogOut whether to log out after cancelling current request
      */
     private void cancelCurrentRequest(final Boolean andLogOut) {

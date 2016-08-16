@@ -111,16 +111,11 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     private GifImageView mainImage;
 
-    // to periodically check email verification status
-    private Handler checkEmailHandler;
-    private Runnable checkEmailRunnable;
-    private static final long CHECK_EMAIL_INTERVAL = 30000;
-
     // to logout view a while after notification
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
-    private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
-//    private static final int RESET_TIMEOUT = 5000;
+    private static final int RESET_TIMEOUT = 5 * 60000;         // 5 minutes
+//    private static final int RESET_TIMEOUT = 5000;              // for testing
 
     private List<Stop> stopList;
     ArrayAdapter spinnerAdapter;
@@ -129,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
+
+        // TODO: periodically check for verification status if not verified
 
         if (getIntent().getExtras() != null) {
             try {
@@ -761,11 +758,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     @Override
     protected void onPause() {
         Log.d(TAG, "Pause");
-
-        if (checkEmailHandler != null) {
-            checkEmailHandler.removeCallbacks(checkEmailRunnable);
-            Log.i("MainActivity", "Handler stopped");
-        }
 
         if (resetViewHandler != null)
             resetViewHandler.removeCallbacks(resetViewRunnable);
