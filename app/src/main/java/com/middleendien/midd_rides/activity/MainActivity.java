@@ -369,15 +369,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                         try {
                                             JSONObject body;
                                             if (!response.isSuccessful()) {     // request failed
-                                                Log.d(TAG, response.errorBody().string());
-
                                                 body = new JSONObject(response.errorBody().string());
                                                 Toast.makeText(MainActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
                                                 Log.d(TAG, body.toString());
                                             } else {                            // request success
-                                                body = new JSONObject(response.body().string());
-                                                Log.d(TAG, body.toString());
-
                                                 putPendingRequest(selectedStop);
 
                                                 // listen for van coming update
