@@ -32,6 +32,7 @@
     <string name="dialog_msg_can_only_make_one_request">You can only make one request at a time</string>
     <string name="dialog_msg_not_logged_in">You have to log in first</string>
     <string name="dialog_msg_not_verified">You have to verify your email first</string>
+    <string name="dialog_msg_reset_email_sent">Reset Password Email Sent</string>
 
     <string name="dialog_btn_yes">Yes</string>
     <string name="dialog_btn_no">No</string>
@@ -97,10 +98,11 @@
     <!--Preference Screen-->
     <string name="pref_cancel_request">Cancel Request</string>
     <string name="pref_log_out">Log Out</string>
-    <string name="pref_reset_passwd">Reset Password</string>
+    <string name="pref_reset_password">Reset Password</string>
     <string name="pref_verification_status_unavailable">Verification Status Unavailable</string>
     <string name="pref_verified">Email Verified</string>
     <string name="pref_not_verifed">Resend Verification Email</string>
+    <string name="pref_already_verified">E-mail Already Verified</string>
     <string name="pref_screen_announcements">Announcements</string>
     <string name="pref_key_no_announcement" translatable="false">NoAnnouncement</string>
     <string name="pref_announcements_no_announcement">No Announcement</string>
@@ -140,12 +142,7 @@
     <string name="password_incorrect">Password Incorrect</string>
     <string name="password_dont_match">Your passwords don\'t match</string>
     <string name="password_didnt_change">Password didn\'t change</string>
-
-    <string name="already_verified">E-mail Already Verified</string>
     <string name="resent_email">Please check your mailbox</string>
-    <string name="reset_email_sent">Reset Password Email Sent</string>
-    <string name="something_went_wrong">Something went wrong</string>
-    <string name="version_not_updated">Your local data might not be up to date</string>
     <string name="permission_internet_denied">MiddRides needs Internet access to log in and send requests</string>
 
 </resources>

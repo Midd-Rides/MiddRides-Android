@@ -12,7 +12,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
-import com.middleendien.midd_rides.activity.MainActivity;
 import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.models.User;
 import com.middleendien.midd_rides.utils.NetworkUtil;
@@ -39,10 +38,7 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference cancelRequestPref;
     private Preference logOutPref;
     private Preference resetPasswordPref;
-    private Preference veriStatusPref;
-
-    private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
-    private static final int USER_RESET_PASSWORD_REQUEST_CODE               = 0x101;
+    private Preference verifyStatusPref;
 
     private static final int USER_LOGOUT_RESULT_CODE                        = 0x102;
     private static final int USER_CANCEL_REQUEST_RESULT_CODE                = 0x103;
@@ -61,8 +57,8 @@ public class SettingsFragment extends PreferenceFragment {
     private void getPrefs() {
         cancelRequestPref       = findPreference(getString(R.string.pref_cancel_request));
         logOutPref              = findPreference(getString(R.string.pref_log_out));
-        resetPasswordPref = findPreference(getString(R.string.pref_reset_passwd));
-        veriStatusPref          = findPreference(getString(R.string.pref_verification_status_unavailable));
+        resetPasswordPref       = findPreference(getString(R.string.pref_reset_password));
+        verifyStatusPref        = findPreference(getString(R.string.pref_verification_status_unavailable));
 
         PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
 
@@ -70,11 +66,11 @@ public class SettingsFragment extends PreferenceFragment {
         User currentUser = UserUtil.getCurrentUser(getActivity());
         if (currentUser != null) {
             // default true
-            veriStatusPref.setTitle(currentUser.isVerified() ?
+            verifyStatusPref.setTitle(currentUser.isVerified() ?
                     getString(R.string.pref_verified) : getString(R.string.pref_not_verifed));
             userPrefCat.setTitle(currentUser.getEmail());
         } else {
-            veriStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
+            verifyStatusPref.setTitle(getString(R.string.pref_verification_status_unavailable));
         }
     }
 
@@ -160,18 +156,36 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
 
-        veriStatusPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        verifyStatusPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                // TODO:
-//                if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {    // email not verified
-//                    ParseUser.getCurrentUser().saveInBackground();
-//                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
-//                            .setTitleText(getString(R.string.resent_email))
-//                            .setConfirmText(getString(R.string.dialog_btn_got_it))
-//                            .show();
-//                    Log.i("SettingsFragment", "Re-sent Email Verification");
-//                }
+                User currentUser = UserUtil.getCurrentUser(getActivity());
+                if (!currentUser.isVerified()) {    // email not verified
+                    NetworkUtil.getInstance().sendVerificationEmail(
+                            currentUser.getEmail(),
+                            currentUser.getPassword(),
+                            getActivity(),
+                            new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if (response.isSuccessful())
+                                        Log.i(TAG, "Re-sent Email Verification");
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    t.printStackTrace();
+                                    Toast.makeText(getActivity(), getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                }
+
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                        .setTitleText(getString(R.string.resent_email))
+                        .setConfirmText(getString(R.string.dialog_btn_got_it))
+                        .show();
+
                 return false;
             }
         });
@@ -199,7 +213,6 @@ public class SettingsFragment extends PreferenceFragment {
                 new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        // TODO:
                         try {
                             JSONObject body;
                             if (!response.isSuccessful()) {         // cancel failed

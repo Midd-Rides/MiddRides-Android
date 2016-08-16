@@ -59,6 +59,9 @@ public class NetworkUtil {
         @DELETE(Constants.CANCEL_REQUEST_URL)
         Call<ResponseBody> cancelRequest(@QueryMap Map<String, String> queryParams);
 
+        @POST(Constants.SEND_EMAIL_URL)
+        @FormUrlEncoded
+        Call<ResponseBody> sendVerificationEmail(@FieldMap Map<String, String> bodyParams);
     }
 
     private static NetworkUtil agent;
@@ -185,6 +188,20 @@ public class NetworkUtil {
         queryParams.put(context.getString(R.string.map_param_password), password);
         queryParams.put(context.getString(R.string.map_param_stop_id), stopId);
         service.cancelRequest(queryParams).enqueue(callback);
+    }
+
+    /***
+     * (Re-)Send verification email
+     * @param email         email
+     * @param password      password (encoded)
+     * @param context       context
+     * @param callback      callback
+     */
+    public void sendVerificationEmail(String email, String password, Context context, Callback<ResponseBody> callback) {
+        Map<String, String> bodyParams = new HashMap<>();
+        bodyParams.put(context.getString(R.string.map_param_email), email);
+        bodyParams.put(context.getString(R.string.map_param_password), password);
+        service.sendVerificationEmail(bodyParams).enqueue(callback);
     }
 
 }

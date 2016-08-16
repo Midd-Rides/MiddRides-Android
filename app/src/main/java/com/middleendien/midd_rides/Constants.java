@@ -18,6 +18,7 @@ public class Constants {
     public static final String REGISTER_URL = "/register";
     public static final String CHANGE_PASSWORD_URL = "/changepwd";
     public static final String MAKE_REQUEST_URL = "/request";
+    public static final String SEND_EMAIL_URL = "/send";
 
     /* DELETE */
     public static final String CANCEL_REQUEST_URL = "/cancel";
