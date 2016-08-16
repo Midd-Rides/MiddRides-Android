@@ -43,9 +43,11 @@ public class UserUtil {
      * Clean up local user
      * @param context       context
      */
-    public static void reset(Context context) {
+    public static void logout(Context context) {
         PreferenceManager.getDefaultSharedPreferences(context).edit()
                 .putString(context.getString(R.string.current_user), null)
+                .putInt(context.getString(R.string.saved_spinner_position), 0)
+                .putString(context.getString(R.string.pending_request), null)
                 .apply();
     }
 

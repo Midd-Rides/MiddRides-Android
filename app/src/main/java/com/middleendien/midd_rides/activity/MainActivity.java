@@ -35,7 +35,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -82,6 +81,7 @@ import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static com.middleendien.midd_rides.firebase.PushBroadcastReceiver.*;
+import static com.middleendien.midd_rides.utils.RequestUtil.*;
 
 public class MainActivity extends AppCompatActivity implements OnPushNotificationListener {
 
@@ -116,11 +116,11 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     private Runnable checkEmailRunnable;
     private static final long CHECK_EMAIL_INTERVAL = 30000;
 
-    // to reset view a while after notification
+    // to logout view a while after notification
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
     private static final int RESET_TIMEOUT = 5 * 60000;      // 5 minutes
-//    private static final int RESET_TIMEOUT = 20000;
+//    private static final int RESET_TIMEOUT = 5000;
 
     private List<Stop> stopList;
     ArrayAdapter spinnerAdapter;
@@ -135,12 +135,12 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 // TODO:
 //                String arrivingAt = getIntent().getExtras().getCharSequence(getString(R.string.parse_request_arriving_location)).toString();
 //                showVanComingDialog(arrivingAt);
-//                Log.d("MainActivity", "Coming to " + arrivingAt);
+//                Log.d(TAG, "Coming to " + arrivingAt);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
-            Log.d("MainActivity", "Not from push");
+            Log.d(TAG, "Not from push");
         }
 
         initView();
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         vanArrivingText.setAlpha(0);
         vanArrivingLocation.setAlpha(0);
 
-        // don't accidentally reset when later requests are made
+        // don't accidentally logout when later requests are made
         if (resetViewHandler != null)
             resetViewHandler.removeCallbacks(resetViewRunnable);
     }
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
                         .putInt(getString(R.string.saved_spinner_position), position)
                         .apply();
-                Log.d("PickupSpinner", "Selected: " + position);
+                Log.d(TAG, "Spinner selected: " + position);
             }
 
             @Override
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                             return;                     // do nothing
                             // TODO: turn this back on after email verification is implemented
 //                        } else if (!currentUser.isVerified()) {
-//                            Log.d("MainActivity", "Email verified: " + currentUser.isVerified());
+//                            Log.d(TAG, "Email verified: " + currentUser.isVerified());
 //                            showWarningDialog(
 //                                    getString(R.string.dialog_title_email_verification),
 //                                    getString(R.string.dialog_msg_not_verified),
@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                         } else if (warnIfDisconnected())
                             return;
 
-                        if (getPendingRequest() != null) {
+                        if (getPendingRequest(MainActivity.this) != null) {
                             showWarningDialog(
                                     getString(R.string.dialog_msg_can_only_make_one_request),
                                     null,
@@ -268,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 callService.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // TODO: check out if this still works
                         if(warnIfDisconnected())
                             return;
 
@@ -297,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     private void cancelCurrentRequest(final int flag) {
         User currentUser = UserUtil.getCurrentUser(this);
-        final Stop pendingRequestStop = getPendingRequest();
+        final Stop pendingRequestStop = getPendingRequest(this);
         NetworkUtil.getInstance().cancelRequest(
                 currentUser.getEmail(),
                 currentUser.getPassword(),
@@ -311,11 +310,16 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                             if (!response.isSuccessful()) {
                                 body = new JSONObject(response.errorBody().string());
                                 Toast.makeText(MainActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
-                                Log.d(TAG, body.toString());
+                                Log.d(TAG, "Cancel unsuccessful - " + body.toString());
                             } else {
                                 resetView();
-                                putPendingRequest(null);
-                                showCancelDialog();
+                                putPendingRequest(null, MainActivity.this);
+                                switch (flag) {
+                                    case CANCEL_REQUEST_FLAG_MANUAL:
+                                        showCancelDialog();
+                                    case CANCEL_REQUEST_FLAG_TIMEOUT:
+                                        showTimeoutDialog();
+                                }
                             }
                         } catch (JSONException | IOException e) {
                             e.printStackTrace();
@@ -339,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 .show();
     }
 
-    private void showTimeoutDialog(String pickUpLocation, Date requestTime) {
+    private void showTimeoutDialog() {
         // TODO:
     }
 
@@ -371,9 +375,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                             if (!response.isSuccessful()) {     // request failed
                                                 body = new JSONObject(response.errorBody().string());
                                                 Toast.makeText(MainActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
-                                                Log.d(TAG, body.toString());
+                                                Log.d(TAG, "Request unsuccessful - " + body.toString());
                                             } else {                            // request success
-                                                putPendingRequest(selectedStop);
+                                                putPendingRequest(selectedStop, MainActivity.this);
 
                                                 // listen for van coming update
                                                 String channelName = selectedStop.getStopId();
@@ -418,10 +422,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 }).show();
     }
 
-    private void showVanComingDialog(String arrivingLocation) {
+    private void showVanComingDialog(String arrivingStop) {
         final SweetAlertDialog dialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
         dialog.setTitleText(getString(R.string.dialog_title_coming));
-        dialog.setContentText(getString(R.string.van_is_coming) + " " + arrivingLocation);
+        dialog.setContentText(getString(R.string.van_is_coming) + " " + arrivingStop);
         dialog.setConfirmText(getString(R.string.i_got_it));
         dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
@@ -438,7 +442,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         dialog.show();
 
 
-        // reset the view after 5 minutes
+        // logout the view after 5 minutes
         // resetView needs to be run from the main thread because it modifies views created
         // from the main thread. If we try to edit it using a different thread it will throw errors.
         // in resetView(), check whether a request is pending and whether notified
@@ -452,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                     @Override
                     public void run(){
                         User currentUser = UserUtil.getCurrentUser(MainActivity.this);
-                        if (currentUser != null && getPendingRequest() != null
+                        if (currentUser != null && getPendingRequest(MainActivity.this) != null
                                 && hasBeenNotified()) {
                             // logged in && has pending request && notified
                             cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
@@ -462,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
             }
         };
         resetViewHandler.postDelayed(resetViewRunnable, RESET_TIMEOUT);     // 5 minutes
-        Log.d("MainActivity", "Reset countdown restarting... " + RESET_TIMEOUT / 1000 + " seconds left");
+        Log.d(TAG, "Reset countdown restarting... " + RESET_TIMEOUT / 1000 + " seconds left");
     }
 
     private void showWarningDialog(String title, String contentText, String confirmText) {
@@ -506,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     @Override
     public void onReceivePushWhileScreenOn(String arrivingLocation) {
-        Log.d("MainActivity", "Received Push while active");
+        Log.d(TAG, "Received Push while active");
         showVanComingDialog(arrivingLocation);
 
         Uri alarm = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -519,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     @Override
     public void onReceivePushWhileDormant() {
-        Log.d("MainActivity", "Received Push while dormant");
+        Log.d(TAG, "Received Push while dormant");
         killSelf();
     }
 
@@ -528,12 +532,12 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
      * Resets the view after 5 minutes.
      */
     private void displayVanArrivingMessages(){
-        Log.d("MainActivity", "DisplayVanArrivingMessages");
+        Log.d(TAG, "DisplayVanArrivingMessages");
         // Display messages informing the user that the van is coming
         vanArrivingLocation.setAlpha(1);
         vanArrivingText.setAlpha(1);
 
-        Log.i("MainActivity", vanArrivingText.getText() + " " + vanArrivingLocation.getText());
+        Log.i(TAG, vanArrivingText.getText() + " " + vanArrivingLocation.getText());
     }
 
     @Override
@@ -546,9 +550,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Action Bar items' click events
-        int id = item.getItemId();
-
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.action_settings:
                 if (UserUtil.getCurrentUser(this) != null) {
                     Intent toSettingsScreen = new Intent(MainActivity.this, SettingsActivity.class);
@@ -632,25 +634,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     /***
-     * Save a pending request to local storage
-     * @param stop          stop that the request is for
-     */
-    private void putPendingRequest(@Nullable Stop stop) {
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putString(getString(R.string.pending_request), new Gson().toJson(stop, Stop.class))
-                .apply();
-    }
-
-    /***
-     * Get the pending request from local storage
-     * @return              stop that current pending request is for
-     */
-    private @Nullable Stop getPendingRequest() {
-        return new Gson().fromJson(PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(getString(R.string.pending_request), null), Stop.class);
-    }
-
-    /***
      * Whether user has been notified for current request
      * @return              whether notified
      */
@@ -669,8 +652,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case SETTINGS_SCREEN_REQUEST_CODE:
-                Log.d("MainActivity", "Entering from SettingsActivity, 0x" + Integer.toHexString(resultCode).toUpperCase());
+                Log.d(TAG, "Entering from SettingsActivity, 0x" + Integer.toHexString(resultCode).toUpperCase());
                 if (resultCode == USER_LOGOUT_RESULT_CODE) {
+                    UserUtil.logout(this);
                     cancelAnimation();
                     Intent toLoginActivity = new Intent(this, LoginActivity.class);
                     startActivity(toLoginActivity);
@@ -679,6 +663,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 if (resultCode == USER_CANCEL_REQUEST_RESULT_CODE) {
                     setTitle(getString(R.string.title_activity_main_select_pickup_location));
                     cancelAnimation();
+                    Log.d(TAG, "Cancelled");
                 }
                 return;
         }
@@ -688,8 +673,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Log.d("MainActivity", "onNewIntent");
-//        Synchronizer.getInstance(this).getListObjectsLocal(getString(R.string.parse_class_location), LOCATION_UPDATE_FROM_LOCAL_REQUEST_CODE);
+        Log.d(TAG, "onNewIntent");
         setIntent(intent);
         super.onNewIntent(intent);
     }
@@ -720,8 +704,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
         // check if there is request pending
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // TODO:
-        if (currentUser != null && getPendingRequest() != null) {      // yes
+        if (currentUser != null && getPendingRequest(this) != null) {      // yes
             if (hasBeenNotified()) {
                 displayVanArrivingMessages();
             }
@@ -756,7 +739,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                if (currentUser != null && getPendingRequest() != null && hasBeenNotified()) {
+                                if (currentUser != null && getPendingRequest(MainActivity.this) != null && hasBeenNotified()) {
                                     // logged in && has pending request && notified
                                     cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
                                 }
@@ -766,7 +749,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 };
                 // keep counting down
                 resetViewHandler.postDelayed(resetViewRunnable, RESET_TIMEOUT - (currentTime - receivedTime));
-                Log.d("MainActivity", "Reset countdown restarting... " + (RESET_TIMEOUT - (currentTime - receivedTime)) / 1000 + " seconds left");
+                Log.d(TAG, "Reset countdown restarting... " + (RESET_TIMEOUT - (currentTime - receivedTime)) / 1000 + " seconds left");
             } else {                            // something is wrong
                 // sod off
             }
@@ -777,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     @Override
     protected void onPause() {
-        Log.d("MainActivity", "Pause");
+        Log.d(TAG, "Pause");
 
         if (checkEmailHandler != null) {
             checkEmailHandler.removeCallbacks(checkEmailRunnable);

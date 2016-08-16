@@ -80,9 +80,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        // TODO: what is this?
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
+        // nothing
     }
 
     private void initView() {

@@ -8,20 +8,37 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.middleendien.midd_rides.R;
+import com.middleendien.midd_rides.activity.MainActivity;
+import com.middleendien.midd_rides.models.Stop;
 import com.middleendien.midd_rides.models.User;
+import com.middleendien.midd_rides.utils.NetworkUtil;
+import com.middleendien.midd_rides.utils.RequestUtil;
 import com.middleendien.midd_rides.utils.UserUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.preference.Preference.*;
 
 public class SettingsFragment extends PreferenceFragment {
 
+    private static final String TAG = "SettingsFragment";
+
     private Preference cancelRequestPref;
     private Preference logOutPref;
-    private Preference resetPasswdPref;
+    private Preference resetPasswordPref;
     private Preference veriStatusPref;
 
     private static final int INCREMENT_FIELD_REQUEST_CODE                   = 0x100;
@@ -44,7 +61,7 @@ public class SettingsFragment extends PreferenceFragment {
     private void getPrefs() {
         cancelRequestPref       = findPreference(getString(R.string.pref_cancel_request));
         logOutPref              = findPreference(getString(R.string.pref_log_out));
-        resetPasswdPref         = findPreference(getString(R.string.pref_reset_passwd));
+        resetPasswordPref = findPreference(getString(R.string.pref_reset_passwd));
         veriStatusPref          = findPreference(getString(R.string.pref_verification_status_unavailable));
 
         PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
@@ -67,10 +84,8 @@ public class SettingsFragment extends PreferenceFragment {
         if (UserUtil.getCurrentUser(getActivity()) == null) {                   // not logged in
             cancelRequestPref.setEnabled(false);
         } else {
-            // TODO: save pending request in SharedPreference
-//            Log.d("SettingsFragment", "Current user pending request: " + ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) + "");
-//            cancelRequestPref.setEnabled(UserUtil.getCurrentUser(getActivity())
-//                    .getBoolean(getString(R.string.parse_user_pending_request)));
+            Log.d(TAG, "Current user pending request: " + RequestUtil.getPendingRequest(getActivity()));
+            cancelRequestPref.setEnabled(RequestUtil.getPendingRequest(getActivity()) != null);
         }
 
         // initialise click events
@@ -79,7 +94,6 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 cancelCurrentRequest(false);
-
                 return true;
             }
         });
@@ -89,9 +103,7 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                // TODO: pending request thing
-//                final Boolean hasPendingRequest = UserUtil.getCurrentUser(getActivity()).getBoolean(getString(R.string.parse_user_pending_request));
-                final Boolean hasPendingRequest = false;
+                final Boolean hasPendingRequest = RequestUtil.getPendingRequest(getActivity()) != null;
 
                 new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                         .setTitleText(getString(R.string.dialog_msg_are_you_sure))
@@ -106,11 +118,6 @@ public class SettingsFragment extends PreferenceFragment {
                                     // cancel the request first
                                     cancelCurrentRequest(true);
                                 } else {
-                                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                                    editor.putBoolean(getString(R.string.waiting_to_log_out), false).apply();
-                                    // TODO: what's this for
-
-                                    UserUtil.reset(getActivity());
                                     getActivity().setResult(USER_LOGOUT_RESULT_CODE);
                                     getActivity().finish();
                                 }
@@ -121,7 +128,7 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
 
-        resetPasswdPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        resetPasswordPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
@@ -130,7 +137,7 @@ public class SettingsFragment extends PreferenceFragment {
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
                             public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                // TODO: to reset screen
+                                // show logout screen
                                 FragmentManager fragmentManager = getFragmentManager();
                                 fragmentManager.beginTransaction()
                                         .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
@@ -182,19 +189,57 @@ public class SettingsFragment extends PreferenceFragment {
      * @param andLogOut whether to log out after cancelling current request
      */
     private void cancelCurrentRequest(final Boolean andLogOut) {
-        // TODO:
+        final User currentUser = UserUtil.getCurrentUser(getActivity());
+        Stop pendingRequestStop = RequestUtil.getPendingRequest(getActivity());
+        NetworkUtil.getInstance().cancelRequest(
+                currentUser.getEmail(),
+                currentUser.getPassword(),
+                pendingRequestStop.getStopId(),
+                getActivity(),
+                new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        // TODO:
+                        try {
+                            JSONObject body;
+                            if (!response.isSuccessful()) {         // cancel failed
+                                body = new JSONObject(response.errorBody().string());
+                                Toast.makeText(getActivity(), body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, body.toString());
+                            } else {                // cancel success
+                                cancelRequestPref.setEnabled(false);
+                                getActivity().setResult(USER_CANCEL_REQUEST_RESULT_CODE);
+                                RequestUtil.putPendingRequest(null, getActivity());     // empty pending request
+                                // go ahead and log out
+                                if (andLogOut) {
+                                    getActivity().setResult(USER_LOGOUT_RESULT_CODE);
+                                    getActivity().finish();
+                                } else
+                                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+                                            .setTitleText(getString(R.string.dialog_title_request_cancelled))
+                                            .show();
+                            }
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        t.printStackTrace();
+                        Toast.makeText(getActivity(), getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
     public void onResume(){
         super.onResume();
-
-        // TODO:
-//        if (ParseUser.getCurrentUser() != null &&           // please test before you commit
-//                ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {    // has pending request
-//            cancelRequestPref.setEnabled(true);
-//        } else {
-//            cancelRequestPref.setEnabled(false);
-//        }
+        if (UserUtil.getCurrentUser(getActivity()) != null &&           // please test before you commit
+                RequestUtil.getPendingRequest(getActivity()) != null) {    // has pending request
+            cancelRequestPref.setEnabled(true);
+        } else {
+            cancelRequestPref.setEnabled(false);
+        }
     }
 }

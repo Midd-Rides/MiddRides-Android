@@ -100,7 +100,7 @@ public class PushBroadcastReceiver extends BroadcastReceiver {
                 && pickUpStop.equals(arrivingStop)) {
             long receivedTime = Calendar.getInstance().getTimeInMillis();
             editor.putLong(context.getString(R.string.push_receive_time), receivedTime)
-                    // so that reset view will be run
+                    // so that logout view will be run
                     .putBoolean(context.getString(R.string.have_been_notified), true).apply();
 
             Log.d("PushReceiver", "Notified");
