@@ -103,8 +103,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     // for double click exit
     private long backFirstPressed;
 
-    private int serverVersion;
-
     // location spinners
     private Spinner pickUpSpinner;
     private Stop selectedStop;
@@ -131,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
-        Log.d("MainActivity", "Create");
 
         if (getIntent().getExtras() != null) {
             try {
@@ -202,6 +199,9 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedStop = (Stop) spinnerAdapter.getItem(position);
                 vanArrivingLocation.setText(selectedStop.getName());
+                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
+                        .putInt(getString(R.string.saved_spinner_position), position)
+                        .apply();
                 Log.d("PickupSpinner", "Selected: " + position);
             }
 
@@ -212,6 +212,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         });
 
         spinnerAdapter.notifyDataSetChanged();
+
+        // load saved spinner position if available
+        pickUpSpinner.setSelection(PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt(getString(R.string.saved_spinner_position), 0), true);
 
         toggleCallButton(BUTTON_MAKE_REQUEST);
 
@@ -292,7 +296,40 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void cancelCurrentRequest(final int flag) {
-        // TODO: remember to unsubscribe
+        User currentUser = UserUtil.getCurrentUser(this);
+        final Stop pendingRequestStop = getPendingRequest();
+        NetworkUtil.getInstance().cancelRequest(
+                currentUser.getEmail(),
+                currentUser.getPassword(),
+                pendingRequestStop.getStopId(),
+                this,
+                new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            JSONObject body;
+                            if (!response.isSuccessful()) {
+                                body = new JSONObject(response.errorBody().string());
+                                Toast.makeText(MainActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, body.toString());
+                            } else {
+                                resetView();
+                                putPendingRequest(null);
+                                showCancelDialog();
+                            }
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        FirebaseMessaging.getInstance().unsubscribeFromTopic(pendingRequestStop.getStopId());
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        t.printStackTrace();
+                        Toast.makeText(MainActivity.this, getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void showCancelDialog() {
@@ -303,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
     }
 
     private void showTimeoutDialog(String pickUpLocation, Date requestTime) {
-
+        // TODO:
     }
 
     private void showRequestDialog() {
@@ -314,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 .setCancelText(getString(R.string.dialog_btn_cancel))
                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                     @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                    public void onClick(final SweetAlertDialog sweetAlertDialog) {
                         // make request
                         User currentUser = UserUtil.getCurrentUser(MainActivity.this);
                         if (currentUser == null) {
@@ -329,49 +366,67 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                                 new Callback<ResponseBody>() {
                                     @Override
                                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                        // TODO:
+                                        try {
+                                            JSONObject body;
+                                            if (!response.isSuccessful()) {     // request failed
+                                                Log.d(TAG, response.errorBody().string());
+
+                                                body = new JSONObject(response.errorBody().string());
+                                                Toast.makeText(MainActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
+                                                Log.d(TAG, body.toString());
+                                            } else {                            // request success
+                                                body = new JSONObject(response.body().string());
+                                                Log.d(TAG, body.toString());
+
+                                                putPendingRequest(selectedStop);
+
+                                                // listen for van coming update
+                                                String channelName = selectedStop.getStopId();
+                                                FirebaseMessaging.getInstance().subscribeToTopic(channelName);
+
+                                                setTitle(getString(R.string.title_activity_main_van_on_way));
+                                                toggleCallButton(BUTTON_CANCEL_REQUEST);
+
+                                                // for spinner position when re-entering
+                                                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
+                                                        .putInt(getString(R.string.saved_spinner_position), pickUpSpinner.getSelectedItemPosition())
+                                                        .apply();
+
+                                                // change alert type
+                                                sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                                                sweetAlertDialog.setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                                        .setTitleText(getString(R.string.dialog_title_request_success))
+                                                        .setContentText(getString(R.string.dialog_msg_you_will_be_notified))
+                                                        .showCancelButton(false)
+                                                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                            @Override
+                                                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                                showAnimation();
+                                                                sweetAlertDialog.dismissWithAnimation();
+                                                            }
+                                                        });
+
+                                            }
+                                        } catch (JSONException | IOException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
 
                                     @Override
                                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                        // TODO:
+                                        t.printStackTrace();
+                                        Toast.makeText(MainActivity.this, getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
                                     }
                                 }
                         );
-
-                        // Replace whitespaces and forward slashes in location name with hyphens
-                        String channelName = selectedStop.getStopId();
-                        FirebaseMessaging.getInstance().subscribeToTopic(channelName);
-
-                        setTitle(getString(R.string.title_activity_main_van_on_way));
-                        toggleCallButton(BUTTON_CANCEL_REQUEST);
-
-                        // for spinner position when re-entering
-                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
-                        editor.putInt(getString(R.string.request_spinner_position), pickUpSpinner.getSelectedItemPosition())
-                                .apply();
-
-                        // change alert type
-                        sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
-                        sweetAlertDialog.setConfirmText(getString(R.string.dialog_btn_dismiss))
-                                .setTitleText(getString(R.string.dialog_title_request_success))
-                                .setContentText(getString(R.string.dialog_msg_you_will_be_notified))
-                                .showCancelButton(false)
-                                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                    @Override
-                                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                        showAnimation();
-                                        sweetAlertDialog.dismissWithAnimation();
-                                    }
-                                });
                     }
                 }).show();
     }
 
-    private void showVanComingDialog(String arrivingLocatoin) {
+    private void showVanComingDialog(String arrivingLocation) {
         final SweetAlertDialog dialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
         dialog.setTitleText(getString(R.string.dialog_title_coming));
-        dialog.setContentText(getString(R.string.van_is_coming) + " " + arrivingLocatoin);
+        dialog.setContentText(getString(R.string.van_is_coming) + " " + arrivingLocation);
         dialog.setConfirmText(getString(R.string.i_got_it));
         dialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
@@ -401,14 +456,12 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 runOnUiThread(new Runnable(){
                     @Override
                     public void run(){
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                        // TODO:
-//                        if (ParseUser.getCurrentUser() != null &&
-//                                ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
-//                                sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
-//                            // logged in && has pending request && notified
-//                            cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
-//                        }
+                        User currentUser = UserUtil.getCurrentUser(MainActivity.this);
+                        if (currentUser != null && getPendingRequest() != null
+                                && hasBeenNotified()) {
+                            // logged in && has pending request && notified
+                            cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+                        }
                     }
                 });
             }
@@ -587,7 +640,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
      * Save a pending request to local storage
      * @param stop          stop that the request is for
      */
-    private void putPendingRequest(Stop stop) {
+    private void putPendingRequest(@Nullable Stop stop) {
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .putString(getString(R.string.pending_request), new Gson().toJson(stop, Stop.class))
                 .apply();
@@ -595,11 +648,19 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     /***
      * Get the pending request from local storage
-     * @return
+     * @return              stop that current pending request is for
      */
     private @Nullable Stop getPendingRequest() {
         return new Gson().fromJson(PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(getString(R.string.pending_request), null), Stop.class);
+    }
+
+    /***
+     * Whether user has been notified for current request
+     * @return              whether notified
+     */
+    private boolean hasBeenNotified() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.have_been_notified), false);
     }
 
     private void killSelf() {
@@ -660,51 +721,22 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
 
     @Override
     protected void onResume() {
-        Log.d("MainActivity", "Resume");
-
-        // TODO:
-//        LoginAgent.getInstance(this).registerListener(LoginAgent.LOGOUT, this);
-
-        // if email not verified, periodically check for email verification status
-        // TODO:
-//        if (ParseUser.getCurrentUser() != null && !ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
-//            Log.i("MainActivity", "Handler started, checking email verification status...");
-//
-//            checkEmailHandler = new Handler();
-//
-//            checkEmailRunnable = new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (!ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_email_verified))) {
-//                        // email still not verified
-//                        // TODO: re-check with server
-//                        checkEmailHandler.postDelayed(this, CHECK_EMAIL_INTERVAL);
-//                        Log.i("MainActivity", "Email still not verified " + (new Date()).toString());
-//                    } else {
-//                        // email verified now
-//                        checkEmailHandler.removeCallbacks(this);
-//                        showEmailVerifiedDialog();
-//                        Log.i("MainActivity", "Finally verified email");
-//                    }
-//                }
-//            };
-//            checkEmailHandler.postDelayed(checkEmailRunnable, CHECK_EMAIL_INTERVAL);           // check every half minute
-//        }
+        final User currentUser = UserUtil.getCurrentUser(MainActivity.this);
 
         // check if there is request pending
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // TODO:
-//        if (ParseUser.getCurrentUser() != null && ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request))) {      // yes
-//            if (sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
-//                displayVanArrivingMessages();
-//            }
-//            showAnimation();
-//            toggleCallButton(BUTTON_CANCEL_REQUEST);
-//        } else {                                                          // no
-//            cancelAnimation();
-//            toggleCallButton(BUTTON_MAKE_REQUEST);
-//            mainImage.setImageResource(R.drawable.logo_with_background);
-//        }
+        if (currentUser != null && getPendingRequest() != null) {      // yes
+            if (hasBeenNotified()) {
+                displayVanArrivingMessages();
+            }
+            showAnimation();
+            toggleCallButton(BUTTON_CANCEL_REQUEST);
+        } else {                                                          // no
+            cancelAnimation();
+            toggleCallButton(BUTTON_MAKE_REQUEST);
+            mainImage.setImageResource(R.drawable.logo_with_background);
+        }
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(getString(R.string.screen_on), true).apply();
@@ -713,7 +745,7 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         registerPushListener(this);
 
         // checking for request timeout
-        if (sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
+        if (sharedPreferences.getBoolean(getString(R.string.have_been_notified), false)) {
             // notified, now check when the user was notified
             long currentTime = Calendar.getInstance().getTimeInMillis();
             long receivedTime = sharedPreferences.getLong(getString(R.string.push_receive_time), currentTime);
@@ -729,14 +761,10 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                                // TODO:
-//                                if (ParseUser.getCurrentUser() != null &&
-//                                        ParseUser.getCurrentUser().getBoolean(getString(R.string.parse_user_pending_request)) &&
-//                                        sharedPreferences.getBoolean(getString(R.string.request_notified), false)) {
-//                                    // logged in && has pending request && notified
-//                                    cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
-//                                }
+                                if (currentUser != null && getPendingRequest() != null && hasBeenNotified()) {
+                                    // logged in && has pending request && notified
+                                    cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
+                                }
                             }
                         });
                     }
@@ -748,8 +776,6 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
                 // sod off
             }
         }
-
-        // TODO: will be beneficial to add another task to constantly check how many people are waiting at one station
 
         super.onResume();
     }
@@ -794,42 +820,4 @@ public class MainActivity extends AppCompatActivity implements OnPushNotificatio
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // for debugging
-
-    @Override
-    protected void onStart() {
-        Log.d("MainActivity", "Start");
-        super.onStart();
-    }
-
-    @Override
-    protected void onRestart() {
-        Log.d("MainActivity", "Restart");
-        super.onRestart();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d("MainActivity", "Stop");
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d("MainActivity", "Destroy");
-        super.onDestroy();
-    }
 }

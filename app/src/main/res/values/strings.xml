@@ -110,12 +110,12 @@
     <string name="last_updated" translatable="false">lastUpdated</string>
     <string name="all_stops" translatable="false">allStops</string>
     <string name="pending_request" translatable="false">pendingRequest</string>
+    <string name="have_been_notified" translatable="false">notified</string>
+    <string name="saved_spinner_position" translatable="false">spinnerPosition</string>
 
     <string name="login_status" translatable="false">LoginStatus</string>
-    <string name="request_spinner_position" translatable="false">spinnerPosition</string>
     <string name="waiting_to_log_out" translatable="false">waitingToLogOut</string>
     <string name="screen_on" translatable="false">screenOn</string>
-    <string name="request_notified" translatable="false">notified</string>
     <string name="push_receive_time" translatable="false">pushReceiveTime</string>
     <string name="cat_request" translatable="false">Request</string>
     <string name="cat_user" translatable="false">User</string>
