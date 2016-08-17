@@ -126,7 +126,9 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        // TODO: periodically check for verification status if not verified
+        if (UserUtil.getCurrentUser(this) != null
+                && !UserUtil.getCurrentUser(this).isVerified())
+            UserUtil.syncCurrentUser(this);
 
         if (getIntent().getExtras() != null) {
             try {
@@ -734,7 +736,6 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                                 if (currentUser != null && getPendingRequest(MainActivity.this) != null && hasBeenNotified()) {
                                     // logged in && has pending request && notified
                                     cancelCurrentRequest(CANCEL_REQUEST_FLAG_TIMEOUT);
-                                    showTimeoutDialog();
                                 }
                             }
                         });

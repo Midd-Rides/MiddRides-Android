@@ -45,6 +45,9 @@ public class NetworkUtil {
         @FormUrlEncoded
         Call<ResponseBody> register(@FieldMap Map<String, String> bodyParams);
 
+        @GET(Constants.SYNC_USER_URL)
+        Call<ResponseBody> syncUser(@QueryMap Map<String, String> queryParams);
+
         @POST(Constants.CHANGE_PASSWORD_URL)
         @FormUrlEncoded
         Call<ResponseBody> changePassword(@FieldMap Map<String, String> bodyParams);
@@ -128,6 +131,20 @@ public class NetworkUtil {
         bodyParams.put(context.getString(R.string.map_param_email), email);
         bodyParams.put(context.getString(R.string.map_param_password), password);
         service.register(bodyParams).enqueue(callback);
+    }
+
+    /***
+     * Synchronize user
+     * @param email         email
+     * @param password      password (encoded)
+     * @param context       context
+     * @param callback      callback
+     */
+    public void syncUser(String email, String password, Context context, Callback<ResponseBody> callback) {
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put(context.getString(R.string.map_param_email), email);
+        queryParams.put(context.getString(R.string.map_param_password), password);
+        service.syncUser(queryParams).enqueue(callback);
     }
 
     /***
