@@ -57,9 +57,6 @@
     <!--Keys-->
     <string name="key_arriving_stop" translatable="false">arrivingStop</string>
 
-    <!--Log in/Sign up message-->
-    <string name="please_turn_on_gps">Please turn on gps locations tracking</string>
-
     <!--Network Parameter Keys-->
     <string name="map_param_email" translatable="false">email</string>
     <string name="map_param_password" translatable="false">password</string>
@@ -117,6 +114,7 @@
 
     <!--Spinners-->
     <string name="spinner_pick_up">Pick Up Location</string>
+    <string name="click_to_choose">Click to choose your stop</string>
 
     <!--TextViews-->
     <string name="text_hint_email">Email</string>

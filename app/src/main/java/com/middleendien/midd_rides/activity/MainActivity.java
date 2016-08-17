@@ -81,6 +81,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 import static com.middleendien.midd_rides.utils.RequestUtil.*;
 
@@ -169,6 +170,20 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
             getWindow().setExitTransition(null);
             getWindow().setReenterTransition(null);
         }
+
+        // tutorial for the spinner
+        new MaterialShowcaseView.Builder(this)
+                .setTarget(pickUpSpinner)
+                .setContentText(getString(R.string.click_to_choose))
+                .setDismissText(getString(R.string.dialog_btn_got_it))
+                .setDismissTextColor(ContextCompat.getColor(this, R.color.red_btn_bg_color))
+                .setDismissOnTargetTouch(true)
+                .setDismissOnTouch(false)
+                .setMaskColour(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setShapePadding(-30)
+                .setDelay(1000)
+                .singleUse("spinner")
+                .show();
     }
 
     /**
