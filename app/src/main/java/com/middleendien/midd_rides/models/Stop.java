@@ -4,7 +4,7 @@ package com.middleendien.midd_rides.models;
  * Created by Nosagie on 10/23/15.
  * Modified to an extent where the previous line should be ignored, blur
  *
- * MiddRides Stop
+ * MiddRides Stop - Peter
  * Latitude and Longitude methods are used to find closest stop to the user
  */
 
@@ -14,8 +14,8 @@ public class Stop {
     private String mStopId;
 
     public Stop(String name, String stopId){
-        mName = name;
-        mStopId = stopId;
+        setName(name);
+        setStopId(stopId);
     }
 
     public String getName() {
@@ -31,7 +31,7 @@ public class Stop {
         return mStopId;
     }
 
-    public void setStopId(String stopId) {
+    private void setStopId(String stopId) {
         mStopId = stopId;
     }
 

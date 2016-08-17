@@ -10,8 +10,8 @@
             android:title="@string/pref_log_out" />
 
         <Preference
-            android:key="@string/pref_reset_password"
-            android:title="@string/pref_reset_password" />
+            android:key="@string/pref_change_password"
+            android:title="@string/pref_change_password" />
 
         <Preference
             android:key="@string/pref_verification_status_unavailable"

@@ -30,7 +30,7 @@
     <string name="pref_cancel_request">取消请求</string>
     <string name="pref_log_out">注销</string>
     <string name="pref_not_verified">重新发送验证邮件</string>
-    <string name="pref_reset_password">重设密码</string>
+    <string name="pref_change_password">重设密码</string>
     <string name="pref_screen_announcements">通知</string>
     <string name="pref_verified">邮箱已验证</string>
     <string name="press_again_exit">再按一次退出</string>

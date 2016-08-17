@@ -11,6 +11,7 @@ import com.middleendien.midd_rides.models.Stop;
 /**
  * Created by Peter on 8/16/16.
  *
+ * For querying and saving pending requests locally
  */
 
 public class RequestUtil {

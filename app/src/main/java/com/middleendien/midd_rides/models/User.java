@@ -12,16 +12,16 @@ public class User {
     private boolean mVerified;
 
     public User(String email, String encryptedPassword, boolean verified) {
-        mEmail = email;
-        mPassword = encryptedPassword;
-        mVerified = verified;
+        setEmail(email);
+        setPassword(encryptedPassword);
+        setVerified(verified);
     }
 
     public String getEmail() {
         return mEmail;
     }
 
-    public User setEmail(String email) {
+    private User setEmail(String email) {
         mEmail = email;
         return this;
     }

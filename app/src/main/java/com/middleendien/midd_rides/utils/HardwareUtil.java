@@ -33,6 +33,7 @@ public class HardwareUtil {
      * @param context       context
      * @return              whether running
      */
+    @SuppressWarnings("unused")
     public static boolean isAppRunning(Context context) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);

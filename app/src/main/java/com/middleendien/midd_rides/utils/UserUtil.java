@@ -6,7 +6,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Patterns;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.middleendien.midd_rides.R;
@@ -25,6 +24,7 @@ import retrofit2.Response;
 /**
  * Created by Peter on 8/15/16.
  *
+ * Anything user related, done here
  */
 
 public class UserUtil {

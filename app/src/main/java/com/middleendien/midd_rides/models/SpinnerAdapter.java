@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.widget.ArrayAdapter;
 
-import com.middleendien.midd_rides.models.Stop;
-
 import java.util.List;
 
 /**

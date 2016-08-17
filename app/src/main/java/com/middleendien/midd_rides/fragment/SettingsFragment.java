@@ -1,6 +1,5 @@
 package com.middleendien.midd_rides.fragment;
 
-
 import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -57,7 +56,7 @@ public class SettingsFragment extends PreferenceFragment {
     private void getPrefs() {
         cancelRequestPref       = findPreference(getString(R.string.pref_cancel_request));
         logOutPref              = findPreference(getString(R.string.pref_log_out));
-        resetPasswordPref       = findPreference(getString(R.string.pref_reset_password));
+        resetPasswordPref       = findPreference(getString(R.string.pref_change_password));
         verifyStatusPref        = findPreference(getString(R.string.pref_verification_status_unavailable));
 
         PreferenceCategory userPrefCat = (PreferenceCategory) findPreference(getString(R.string.cat_user));
@@ -241,6 +240,7 @@ public class SettingsFragment extends PreferenceFragment {
                                 } else
                                     new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
                                             .setTitleText(getString(R.string.dialog_title_request_cancelled))
+                                            .setConfirmText(getString(R.string.dialog_btn_dismiss))
                                             .show();
                             }
                         } catch (JSONException | IOException e) {
