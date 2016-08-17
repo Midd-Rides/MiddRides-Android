@@ -236,14 +236,13 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                                     null,
                                     getString(R.string.dialog_btn_dismiss));
                             return;                     // do nothing
-                            // TODO: turn this back on after email verification is implemented
-//                        } else if (!currentUser.isVerified()) {
-//                            Log.d(TAG, "Email verified: " + currentUser.isVerified());
-//                            showWarningDialog(
-//                                    getString(R.string.dialog_title_email_verification),
-//                                    getString(R.string.dialog_msg_not_verified),
-//                                    getString(R.string.dialog_btn_dismiss));
-//                            return;
+                        } else if (!currentUser.isVerified()) {
+                            Log.d(TAG, "Email verified: " + currentUser.isVerified());
+                            showWarningDialog(
+                                    getString(R.string.dialog_title_email_verification),
+                                    getString(R.string.dialog_msg_not_verified),
+                                    getString(R.string.dialog_btn_dismiss));
+                            return;
                         } else if (warnIfDisconnected())
                             return;
 
