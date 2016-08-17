@@ -5,12 +5,9 @@
     <string name="title_activity_main_page" translatable="false">MiddRides</string>
     <string name="title_activity_main_select_pickup_location">Select your pick up location</string>
     <string name="title_activity_main_van_on_way">Your van is on its way</string>
-    <string name="title_activity_main_service_down">MiddRides is not running</string>
-    
+
     <!--Action Bars & SnackBar-->
     <string name="action_settings">Settings</string>
-    <string name="action_login">Log In</string>
-    <string name="not_email_verified">You have to verify your email first</string>
     <string name="press_again_exit">Press again to exit</string>
     <string name="no_internet_warning">Internet connection unavailable</string>
 
@@ -22,17 +19,13 @@
     <string name="change_password">Change Password</string>
 
     <!--Dialogs-->
-    <string name="dialog_select_location">Select Location</string>
     <string name="dialog_msg_are_you_sure">Are you sure?</string>
-    <string name="dialog_msg_email_verified">You have successfully verified your email</string>
     <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
     <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
-    <string name="dialog_msg_did_you_catch_your_van">Did you catch your van?</string>
     <string name="dialog_msg_middrides_not_available">MiddRides is not currently available</string>
     <string name="dialog_msg_can_only_make_one_request">You can only make one request at a time</string>
     <string name="dialog_msg_not_logged_in">You have to log in first</string>
     <string name="dialog_msg_not_verified">You have to verify your email first</string>
-    <string name="dialog_msg_reset_email_sent">Reset Password Email Sent</string>
     <string name="dialog_msg_have_you_caught_the_can">Have you caught the van?</string>
 
     <string name="dialog_btn_yes">Yes</string>
@@ -48,7 +41,6 @@
     <string name="dialog_title_request_success">Request Success</string>
     <string name="dialog_title_request_cancelled">Request Cancelled</string>
     <string name="dialog_title_request_timeout">Request Timed Out</string>
-    <string name="dialog_title_congrats">Congratulations!</string>
     <string name="dialog_title_coming">Van Coming</string>
     <string name="dialog_title_service_down">Service Down</string>
     <string name="dialog_title_email_verification">Email Verification</string>
@@ -82,20 +74,20 @@
     <!--Others-->
     <string name="app_logo">App Logo</string>
 
-    <!--Permission-->
-    <string name="perm_contacts_rationale">We need to access your email account names</string>
-
     <!--Preference Activity-->
     <string name="pref_cancel_request">Cancel Request</string>
     <string name="pref_log_out">Log Out</string>
     <string name="pref_reset_password">Reset Password</string>
     <string name="pref_verification_status_unavailable">Verification Status Unavailable</string>
     <string name="pref_verified">Email Verified</string>
-    <string name="pref_not_verifed">Resend Verification Email</string>
-    <string name="pref_already_verified">E-mail Already Verified</string>
+    <string name="pref_not_verified">Resend Verification Email</string>
     <string name="pref_screen_announcements">Announcements</string>
-    <string name="pref_key_no_announcement" translatable="false">NoAnnouncement</string>
     <string name="pref_announcements_no_announcement">No Announcement</string>
+
+    <string name="pref_key_no_announcement" translatable="false">NoAnnouncement</string>
+    <string name="cat_request" translatable="false">Request</string>
+    <string name="cat_user" translatable="false">User</string>
+    <string name="cat_others" translatable="false">Others</string>
 
     <!--SharedPreferences-->
     <string name="current_user" translatable="false">currentUser</string>
@@ -107,10 +99,6 @@
     <string name="saved_stop_name" translatable="false">stopName</string>
     <string name="push_receive_time" translatable="false">pushReceiveTime</string>
     <string name="screen_on" translatable="false">screenOn</string>
-
-    <string name="cat_request" translatable="false">Request</string>
-    <string name="cat_user" translatable="false">User</string>
-    <string name="cat_others" translatable="false">Others</string>
 
     <!--Spinners-->
     <string name="spinner_pick_up">Pick Up Location</string>
