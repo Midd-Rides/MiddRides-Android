@@ -106,12 +106,13 @@ public class ResetPasswordFragment extends Fragment {
                                 setDialogShowing(false);
                                 try {
                                     JSONObject body;
-                                    if (!response.isSuccessful()) {             // logout unsuccessful
+                                    if (!response.isSuccessful()) {             // change unsuccessful
                                         body = new JSONObject(response.errorBody().string());
                                         Toast.makeText(getActivity(), getString(R.string.res_param_error), Toast.LENGTH_SHORT).show();
                                         Log.d(TAG, body.toString());
-                                    } else {                                    // logout success
-                                        UserUtil.getCurrentUser(getActivity()).setPassword(Privacy.encodePassword(newPass));
+                                    } else {                                    // change success
+                                        UserUtil.setCurrentUser(getActivity(),
+                                                UserUtil.getCurrentUser(getActivity()).setPassword(Privacy.encodePassword(newPass)));
                                         getFragmentManager().beginTransaction().remove(ResetPasswordFragment.this).commit();
                                         getFragmentManager().popBackStack();
                                     }
