@@ -115,8 +115,8 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
     // to logout view a while after notification
     private Handler resetViewHandler;
     private Runnable resetViewRunnable;
-//    private static final int RESET_TIMEOUT = 5 * 60000;         // 5 minutes
-    private static final int RESET_TIMEOUT = 5000;              // for testing
+    private static final int RESET_TIMEOUT = 5 * 60000;         // 5 minutes
+//    private static final int RESET_TIMEOUT = 5000;              // for testing
 
     private List<Stop> stopList;
     private SpinnerAdapter spinnerAdapter;
@@ -316,8 +316,10 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                                 switch (flag) {
                                     case CANCEL_REQUEST_FLAG_MANUAL:
                                         showCancelDialog();
+                                        break;
                                     case CANCEL_REQUEST_FLAG_TIMEOUT:
                                         showTimeoutDialog();
+                                        break;
                                 }
                             }
                         } catch (JSONException | IOException e) {
