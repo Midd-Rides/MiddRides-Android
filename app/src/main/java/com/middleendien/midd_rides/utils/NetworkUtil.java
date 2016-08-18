@@ -3,6 +3,7 @@ package com.middleendien.midd_rides.utils;
 import android.content.Context;
 
 import com.middleendien.midd_rides.Constants;
+import com.middleendien.midd_rides.Privacy;
 import com.middleendien.midd_rides.R;
 
 import java.util.HashMap;
@@ -92,7 +93,7 @@ public class NetworkUtil {
      */
     private NetworkUtil() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.SERVER_BASE_URL)
+                .baseUrl(Privacy.SERVER_BASE_URL)
                 .build();
         service = retrofit.create(MiddRidesService.class);
     }
