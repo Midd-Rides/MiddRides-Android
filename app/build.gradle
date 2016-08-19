@@ -20,7 +20,7 @@ android {
     buildToolsVersion '24.0.1'
     defaultConfig {
         applicationId 'com.middleendien.midd_rides'
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 24
         versionName '1.6.0'
         versionCode 7
@@ -28,7 +28,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            shrinkResources true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
