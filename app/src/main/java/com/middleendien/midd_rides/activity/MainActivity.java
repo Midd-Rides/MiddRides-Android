@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
      * @return true if disconnected, false if connected
      */
     private boolean warnIfDisconnected(){
-        if (!HardwareUtil.isNetworkAvailable(getApplicationContext())){
+        if (!HardwareUtil.isNetworkAvailable(getApplicationContext())) {
             showWarningDialog(
                     getString(R.string.no_internet_warning),
                     null,
