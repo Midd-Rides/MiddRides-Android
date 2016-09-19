@@ -746,8 +746,8 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                 resetViewHandler = new Handler();
                 resetViewRunnable = new Runnable() {
                     @Override
-                    public void run(){
-                        runOnUiThread(new Runnable(){
+                    public void run() {
+                        runOnUiThread(new Runnable() {
                             @Override
                             public void run(){
                                 if (currentUser != null && getPendingRequest(MainActivity.this) != null && hasBeenNotified()) {

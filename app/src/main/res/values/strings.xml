@@ -20,7 +20,7 @@
 
     <!--Dialogs-->
     <string name="dialog_msg_are_you_sure">Are you sure?</string>
-    <string name="dialog_msg_you_will_be_notified">You will be notified when the van arrives</string>
+    <string name="dialog_msg_you_will_be_notified">You will be notified when the van is on its way</string>
     <string name="dialog_msg_will_cancel_request">This will cancel you current request</string>
     <string name="dialog_msg_middrides_not_available">MiddRides is not currently available</string>
     <string name="dialog_msg_can_only_make_one_request">You can only make one request at a time</string>
