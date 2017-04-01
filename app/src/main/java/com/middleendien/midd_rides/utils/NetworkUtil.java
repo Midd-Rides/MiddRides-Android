@@ -99,7 +99,7 @@ public class NetworkUtil {
     }
 
     /***
-     * Check if server if running
+     * Check if server is running
      * @param callback      callback
      */
     public void isServerRunning(Callback<ResponseBody> callback) {
