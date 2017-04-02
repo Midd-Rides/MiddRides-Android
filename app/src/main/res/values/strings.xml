@@ -118,6 +118,7 @@
     <string name="unexpected_server_response">Unexpected server response</string>
     <string name="incorrect_email_format">Incorrect Email Format</string>
     <string name="password_incorrect">Password Incorrect</string>
+    <string name="password_too_short">Your password is too short</string>
     <string name="password_dont_match">Your passwords don\'t match</string>
     <string name="password_didnt_change">Password didn\'t change</string>
     <string name="resent_email">Please check your mailbox</string>

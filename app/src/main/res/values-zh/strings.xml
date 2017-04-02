@@ -65,4 +65,5 @@
     <string name="text_hint_password_old">旧密码</string>
     <string name="unexpected_server_response">未知错误</string>
     <string name="your_place">你的地点</string>
+    <string name="password_too_short">密码太短</string>
 </resources>
