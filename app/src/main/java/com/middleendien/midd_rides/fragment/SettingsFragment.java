@@ -1,12 +1,14 @@
 package com.middleendien.midd_rides.fragment;
 
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,12 +24,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.content.DialogInterface.*;
 import static android.preference.Preference.*;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -100,15 +102,19 @@ public class SettingsFragment extends PreferenceFragment {
                 final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 final Boolean hasPendingRequest = RequestUtil.getPendingRequest(getActivity()) != null;
 
-                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
-                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
-                        .setContentText(hasPendingRequest ? getString(R.string.dialog_msg_will_cancel_request) : null)
-                        .showContentText(hasPendingRequest)
-                        .setConfirmText(getString(R.string.dialog_btn_yes))
-                        .setCancelText(getString(R.string.dialog_btn_cancel))
-                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(getString(R.string.dialog_msg_are_you_sure))
+                        .setMessage(hasPendingRequest ? getString(R.string.dialog_msg_will_cancel_request) : null)
+                        .setCancelable(true)
+                        .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
                             @Override
-                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // do nothing
+                            }
+                        })
+                        .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
                                 if (hasPendingRequest) {
                                     // cancel the request first
                                     cancelCurrentRequest(true);
@@ -117,7 +123,9 @@ public class SettingsFragment extends PreferenceFragment {
                                     getActivity().finish();
                                 }
                             }
-                        }).show();
+                        })
+                        .create()
+                        .show();
 
                 return false;
             }
@@ -126,12 +134,11 @@ public class SettingsFragment extends PreferenceFragment {
         resetPasswordPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
-                        .setTitleText(getString(R.string.dialog_msg_are_you_sure))
-                        .setConfirmText(getString(R.string.dialog_btn_yes))
-                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(getString(R.string.dialog_msg_are_you_sure))
+                        .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
                             @Override
-                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            public void onClick(DialogInterface dialogInterface, int i) {
                                 // show logout screen
                                 FragmentManager fragmentManager = getFragmentManager();
                                 fragmentManager.beginTransaction()
@@ -139,16 +146,16 @@ public class SettingsFragment extends PreferenceFragment {
                                         .replace(android.R.id.content, new ResetPasswordFragment())
                                         .addToBackStack("settings")
                                         .commit();
-                                sweetAlertDialog.dismissWithAnimation();
+                                dialogInterface.dismiss();
                             }
                         })
-                        .setCancelText(getString(R.string.dialog_btn_cancel))
-                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
                             @Override
-                            public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                sweetAlertDialog.dismissWithAnimation();
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
                             }
                         })
+                        .create()
                         .show();
 
                 return false;
@@ -160,12 +167,11 @@ public class SettingsFragment extends PreferenceFragment {
             public boolean onPreferenceClick(Preference preference) {
                 final User currentUser = UserUtil.getCurrentUser(getActivity());
                 if (!currentUser.isVerified()) {    // email not verified
-                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
-                            .setTitleText(getString(R.string.dialog_msg_are_you_sure))
-                            .setConfirmText(getString(R.string.dialog_btn_yes))
-                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle(getString(R.string.dialog_msg_are_you_sure))
+                            .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
                                 @Override
-                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                public void onClick(DialogInterface dialogInterface, int i) {
                                     NetworkUtil.getInstance().sendVerificationEmail(
                                             currentUser.getEmail(),
                                             currentUser.getPassword(),
@@ -185,22 +191,64 @@ public class SettingsFragment extends PreferenceFragment {
                                             }
                                     );
 
-                                    sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
-                                    sweetAlertDialog.setTitleText(getString(R.string.resent_email))
-                                            .setConfirmText(getString(R.string.dialog_btn_got_it))
-                                            .setConfirmClickListener(null)
-                                            .showCancelButton(false)
+                                    dialogInterface.dismiss();
+                                    new AlertDialog.Builder(getActivity())
+                                            .setTitle(getString(R.string.resent_email))
+                                            .setPositiveButton(getString(R.string.dialog_btn_got_it), null)
+                                            .create()
                                             .show();
                                 }
                             })
-                            .setCancelText(getString(R.string.dialog_btn_cancel))
-                            .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
                                 @Override
-                                public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                    sweetAlertDialog.dismissWithAnimation();
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
                                 }
                             })
+                            .create()
                             .show();
+
+//                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
+//                            .setTitleText(getString(R.string.dialog_msg_are_you_sure))
+//                            .setConfirmText(getString(R.string.dialog_btn_yes))
+//                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+//                                @Override
+//                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+//                                    NetworkUtil.getInstance().sendVerificationEmail(
+//                                            currentUser.getEmail(),
+//                                            currentUser.getPassword(),
+//                                            getActivity(),
+//                                            new Callback<ResponseBody>() {
+//                                                @Override
+//                                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                                                    if (response.isSuccessful())
+//                                                        Log.i(TAG, "Re-sent Email Verification");
+//                                                }
+//
+//                                                @Override
+//                                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                                                    t.printStackTrace();
+//                                                    Toast.makeText(getActivity(), getString(R.string.failed_to_talk_to_server), Toast.LENGTH_SHORT).show();
+//                                                }
+//                                            }
+//                                    );
+//
+//                                    sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+//                                    sweetAlertDialog.setTitleText(getString(R.string.resent_email))
+//                                            .setConfirmText(getString(R.string.dialog_btn_got_it))
+//                                            .setConfirmClickListener(null)
+//                                            .showCancelButton(false)
+//                                            .show();
+//                                }
+//                            })
+//                            .setCancelText(getString(R.string.dialog_btn_cancel))
+//                            .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+//                                @Override
+//                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+//                                    sweetAlertDialog.dismissWithAnimation();
+//                                }
+//                            })
+//                            .show();
                 }
 
                 return false;
@@ -214,6 +262,7 @@ public class SettingsFragment extends PreferenceFragment {
      */
     private void cancelCurrentRequest(final Boolean andLogOut) {
         final User currentUser = UserUtil.getCurrentUser(getActivity());
+        // TODO: if currentUser is null, log out or show something weird
         Stop pendingRequestStop = RequestUtil.getPendingRequest(getActivity());
         NetworkUtil.getInstance().cancelRequest(
                 currentUser.getEmail(),
@@ -238,9 +287,10 @@ public class SettingsFragment extends PreferenceFragment {
                                     getActivity().setResult(USER_LOGOUT_RESULT_CODE);
                                     getActivity().finish();
                                 } else
-                                    new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE)
-                                            .setTitleText(getString(R.string.dialog_title_request_cancelled))
-                                            .setConfirmText(getString(R.string.dialog_btn_dismiss))
+                                    new AlertDialog.Builder(getActivity())
+                                            .setTitle(getString(R.string.dialog_title_request_cancelled))
+                                            .setPositiveButton(getString(R.string.dialog_btn_dismiss), null)
+                                            .create()
                                             .show();
                             }
                         } catch (JSONException | IOException e) {

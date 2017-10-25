@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 
@@ -39,7 +40,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REGISTER_REQUEST_CODE = 0x100;
     private static final int PERMISSION_INTERNET_REQUEST_CODE = 0x201;
 
-    private SweetAlertDialog progressDialog;
+    private AlertDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,15 +221,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setDialogShowing(boolean showing) {
         if (showing) {
-            progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
-                    .setTitleText(getString(R.string.dialog_logging_in));
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.showCancelButton(false);
-            progressDialog.getProgressHelper().setBarColor(ContextCompat.getColor(this, R.color.colorAccent));
+            progressDialog = new AlertDialog.Builder(this).create();
+            progressDialog.setTitle(getString(R.string.dialog_logging_in));
             progressDialog.show();
         } else {
             if (progressDialog.isShowing())
-                progressDialog.dismissWithAnimation();
+                progressDialog.dismiss();
         }
     }
 

@@ -25,6 +25,7 @@ package com.middleendien.midd_rides.activity;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
@@ -38,6 +39,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -73,7 +75,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
@@ -83,6 +84,7 @@ import retrofit2.Response;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
+import static android.content.DialogInterface.*;
 import static com.middleendien.midd_rides.utils.RequestUtil.*;
 
 public class MainActivity extends AppCompatActivity implements OnNotificationReceiveListener {
@@ -176,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                 .setTarget(pickUpSpinner)
                 .setContentText(getString(R.string.click_to_choose))
                 .setDismissText(getString(R.string.dialog_btn_got_it))
-                .setDismissTextColor(ContextCompat.getColor(this, R.color.red_btn_bg_color))
+                .setDismissTextColor(ContextCompat.getColor(this, R.color.colorRedButtonBackground))
                 .setDismissOnTargetTouch(true)
                 .setDismissOnTouch(false)
                 .setMaskColour(ContextCompat.getColor(this, R.color.colorPrimary))
@@ -353,42 +355,40 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
     }
 
     private void showCancelDialog() {
-        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.NORMAL_TYPE)
-                .setTitleText(getString(R.string.dialog_title_request_cancelled))
-                .setConfirmText(getString(R.string.dialog_btn_dismiss))
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.dialog_title_request_cancelled))
+                .setPositiveButton(getString(R.string.dialog_btn_dismiss), null)
+                .create()
                 .show();
     }
 
     private void showTimeoutDialog() {
-        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.NORMAL_TYPE)
-                .setTitleText(getString(R.string.dialog_title_request_timeout))
-                .setContentText(getString(R.string.dialog_msg_have_you_caught_the_can))
-                .setConfirmText(getString(R.string.dialog_btn_yes))
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.dialog_title_request_timeout))
+                .setMessage(getString(R.string.dialog_msg_have_you_caught_the_can))
+                .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
                     @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        // TODO:
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // TODO: figure out why this is a TODO
                     }
                 })
-                .setCancelText(getString(R.string.dialog_btn_no))
-                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                .setNegativeButton(getString(R.string.dialog_btn_no), new OnClickListener() {
                     @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        // TODO:
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // TODO: this too
                     }
-                }).show();
+                })
+                .create()
+                .show();
     }
 
     private void showRequestDialog() {
-        new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
-                .setTitleText(getString(R.string.dialog_title_request_confirm))
-                .setContentText(getString(R.string.dialog_request_message) + " " + selectedStop.getName() + "?")
-                .setConfirmText(getString(R.string.dialog_btn_yes))
-                .setCancelText(getString(R.string.dialog_btn_cancel))
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.dialog_title_request_confirm))
+                .setMessage(getString(R.string.dialog_request_message) + ' ' + selectedStop.getName() + '?')
+                .setPositiveButton(getString(R.string.dialog_btn_yes), new OnClickListener() {
                     @Override
-                    public void onClick(final SweetAlertDialog sweetAlertDialog) {
-                        // make request
+                    public void onClick(final DialogInterface dialogInterface, int i) {
                         User currentUser = UserUtil.getCurrentUser(MainActivity.this);
                         if (currentUser == null) {
                             Toast.makeText(MainActivity.this, getString(R.string.dialog_msg_not_logged_in), Toast.LENGTH_SHORT).show();
@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                                                 body = new JSONObject(response.errorBody().string());
                                                 Toast.makeText(MainActivity.this, body.getString(getString(R.string.res_param_error)), Toast.LENGTH_SHORT).show();
                                                 Log.d(TAG, "Request unsuccessful - " + body.toString());
-                                            } else {                            // request success
+                                            } else {
                                                 putPendingRequest(selectedStop, MainActivity.this);
 
                                                 // listen for van coming update
@@ -424,20 +424,19 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                                                         .putString(getString(R.string.saved_stop_name), selectedStop.getName())
                                                         .apply();
 
-                                                // change alert type
-                                                sweetAlertDialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
-                                                sweetAlertDialog.setConfirmText(getString(R.string.dialog_btn_dismiss))
-                                                        .setTitleText(getString(R.string.dialog_title_request_success))
-                                                        .setContentText(getString(R.string.dialog_msg_you_will_be_notified))
-                                                        .showCancelButton(false)
-                                                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                // new alert dialog
+                                                dialogInterface.dismiss();
+                                                new AlertDialog.Builder(MainActivity.this)
+                                                        .setTitle(getString(R.string.dialog_title_request_success))
+                                                        .setPositiveButton(getString(R.string.dialog_btn_dismiss), new OnClickListener() {
                                                             @Override
-                                                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                            public void onClick(DialogInterface dialogInterface, int i) {
                                                                 showAnimation();
-                                                                sweetAlertDialog.dismissWithAnimation();
+                                                                dialogInterface.dismiss();
                                                             }
-                                                        });
-
+                                                        })
+                                                        .create()
+                                                        .show();
                                             }
                                         } catch (JSONException | IOException e) {
                                             e.printStackTrace();
@@ -452,25 +451,33 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
                                 }
                         );
                     }
-                }).show();
+                })
+                .setNegativeButton(getString(R.string.dialog_btn_cancel), new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .create()
+                .show();
     }
 
     private void showVanComingDialog(final String arrivingStop) {
-        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
-                .setTitleText(getString(R.string.dialog_title_coming))
-                .setContentText(getString(R.string.van_is_coming) + " " + arrivingStop)
-                .setConfirmText(getString(R.string.dialog_btn_got_it))
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle(getString(R.string.dialog_title_coming))
+                .setMessage(getString(R.string.van_is_coming) + ' ' + arrivingStop)
+                .setPositiveButton(getString(R.string.dialog_btn_got_it), new OnClickListener() {
                     @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        sweetAlertDialog.dismissWithAnimation();
-                        // Replace whitespaces and forward slashes in location name with hyphens
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
                         String channelName = selectedStop.getStopId();
                         FirebaseMessaging.getInstance().unsubscribeFromTopic(channelName);
 
                         displayVanArrivingMessages();
                     }
-                }).show();
+                })
+                .create()
+                .show();
 
         // logout the view after 5 minutes
         // resetView needs to be run from the main thread because it modifies views created
@@ -500,11 +507,11 @@ public class MainActivity extends AppCompatActivity implements OnNotificationRec
     }
 
     private void showWarningDialog(String title, String contentText, String confirmText) {
-        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                .setTitleText(title)
-                .setContentText(contentText)
-                .showContentText(contentText != null)
-                .setConfirmText(confirmText)
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(contentText)
+                .setPositiveButton(confirmText, null)
+                .create()
                 .show();
     }
 

@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,7 +45,7 @@ public class ResetPasswordFragment extends Fragment {
     private EditText newPassword;
     private EditText confirmPassword;
 
-    private SweetAlertDialog progressDialog;
+    private AlertDialog progressDialog;
 
     @Nullable
     @Override
@@ -133,15 +133,12 @@ public class ResetPasswordFragment extends Fragment {
 
     private void setDialogShowing(boolean showing) {
         if (showing) {
-            progressDialog = new SweetAlertDialog(getActivity(), SweetAlertDialog.PROGRESS_TYPE)
-                    .setTitleText(getString(R.string.dialog_changing_password));
+            progressDialog = new AlertDialog.Builder(getActivity()).create();
+            progressDialog.setTitle(getString(R.string.dialog_changing_password));
             progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.showCancelButton(false);
-            progressDialog.getProgressHelper().setBarColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
-            progressDialog.show();
         } else {
             if (progressDialog.isShowing())
-                progressDialog.dismissWithAnimation();
+                progressDialog.dismiss();
         }
     }
 

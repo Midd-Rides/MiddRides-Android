@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,7 +33,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
     public static final int REGISTER_SUCCESS_CODE = 0x101;
     public static final int REGISTER_FAILURE_CODE = 0x102;
 
-    private SweetAlertDialog progressDialog;
+    private AlertDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,22 +200,20 @@ public class RegisterActivity extends AppCompatActivity {
      */
     private void setDialogShowing(boolean showing) {
         if (showing) {
-            progressDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
-                    .setTitleText(getString(R.string.dialog_registering));
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.showCancelButton(false);
-            progressDialog.getProgressHelper().setBarColor(ContextCompat.getColor(this, R.color.colorAccent));
+            progressDialog = new AlertDialog.Builder(this).create();
+            progressDialog.setTitle(getString(R.string.dialog_registering));
             progressDialog.show();
         } else {
             if (progressDialog.isShowing())
-                progressDialog.dismissWithAnimation();
+                progressDialog.dismiss();
         }
     }
 
     private void hideKeyboard() {
         try {
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            if (imm != null)
+                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         } catch (Exception e) {
             // again, don't worry
         }
