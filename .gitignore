@@ -1,6 +1,7 @@
 # Android Studio
 /.idea/workspace.xml
 /.idea/libraries
+/.idea/caches
 
 # Built application files
 *.apk
